@@ -1,30 +1,30 @@
 # Architekturális karakterisztikák
 
-## Hatékonyság (Performance Efficiency)
+## Hatékonyság
 
 **Mit jelent?**
 
-* [https://quality.arc42.org/qualities/performance_efficiency](https://www.google.com/search?q=https://quality.arc42.org/qualities/performance_efficiency)
+* [https://quality.arc42.org/qualities/performance](https://quality.arc42.org/qualities/performance)
 
 **Miért fontos?**
 
 * A fejlesztés során kötelező a klímabarát és sávszélesség-takarékos technológiák alkalmazása. A rendszernek a lehető legkisebb energiafogyasztással és szervererőforrás-igénnyel kell működnie.
 
 
-* Zamunda bizonyos területein az internetlefedettség hiányos, alacsony a sávszélesség és magas a késleltetés, ezért az adatforgalmat (különösen a multimédiás tartalmaknál) a végletekig optimalizálni kell a használhatóság érdekében.
+* Zamunda bizonyos területein az internetlefedettség hiányos, alacsony a sávszélesség és magas a késleltetés, ezért az adatforgalmat, különösen a multimédiás tartalmaknál, optimalizálni kell a használhatóság érdekében.
 
-## Integritás (Integrity)
+## Integritás
 
 **Mit jelent?**
 
-* [https://quality.arc42.org/qualities/integrity](https://www.google.com/search?q=https://quality.arc42.org/qualities/integrity)
+* [https://quality.arc42.org/qualities/integrity](https://quality.arc42.org/qualities/integrity)
 
 **Miért fontos?**
 
 * A rendszer legkritikusabb funkciója a lakossági szavazás. A platformba vetett állampolgári bizalom megköveteli, hogy a szavazatokat utólagosan senki ne tudja módosítani vagy törölni, még a legmagasabb szintű rendszeradminisztrátorok sem.
-* A szavazatok megbízhatóságát és a pályázatok tisztaságát technológiai (pl. kriptográfiai láncolás, append-only adatbázisok) garanciákkal kell védeni az illetéktelen beavatkozások ellen.
+* A szavazatok megbízhatóságát és a pályázatok tisztaságát technológiai garanciákkal kell védeni az illetéktelen beavatkozások ellen.
 
-## Robusztusság (Robustness)
+## Robusztusság
 
 **Mit jelent?**
 
@@ -32,10 +32,10 @@
 
 **Miért fontos?**
 
-* Az instabil zamundai hálózati viszonyok miatt a rendszernek hibatűrőnek kell lennie. Például, ha egy polgár feltölt egy nagyobb videót a parkosítási ötletéhez, és a kapcsolat megszakad, a rendszernek képesnek kell lennie adatvesztés nélkül folytatni a műveletet a kapcsolat helyreállásakor (chunked upload).
-* A platformnak akkor is elegánsan kell kezelnie a hibákat, ha a külső Zamunda One API (amely a bejelentkezésért és a lakcímhitelesítésért felelős) átmenetileg lassul vagy elérhetetlenné válik.
+* Zamunda bizonyos területein a hálózati kapcsolat instabil, lassú és magas késleltetésű. A rendszernek ilyen körülmények között is használhatónak kell maradnia, amit kliensoldali és szerveroldali gyorsítótárazással kell biztosítani, hogy az oldal váza és a korábban letöltött tartalmak a lehető legrövideb idő alatt és minimális adatforgalommal is elérhetőek legyenek.
+* A polgárok által beküldött probléma-megoldás párokhoz tartozó nagyméretű multimédiás fájlok (fotók, videók) feltöltése során számítani kell a mobilnet gyakori megszakadására. A rendszernek robusztus, darabolt és hiba esetén automatikusan folytatható adatátvitelt kell alkalmaznia, hogy a feltöltés ne vesszen el egy pillanatnyi térerőhiány miatt.
 
-## Elaszticitás (Elasticity)
+## Elaszticitás
 
 **Mit jelent?**
 
