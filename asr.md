@@ -1,0 +1,48 @@
+# Architekturálisan szignifikáns követelmények
+
+## ZDR általános követelmények
+
+### Takarékosság és klímabarát működés
+
+Zamunda nem szegény ország, de feleslegesen nem is akarja szórni a pénzt: a projektek tervezésénél törekedni kell a takarékosságra. Szintén ezt igénylik a klímabarát célok! A rendszernek úgy kell magas felhasználói élményt nyújtania, hogy közben a szerveroldali energiafogyasztás és a hálózati sávszélesség-használat a lehető legalacsonyabb maradjon. Ezen felül az ország bizonyos területein az internetlefedettség hiányos, így a rendszernek tolerálnia kell a magas késleltetést és az alacsony sávszélességet.
+
+## Minőségi jellemzők
+
+Az előzőleg azonosított [architekturális karakterisztikának](./ac.md) tekinthető minőségi attribútumok az alábbiak:
+
+* Hatékonyság.
+* Integritás.
+* Robusztusság.
+* Elaszticitás.
+
+## Szignifikáns funkcionális követelmények
+
+### F-OB-02 és F-OB-03: Multimédia feltöltés és automatikus tömörítés
+
+A rendszer kép- és videófeltöltési lehetőséget biztosít az ötletekhez (F-OB-02), melyeket a szerveroldalon automatikusan átméretez és tömörít a lassú internetkapcsolattal rendelkező régiók kiszolgálása és a klímabarát adattárolás érdekében (F-OB-03).
+
+**Miért ASR?**
+
+* A rossz zamundai hálózati lefedettség miatt a nagyméretű médiafájlok feltöltése hagyományos módszerekkel megszakadna, ezért az architektúrának egy robusztus, darabolt és megszakítás esetén folytatható feltöltési mechanizmust kell biztosítania (pl. [TUS protokoll](https://tus.io/) segítségével).
+* A szerveroldali videó/kép tömörítés jelentős és hirtelen CPU terhelést okoz. Ezt az alaprendszertől független, aszinkron háttérfolyamatként (background worker/queue) kell megtervezni, hogy egy tömeges feltöltési hullám ne lassítsa le a teljes webes felületet és a szavazást.
+* Jelentős hatással van a CDN (Content Delivery Network) és a fájltárolási stratégiára a hálózat-optimalizálás érdekében.
+
+### F-PK-03: Alacsony hálózati terhelésű publikus listanézet
+
+A rendszer publikus, optimalizált (alacsony hálózati terhelésű) listanézetet biztosít a felhasználók számára a pályázatok böngészéséhez.
+
+**Miért ASR?**
+
+* Az alacsony sávszélesség miatt a hagyományos, teljes oldalakat letöltő architektúra (SSR) itt nem lesz hatékony.
+* Az API tervezésénél gyorsítótárazást és minimalizált adatátvitelt (pl. csak a szükséges JSON mezők küldése, lapozás/lazy loading) kell a rendszer legalsó rétegeibe is beépíteni.
+
+## Szervezeti tapasztalat, preferenciák
+
+### PostgreSQL
+
+A PostgreSQL tapasztalattal rendelkezik, melyet érdemes lehet kihasználni ebben a projektben, szemben a drága, harmadik féltől származó szolgáltatásokkal vagy "heavyweight" keretrendszerekkel.
+
+**Miért ASR?**
+
+* **Klímabarát és takarékos működés:** A Go rendkívül alacsony memória- és CPU-igényű, ami tökéletesen illeszkedik a ZDR klímabarát céljaihoz, és jelentősen csökkenti a szerverfenntartás költségeit.
+* A meglévő PostgreSQL tudásunkra építve házon belül, extra licenszköltségek nélkül is meg tudjuk oldani a szavazatok megmásíthatatlanságát biztosító adatbázis-szintű védelmet, "append-only" táblák segítségével, ami felgyorsítja a fejlesztést és csökkenti a technológiai kockázatot.
