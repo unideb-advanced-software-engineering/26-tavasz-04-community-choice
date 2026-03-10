@@ -35,14 +35,3 @@ A rendszer publikus, optimalizált (alacsony hálózati terhelésű) listanézet
 
 * Az alacsony sávszélesség miatt a hagyományos, teljes oldalakat letöltő architektúra (SSR) itt nem lesz hatékony.
 * Az API tervezésénél gyorsítótárazást és minimalizált adatátvitelt (pl. csak a szükséges JSON mezők küldése, lapozás/lazy loading) kell a rendszer legalsó rétegeibe is beépíteni.
-
-## Szervezeti tapasztalat, preferenciák
-
-### PostgreSQL
-
-A PostgreSQL tapasztalattal rendelkezik, melyet érdemes lehet kihasználni ebben a projektben, szemben a drága, harmadik féltől származó szolgáltatásokkal vagy "heavyweight" keretrendszerekkel.
-
-**Miért ASR?**
-
-* **Klímabarát és takarékos működés:** A Go rendkívül alacsony memória- és CPU-igényű, ami tökéletesen illeszkedik a ZDR klímabarát céljaihoz, és jelentősen csökkenti a szerverfenntartás költségeit.
-* A meglévő PostgreSQL tudásunkra építve házon belül, extra licenszköltségek nélkül is meg tudjuk oldani a szavazatok megmásíthatatlanságát biztosító adatbázis-szintű védelmet, "append-only" táblák segítségével, ami felgyorsítja a fejlesztést és csökkenti a technológiai kockázatot.
