@@ -1,0 +1,38 @@
+---
+title: Community Choice – Zamunda
+description: A Zamunda Digitális Reneszánsz program közösségi ötletplatformjának dokumentációja
+template: splash
+hero:
+  tagline: Közösségi ötletplatform Zamunda polgárainak
+  actions:
+    - text: Esettanulmány
+      link: /esettanulmany/
+      icon: right-arrow
+    - text: Architekturális döntések
+      link: /adrs/adr-001/
+      icon: document
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Dokumentáció áttekintése
+
+<CardGrid stagger>
+	<Card title="Esettanulmány" icon="open-book">
+		A projekt háttere, a Zamunda Digitális Reneszánsz (ZDR) program és a platform követelményei.
+		[Olvasd el](/esettanulmany/)
+	</Card>
+	<Card title="Architekturális karakterisztikák" icon="star">
+		Hatékonyság, Integritás, Robusztusság és Elaszticitás – a rendszer minőségi jellemzői.
+		[Olvasd el](/architektura/karakterisztikak/)
+	</Card>
+	<Card title="Szignifikáns követelmények" icon="list-format">
+		Az architektúrát meghatározó funkcionális és nem-funkcionális követelmények.
+		[Olvasd el](/architektura/szignifikans-kovetelmenyek/)
+	</Card>
+	<Card title="Stílusválasztás" icon="puzzle">
+		Miért a Hibrid SBA + EDA a nyerő architektúra a Community Choice platformhoz.
+		[Olvasd el](/architektura/stilusvalasztas/)
+	</Card>
+</CardGrid>
