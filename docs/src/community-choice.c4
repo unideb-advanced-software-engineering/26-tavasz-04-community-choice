@@ -2,82 +2,160 @@ specification {
 	element actor {
 		style {
 			shape person
+			color green
+			icon bootstrap:person
 		}
 	}
 
-	element system
+	element system {
+		style {
+			color primary
+			icon bootstrap:diagram-3
+		}
+	}
 
 	element externalSystem {
 		style {
-			color muted
+			color amber
+			icon bootstrap:cloud
 		}
 	}
 
 	element webapp {
 		style {
 			shape browser
+			color sky
+			icon tech:react
 		}
 	}
 
 	element service {
 		style {
 			shape component
+			color indigo
+			icon tech:nodejs
 		}
 	}
 
 	element worker {
 		style {
 			shape component
+			color green
+			icon tech:nodejs
 		}
 	}
 
 	element queue {
 		style {
 			shape queue
+			color red
+			icon tech:rabbitmq
 		}
 	}
 
 	element database {
 		style {
 			shape cylinder
+			color blue
+			icon tech:postgresql
 		}
 	}
 
 	element storage {
 		style {
 			shape bucket
+			color amber
+			icon bootstrap:bucket
 		}
 	}
 }
 
 model {
-	allampol = actor 'Zamundai állampolgár' 'Ötleteket javasol és szavaz a helyi pályázatokon'
-	admin = actor 'Közigazgatási adminisztrátor' 'Pályázatokat hirdet és moderál'
+	allampol = actor 'Zamundai állampolgár' 'Ötleteket javasol és szavaz a helyi pályázatokon' 'Reszponzív böngésző'
+	admin = actor 'Közigazgatási adminisztrátor' 'Pályázatokat hirdet és moderál' 'Hivatali böngésző'
 
-	zamundaOne = externalSystem 'Zamunda One' 'Állami azonosítási és lakcímadat-szolgáltató API'
-	cdn = externalSystem 'CDN' 'Tömörített médiatartalmak gyors kiszolgálása'
+	zamundaOne = externalSystem 'Zamunda One' 'Állami azonosítási és lakcímadat-szolgáltató API' 'OAuth2 / OpenID Connect + REST API' {
+		style {
+			color amber
+			icon tech:oauth
+		}
+	}
+
+	cdn = externalSystem 'Cloudflare CDN' 'Tömörített médiatartalmak gyors kiszolgálása' 'Cloudflare CDN' {
+		style {
+			color amber
+			icon tech:cloudflare
+		}
+	}
 
 	cc = system 'Community Choice Platform' 'Lehetővé teszi a polgárok számára helyi fejlesztési ötletek beküldését és szavazását' {
-		webApp = webapp 'Web Alkalmazás' 'Felhasználói felület pályázatokhoz, ötletekhez és szavazáshoz' 'SSR / SPA'
-		votingService = service 'Voting Service' 'Szavazatok felvétele és integritásának biztosítása' 'REST API'
-		campaignService = service 'Campaign & Idea Service' 'Pályázatok és ötletek életciklus-kezelése, médiatöltés fogadása' 'REST API'
-		adminService = service 'Admin Service' 'Adminisztrációs műveletek' 'REST API'
-		messageBroker = queue 'Message Broker' 'Aszinkron eseménysor médiafeldolgozáshoz' 'RabbitMQ'
-		mediaWorker = worker 'Media Worker' 'Képek és videók átméretezése és tömörítése' 'Background Worker'
-		database = database 'Relációs adatbázis' 'Szavazatok, pályázatok, ötletek, felhasználók - közös adatbázis' 'PostgreSQL'
-		mediaStorage = storage 'Médiafájl-tároló' 'Eredeti és tömörített képek, videók' 'Object Storage (S3)'
+		webApp = webapp 'Web Alkalmazás' 'Felhasználói felület pályázatokhoz, ötletekhez és szavazáshoz' 'Astro + React + TypeScript' {
+			style {
+				color sky
+				icon tech:astro
+			}
+		}
 
-		webApp -> votingService 'Szavaz' '' 'REST/JSON'
-		webApp -> campaignService 'Pályázatok és ötletek' '' 'REST/JSON'
-		webApp -> adminService 'Admin műveletek' '' 'REST/JSON'
-		webApp -> zamundaOne 'Hitelesítés és lakcímellenőrzés' '' 'OAuth2'
-		campaignService -> messageBroker 'Médiaesemény küldése' '' 'AMQP'
-		messageBroker -> mediaWorker 'Feldolgozási feladat' '' 'AMQP'
-		mediaWorker -> mediaStorage 'Tömörített fájl tárolása' '' 'S3 API'
-		mediaStorage -> cdn 'Tartalom replikálása' '' 'HTTPS'
-		votingService -> database 'Szavazatokat ír/olvas' '' 'SQL'
-		campaignService -> database 'Pályázatokat ír/olvas' '' 'SQL'
-		adminService -> database 'Adminisztrál' '' 'SQL'
+		votingService = service 'Voting Service' 'Szavazatok felvétele és integritásának biztosítása' 'Node.js + Fastify REST API' {
+			style {
+				color green
+				icon tech:fastify
+			}
+		}
+
+		campaignService = service 'Campaign & Idea Service' 'Pályázatok és ötletek életciklus-kezelése, médiatöltés fogadása' 'Node.js + NestJS REST API' {
+			style {
+				color indigo
+				icon tech:nestjs
+			}
+		}
+
+		adminService = service 'Admin Service' 'Adminisztrációs műveletek' 'Node.js + Express REST API' {
+			style {
+				color blue
+				icon tech:express
+			}
+		}
+
+		messageBroker = queue 'Message Broker' 'Aszinkron eseménysor médiafeldolgozáshoz' 'RabbitMQ' {
+			style {
+				color red
+				icon tech:rabbitmq
+			}
+		}
+
+		mediaWorker = worker 'Media Worker' 'Képek és videók átméretezése és tömörítése' 'Node.js worker + Sharp + FFmpeg' {
+			style {
+				color amber
+				icon tech:ffmpeg
+			}
+		}
+
+		database = database 'Relációs adatbázis' 'Szavazatok, pályázatok, ötletek, felhasználók - közös adatbázis' 'PostgreSQL' {
+			style {
+				color blue
+				icon tech:postgresql
+			}
+		}
+
+		mediaStorage = storage 'Médiafájl-tároló' 'Eredeti és tömörített képek, videók' 'MinIO object storage - S3-kompatibilis API' {
+			style {
+				color amber
+				icon bootstrap:bucket
+			}
+		}
+
+		webApp -> votingService 'Szavaz' '' 'HTTPS + REST/JSON'
+		webApp -> campaignService 'Pályázatok és ötletek' '' 'HTTPS + REST/JSON'
+		webApp -> adminService 'Admin műveletek' '' 'HTTPS + REST/JSON'
+		webApp -> zamundaOne 'Hitelesítés és lakcímellenőrzés' '' 'OAuth2 / OpenID Connect'
+		campaignService -> messageBroker 'Médiaesemény küldése' '' 'RabbitMQ AMQP 0-9-1'
+		messageBroker -> mediaWorker 'Feldolgozási feladat' '' 'RabbitMQ AMQP 0-9-1'
+		mediaWorker -> mediaStorage 'Tömörített fájl tárolása' '' 'MinIO S3 API'
+		mediaStorage -> cdn 'Tartalom replikálása' '' 'Cloudflare HTTPS'
+		votingService -> database 'Szavazatokat ír/olvas' '' 'PostgreSQL wire protocol'
+		campaignService -> database 'Pályázatokat ír/olvas' '' 'PostgreSQL wire protocol'
+		adminService -> database 'Adminisztrál' '' 'PostgreSQL wire protocol'
 	}
 
 	allampol -> cc.webApp 'Böngész, ötletet javasol, szavaz, médiát tölt fel' '' 'HTTPS'
