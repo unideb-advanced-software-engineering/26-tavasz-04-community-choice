@@ -68,7 +68,6 @@ specification {
 
 	element storage {
 		style {
-			shape bucket
 			color amber
 		}
 	}
@@ -91,10 +90,11 @@ model {
 	}
 
 	cc = system 'Community Choice Platform' 'Lehetővé teszi a polgárok számára helyi fejlesztési ötletek beküldését és szavazását' {
-		webApp = webapp 'Web Alkalmazás' 'Felhasználói felület pályázatokhoz, ötletekhez és szavazáshoz' 'Astro + React + TypeScript' {
+		webApp = webapp 'Web Alkalmazás' 'Felhasználói felület pályázatokhoz, ötletekhez és szavazáshoz' 'React + TypeScript' {
 			style {
 				color sky
-				icon tech:astro
+				icon tech:react
+				shape browser
 			}
 		}
 
@@ -143,7 +143,6 @@ model {
 		mediaStorage = storage 'Médiafájl-tároló' 'Eredeti és tömörített képek, videók' 'MinIO object storage - S3-kompatibilis API' {
 			style {
 				color amber
-				icon bootstrap:bucket
 			}
 		}
 
