@@ -1,0 +1,34 @@
+---
+import { LikeC4View as ReactLikeC4View, type LikeC4ViewId } from 'likec4:react';
+
+interface Props {
+	viewId: LikeC4ViewId;
+}
+
+const { viewId } = Astro.props;
+---
+
+<div class="likec4-view not-content">
+	<ReactLikeC4View
+		viewId={viewId}
+		controls
+		pannable
+		zoomable
+		background="solid"
+		browser={false}
+		style={{ width: '100%', height: '100%' }}
+		client:only="react"
+	/>
+</div>
+
+<style>
+	.likec4-view {
+		height: min(72vh, 46rem);
+		min-height: 28rem;
+		overflow: hidden;
+		border: 1px solid var(--sl-color-hairline);
+		border-radius: 0.5rem;
+		background: var(--sl-color-bg-sidebar);
+		margin: 1.5rem 0;
+	}
+</style>

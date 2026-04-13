@@ -10,9 +10,12 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/react": "^5.0.3",
     "@astrojs/starlight": "^0.38.1",
     "astro": "^6.0.1",
-    "mermaid": "^11.14.0",
+    "likec4": "^1.55.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "sharp": "^0.34.2"
   }
 }

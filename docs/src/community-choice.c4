@@ -1,0 +1,97 @@
+specification {
+	element actor {
+		style {
+			shape person
+		}
+	}
+
+	element system
+
+	element externalSystem {
+		style {
+			color muted
+		}
+	}
+
+	element webapp {
+		style {
+			shape browser
+		}
+	}
+
+	element service {
+		style {
+			shape component
+		}
+	}
+
+	element worker {
+		style {
+			shape component
+		}
+	}
+
+	element queue {
+		style {
+			shape queue
+		}
+	}
+
+	element database {
+		style {
+			shape cylinder
+		}
+	}
+
+	element storage {
+		style {
+			shape bucket
+		}
+	}
+}
+
+model {
+	allampol = actor 'Zamundai állampolgár' 'Ötleteket javasol és szavaz a helyi pályázatokon'
+	admin = actor 'Közigazgatási adminisztrátor' 'Pályázatokat hirdet és moderál'
+
+	zamundaOne = externalSystem 'Zamunda One' 'Állami azonosítási és lakcímadat-szolgáltató API'
+	cdn = externalSystem 'CDN' 'Tömörített médiatartalmak gyors kiszolgálása'
+
+	cc = system 'Community Choice Platform' 'Lehetővé teszi a polgárok számára helyi fejlesztési ötletek beküldését és szavazását' {
+		webApp = webapp 'Web Alkalmazás' 'Felhasználói felület pályázatokhoz, ötletekhez és szavazáshoz' 'SSR / SPA'
+		votingService = service 'Voting Service' 'Szavazatok felvétele és integritásának biztosítása' 'REST API'
+		campaignService = service 'Campaign & Idea Service' 'Pályázatok és ötletek életciklus-kezelése, médiatöltés fogadása' 'REST API'
+		adminService = service 'Admin Service' 'Adminisztrációs műveletek' 'REST API'
+		messageBroker = queue 'Message Broker' 'Aszinkron eseménysor médiafeldolgozáshoz' 'RabbitMQ'
+		mediaWorker = worker 'Media Worker' 'Képek és videók átméretezése és tömörítése' 'Background Worker'
+		database = database 'Relációs adatbázis' 'Szavazatok, pályázatok, ötletek, felhasználók - közös adatbázis' 'PostgreSQL'
+		mediaStorage = storage 'Médiafájl-tároló' 'Eredeti és tömörített képek, videók' 'Object Storage (S3)'
+
+		webApp -> votingService 'Szavaz' '' 'REST/JSON'
+		webApp -> campaignService 'Pályázatok és ötletek' '' 'REST/JSON'
+		webApp -> adminService 'Admin műveletek' '' 'REST/JSON'
+		webApp -> zamundaOne 'Hitelesítés és lakcímellenőrzés' '' 'OAuth2'
+		campaignService -> messageBroker 'Médiaesemény küldése' '' 'AMQP'
+		messageBroker -> mediaWorker 'Feldolgozási feladat' '' 'AMQP'
+		mediaWorker -> mediaStorage 'Tömörített fájl tárolása' '' 'S3 API'
+		mediaStorage -> cdn 'Tartalom replikálása' '' 'HTTPS'
+		votingService -> database 'Szavazatokat ír/olvas' '' 'SQL'
+		campaignService -> database 'Pályázatokat ír/olvas' '' 'SQL'
+		adminService -> database 'Adminisztrál' '' 'SQL'
+	}
+
+	allampol -> cc.webApp 'Böngész, ötletet javasol, szavaz, médiát tölt fel' '' 'HTTPS'
+	admin -> cc.webApp 'Pályázatot hirdet, ötleteket moderál' '' 'HTTPS'
+}
+
+views {
+	view context {
+		title 'Community Choice - Context diagram'
+		include *
+	}
+
+	view containers of cc {
+		title 'Community Choice - Container diagram'
+		include *
+	}
+}
