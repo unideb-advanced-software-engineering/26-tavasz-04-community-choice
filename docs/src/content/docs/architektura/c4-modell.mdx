@@ -1,0 +1,68 @@
+---
+title: C4 modell
+description: Community Choice rendszer C4 Context és Container diagramjai
+---
+
+import Mermaid from '../../../components/Mermaid.astro';
+
+A Community Choice platform architektúráját a [C4 modell](https://c4model.com/) két szintjén mutatjuk be: a rendszerkörnyezeti (Context) és a konténer (Container) nézeten.
+
+## Context diagram
+
+A legfelső szint megmutatja, kik használják a rendszert és milyen külső rendszerekkel áll kapcsolatban.
+
+<Mermaid code={`C4Context
+  title Community Choice – Context diagram
+
+  Person(allampol, "Zamundai állampolgár", "Ötleteket javasol és szavaz a helyi pályázatokon")
+  Person(admin, "Közigazgatási adminisztrátor", "Pályázatokat hirdet és moderál")
+
+  System(cc, "Community Choice Platform", "Lehetővé teszi a polgárok számára helyi fejlesztési ötletek beküldését és szavazását")
+
+  System_Ext(zamundaOne, "Zamunda One", "Állami azonosítási és lakcímadat-szolgáltató API")
+  System_Ext(cdn, "CDN", "Tömörített médiatartalmak gyors kiszolgálása")
+
+  Rel(allampol, cc, "Böngész, ötletet javasol, szavaz, médiát tölt fel")
+  Rel(admin, cc, "Pályázatot hirdet, ötleteket moderál")
+  Rel(cc, zamundaOne, "Autentikáció és lakcímellenőrzés", "HTTPS / OAuth2")
+  Rel(cc, cdn, "Médiafájlok kiszolgálása", "HTTPS")
+`} />
+
+## Container diagram
+
+A konténer szint megmutatja, milyen futtatható egységekből áll a rendszer és hogyan kommunikálnak egymással.
+
+<Mermaid code={`C4Container
+  title Community Choice – Container diagram
+
+  Person(allampol, "Zamundai állampolgár")
+  Person(admin, "Adminisztrátor")
+
+  System_Boundary(cc, "Community Choice Platform") {
+    Container(webApp, "Web Alkalmazás", "SSR / SPA", "Felhasználói felület pályázatokhoz, ötletekhez és szavazáshoz")
+    Container(votingService, "Voting Service", "REST API", "Szavazatok felvétele és integritásának biztosítása")
+    Container(campaignService, "Campaign & Idea Service", "REST API", "Pályázatok és ötletek életciklus-kezelése, médiatöltés fogadása")
+    Container(adminService, "Admin Service", "REST API", "Adminisztrációs műveletek")
+    Container(messageBroker, "Message Broker", "RabbitMQ", "Aszinkron eseménysor médiafeldolgozáshoz")
+    Container(mediaWorker, "Media Worker", "Background Worker", "Képek és videók átméretezése és tömörítése")
+    ContainerDb(database, "Relációs adatbázis", "PostgreSQL", "Szavazatok, pályázatok, ötletek, felhasználók – közös adatbázis")
+    ContainerDb(mediaStorage, "Médiafájl-tároló", "Object Storage (S3)", "Eredeti és tömörített képek, videók")
+  }
+
+  System_Ext(zamundaOne, "Zamunda One", "Azonosítás és lakcím-API")
+  System_Ext(cdn, "CDN", "Médiakiszolgálás")
+
+  Rel(allampol, webApp, "Böngészi, szavaz, feltölt", "HTTPS")
+  Rel(admin, webApp, "Adminisztrál", "HTTPS")
+  Rel(webApp, votingService, "Szavaz", "REST/JSON")
+  Rel(webApp, campaignService, "Pályázatok és ötletek", "REST/JSON")
+  Rel(webApp, adminService, "Admin műveletek", "REST/JSON")
+  Rel(webApp, zamundaOne, "Hitelesítés és lakcímellenőrzés", "OAuth2")
+  Rel(campaignService, messageBroker, "Médiaesemény küldése", "AMQP")
+  Rel(messageBroker, mediaWorker, "Feldolgozási feladat", "AMQP")
+  Rel(mediaWorker, mediaStorage, "Tömörített fájl tárolása", "S3 API")
+  Rel(mediaStorage, cdn, "Tartalom replikálása", "HTTPS")
+  Rel(votingService, database, "Szavazatokat ír/olvas", "SQL")
+  Rel(campaignService, database, "Pályázatokat ír/olvas", "SQL")
+  Rel(adminService, database, "Adminisztrál", "SQL")
+`} />

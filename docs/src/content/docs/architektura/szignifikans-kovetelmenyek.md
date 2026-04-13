@@ -11,7 +11,7 @@ Zamunda nem szegény ország, de feleslegesen nem is akarja szórni a pénzt: a 
 
 ## Minőségi jellemzők
 
-Az előzőleg azonosított [architekturális karakterisztikák](/architektura/karakterisztikak) az alábbiak:
+Az előzőleg azonosított [architekturális karakterisztikák](../karakterisztikak/) az alábbiak:
 
 * Hatékonyság.
 * Integritás.

@@ -2,10 +2,12 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
+const githubPagesBase = '/26-tavasz-04-community-choice';
+const isDev = process.env.NODE_ENV === 'development';
 
 export default defineConfig({
 	site: 'https://unideb-advanced-software-engineering.github.io',
-	base: '/26-tavasz-04-community-choice',
+	base: isDev ? '/' : githubPagesBase,
 	integrations: [
 		starlight({
 			title: 'Community Choice',
@@ -29,6 +31,7 @@ export default defineConfig({
 						{ label: 'Karakterisztikák', slug: 'architektura/karakterisztikak' },
 						{ label: 'Szignifikáns követelmények', slug: 'architektura/szignifikans-kovetelmenyek' },
 						{ label: 'Stílusválasztás', slug: 'architektura/stilusvalasztas' },
+						{ label: 'C4 modell', slug: 'architektura/c4-modell' },
 					],
 				},
 				{
