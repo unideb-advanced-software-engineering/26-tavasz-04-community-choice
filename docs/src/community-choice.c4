@@ -71,6 +71,13 @@ specification {
 			color amber
 		}
 	}
+
+    element component {
+        style {
+            shape rectangle
+            color slate
+        }
+    }
 }
 
 model {
@@ -90,7 +97,8 @@ model {
 	}
 
 	cc = system 'Community Choice Platform' 'Lehetővé teszi a polgárok számára helyi fejlesztési ötletek beküldését és szavazását' {
-		webApp = webapp 'Web Alkalmazás' 'Felhasználói felület pályázatokhoz, ötletekhez és szavazáshoz' 'React + TypeScript' {
+		
+        webApp = webapp 'Web Alkalmazás' 'Felhasználói felület pályázatokhoz, ötletekhez és szavazáshoz' 'React + TypeScript' {
 			style {
 				color sky
 				icon tech:react
@@ -98,65 +106,91 @@ model {
 			}
 		}
 
-		votingService = service 'Voting Service' 'Szavazatok felvétele és integritásának biztosítása' 'Node.js + NestJS REST API' {
-			style {
-				color green
-				icon tech:nestjs
-			}
+		votingService = service 'Voting Service' 'Szavazatok felvétele és integritásának biztosítása' 'Node.js + NestJS' {
+			style { color green; icon tech:nestjs }
+
+            votingController = component 'Voting Controller' 'Kezeli a szavazatok beérkezését' 'NestJS Controller'
+            votingLogic = component 'Voting Logic' 'Üzleti logika: 1 szavazat/ötlet szabály érvényesítése' 'NestJS Service'
+            voteZamundaClient = component 'Zamunda One Client' 'Hitelesítés és lakcím ellenőrzés (csak helyi lakos szavazhat)' 'HTTP Client'
+            voteRepo = component 'Vote Repository' 'Megmásíthatatlan szavazatok mentése tranzakcionálisan' 'TypeORM'
+            rateLimiter = component 'Rate Limiter' 'API hívások korlátozása (DDoS védelem)' 'NestJS Interceptor'
+
+            votingController -> rateLimiter 'Ellenőrzi a limitet'
+            votingController -> votingLogic 'Szavazat feldolgozása'
+            votingLogic -> voteZamundaClient 'Lakcím és jogosultság ellenőrzése'
+            votingLogic -> voteRepo 'Adatbázisba mentés'
 		}
 
-		campaignAdminService = service 'Campaign & Admin Service' 'Pályázatok, ötletek, médiatöltés és adminisztrációs műveletek kezelése' 'Node.js + NestJS REST API' {
-			style {
-				color indigo
-				icon tech:nestjs
-			}
+		campaignAdminService = service 'Campaign & Admin Service' 'Pályázatok, ötletek, médiatöltés és adminisztrációs műveletek kezelése' 'Node.js + NestJS' {
+			style { color indigo; icon tech:nestjs }
+
+            publicApi = component 'Public List API' 'Optimalizált, alacsony sávszélességű lekérdezések' 'NestJS Controller'
+            ideaApi = component 'Idea Upload API' 'Ötletek és probléma-megoldás párok beküldése' 'NestJS Controller'
+            adminApi = component 'Admin API' 'Pályázatok hirdetése és moderációja' 'NestJS Controller'
+            uploadManager = component 'TUS Upload Manager' 'Fájldarabok összefűzése és megszakítható feltöltés kezelése' 'TUS Protocol Handler'
+            eventPublisher = component 'Media Event Publisher' 'Aszinkron feldolgozási események küldése' 'RabbitMQ Client'
+            campaignRepo = component 'Campaign Repository' 'Adatbázis műveletek' 'TypeORM'
+            
+            publicApi -> campaignRepo 'Lekérdezések (paginált JSON)'
+            ideaApi -> uploadManager 'Fájldarabok átadása'
+            ideaApi -> campaignRepo 'Ötlet metaadatok mentése'
+            adminApi -> campaignRepo 'Adminisztrációs adatok mentése'
+            uploadManager -> eventPublisher 'Feltöltés kész esemény generálása'
 		}
 
 		messageBroker = queue 'Message Broker' 'Aszinkron eseménysor médiafeldolgozáshoz' 'RabbitMQ' {
-			style {
-				color red
-				icon tech:rabbitmq
-			}
+			style { color red; icon tech:rabbitmq }
 		}
 
-		mediaWorker = worker 'Media Worker' 'Képek és videók átméretezése és tömörítése' 'Node.js worker + Sharp + FFmpeg' {
-			style {
-				color amber
-				icon tech:ffmpeg
-			}
+		mediaWorker = worker 'Media Worker' 'Képek és videók átméretezése és tömörítése' 'Node.js worker' {
+			style { color amber; icon tech:ffmpeg }
+
+            consumer = component 'Event Consumer' 'Üzenetek fogadása a sorból' 'AMQP Client'
+            imageProcessor = component 'Image Compressor' 'Képek átméretezése klímabarát méretre' 'Sharp'
+            videoProcessor = component 'Video Compressor' 'Videók tömörítése alacsony sávszélességhez' 'FFmpeg'
+            storageUploader = component 'Storage Uploader' 'Feldolgozott fájlok feltöltése' 'MinIO Client'
+
+            consumer -> imageProcessor 'Kép feldolgozása'
+            consumer -> videoProcessor 'Videó feldolgozása'
+            imageProcessor -> storageUploader 'Kész kép átadása'
+            videoProcessor -> storageUploader 'Kész videó átadása'
 		}
 
 		database = database 'Relációs adatbázis' 'Szavazatok, pályázatok, ötletek, felhasználók - közös adatbázis' 'PostgreSQL' {
-			style {
-				color blue
-				icon tech:postgresql
-			}
+			style { color blue; icon tech:postgresql }
 		}
 
-		cache = cache 'Cache' 'Időzített session, rate limit és idempotency kulcsok gyors tárolása' 'Redis' {
-			style {
-				color red
-				icon tech:redis
-			}
+		cache = cache 'Cache' 'Időzített session, rate limit és publikus lista gyors tárolása' 'Redis' {
+			style { color red; icon tech:redis }
 		}
 
-		mediaStorage = storage 'Médiafájl-tároló' 'Eredeti és tömörített képek, videók' 'MinIO object storage - S3-kompatibilis API' {
-			style {
-				color amber
-			}
+		mediaStorage = storage 'Médiafájl-tároló' 'Eredeti és tömörített képek, videók' 'MinIO object storage' {
+			style { color amber }
 		}
 
-		webApp -> votingService 'Szavaz' '' 'HTTPS + REST/JSON'
-		webApp -> campaignAdminService 'Pályázatok, ötletek és admin műveletek' '' 'HTTPS + REST/JSON'
-		webApp -> zamundaOne 'Hitelesítés és lakcímellenőrzés' '' 'OAuth2 / OpenID Connect'
-		campaignAdminService -> messageBroker 'Médiaesemény küldése' '' 'RabbitMQ AMQP 0-9-1'
-		messageBroker -> mediaWorker 'Feldolgozási feladat' '' 'RabbitMQ AMQP 0-9-1'
-		mediaWorker -> mediaStorage 'Tömörített fájl tárolása' '' 'MinIO S3 API'
-		mediaStorage -> cdn 'Tartalom replikálása' '' 'Cloudflare HTTPS'
-		votingService -> database 'Szavazatokat ír/olvas' '' 'PostgreSQL wire protocol'
-		campaignAdminService -> database 'Pályázatokat, ötleteket és admin adatokat ír/olvas' '' 'PostgreSQL wire protocol'
-		votingService -> cache 'Idempotency és rate limit kulcsok' '' 'Redis protocol'
-		campaignAdminService -> cache 'Session és rate limit kulcsok' '' 'Redis protocol'
+        // WebApp to internal components
+		webApp -> votingService.votingController 'Szavazat leadása' 'HTTPS/JSON'
+		webApp -> campaignAdminService.publicApi 'Pályázatok és ötletek böngészése' 'HTTPS/JSON'
+        webApp -> campaignAdminService.ideaApi 'Ötletek és média feltöltése' 'HTTPS / TUS'
+        webApp -> campaignAdminService.adminApi 'Adminisztrációs műveletek' 'HTTPS/JSON'
+		webApp -> zamundaOne 'Hitelesítés' 'OAuth2 / OpenID Connect'
+
+        // Voting Service to infrastructure
+        votingService.voteZamundaClient -> zamundaOne 'Lakcím lekérdezése' 'REST'
+        votingService.voteRepo -> database 'Szavazatok mentése (append-only)' 'PostgreSQL wire'
+        votingService.rateLimiter -> cache 'Rate limit kulcsok' 'Redis protocol'
+
+        // Campaign & Admin Service to infrastructure
+        campaignAdminService.campaignRepo -> database 'Adatok mentése és olvasása' 'PostgreSQL wire'
+        campaignAdminService.publicApi -> cache 'Lekérdezések gyorsítótárazása' 'Redis protocol'
+        campaignAdminService.eventPublisher -> messageBroker 'Médiaesemény küldése' 'AMQP 0-9-1'
+
+        // Worker to infrastructure
+        mediaWorker.consumer -> messageBroker 'Feldolgozási feladat fogadása' 'AMQP 0-9-1'
+        mediaWorker.storageUploader -> mediaStorage 'Tömörített fájl tárolása' 'S3 API'
+
+        // Storage to CDN
+		mediaStorage -> cdn 'Tartalom replikálása' 'HTTPS'
 	}
 
 	allampol -> cc.webApp 'Böngész, ötletet javasol, szavaz, médiát tölt fel' '' 'HTTPS'
@@ -173,4 +207,19 @@ views {
 		title 'Community Choice - Container diagram'
 		include *
 	}
+
+    view compVoting of cc.votingService {
+        title 'Community Choice - Voting Service Component Diagram'
+        include *
+    }
+
+    view compCampaignAdmin of cc.campaignAdminService {
+        title 'Community Choice - Campaign & Admin Service Component Diagram'
+        include *
+    }
+
+    view compMediaWorker of cc.mediaWorker {
+        title 'Community Choice - Media Worker Component Diagram'
+        include *
+    }
 }

@@ -1,20 +1,39 @@
 ---
 title: C4 modell
-description: Community Choice rendszer C4 Context és Container diagramjai
+description: Community Choice rendszer C4 Context, Container és Component diagramjai
 ---
 
 import LikeC4View from '../../../components/LikeC4View.astro';
 
-A Community Choice platform architektúráját a [C4 modell](https://c4model.com/) két szintjén mutatjuk be: a rendszerkörnyezeti (Context) és a konténer (Container) nézeten.
+A Community Choice platform architektúráját a [C4 modell](https://c4model.com/) három szintjén mutatjuk be: a rendszerkörnyezeti (Context), a konténer (Container) és a komponens (Component) nézeten.
 
 ## Context diagram
 
-A legfelső szint megmutatja, kik használják a rendszert és milyen külső rendszerekkel áll kapcsolatban.
+A legfelső szint megmutatja, kik használják a rendszert és milyen külső rendszerekkel (például a Zamunda One azonosítóval) áll kapcsolatban.
 
 <LikeC4View viewId="context" />
 
 ## Container diagram
 
-A konténer szint megmutatja, milyen futtatható egységekből áll a rendszer és hogyan kommunikálnak egymással.
+A konténer szint megmutatja a rendszer futtatható egységeit, például a mikro-szolgáltatásokat (SBA stílus) és az aszinkron feldolgozást segítő üzenetsort.
 
 <LikeC4View viewId="containers" />
+
+## Component diagramok
+
+A komponens szintű nézetek részletezik az egyes konténerek belső működését és felelősségi köreit.
+
+### Voting Service
+Ez a szolgáltatás felel a szavazatok biztonságos rögzítéséért. Tartalmazza a lakóhely-ellenőrző klienst (Zamunda One) és a megmásíthatatlan (append-only) adatrögzítést biztosító logikát.
+
+<LikeC4View viewId="compVoting" />
+
+### Campaign & Admin Service
+Kezeli a pályázatok életciklusát és a médiafeltöltést. A **TUS protokoll** segítségével biztosítja a robusztus feltöltést instabil hálózat esetén is, valamint alacsony sávszélességre optimalizált API-t nyújt a listanézetekhez.
+
+<LikeC4View viewId="compCampaignAdmin" />
+
+### Media Worker
+Egy tisztán eseményvezérelt (Event-Driven) komponens, amely a háttérben végzi a képek és videók tömörítését. Ez kulcsfontosságú a klímabarát működés és a takarékos sávszélesség-használat szempontjából.
+
+<LikeC4View viewId="compMediaWorker" />
