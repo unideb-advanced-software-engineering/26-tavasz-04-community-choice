@@ -9,8 +9,6 @@
 **Miért fontos?**
 
 * A fejlesztés során kötelező a klímabarát és sávszélesség-takarékos technológiák alkalmazása. A rendszernek a lehető legkisebb energiafogyasztással és szervererőforrás-igénnyel kell működnie.
-
-
 * Zamunda bizonyos területein az internetlefedettség hiányos, alacsony a sávszélesség és magas a késleltetés, ezért az adatforgalmat, különösen a multimédiás tartalmaknál, optimalizálni kell a használhatóság érdekében.
 
 ## Integritás
@@ -32,7 +30,7 @@
 
 **Miért fontos?**
 
-* Zamunda bizonyos területein a hálózati kapcsolat instabil, lassú és magas késleltetésű. A rendszernek ilyen körülmények között is használhatónak kell maradnia, amit kliensoldali és szerveroldali gyorsítótárazással kell biztosítani, hogy az oldal váza és a korábban letöltött tartalmak a lehető legrövideb idő alatt és minimális adatforgalommal is elérhetőek legyenek.
+* Zamunda bizonyos területein a hálózati kapcsolat instabil, lassú és magas késleltetésű. A rendszernek ilyen körülmények között is használhatónak kell maradnia, amit kliensoldali és szerveroldali gyorsítótárazással kell biztosítani, hogy az oldal váza és a korábban letöltött tartalmak a lehető legrövidebb idő alatt és minimális adatforgalommal is elérhetőek legyenek.
 * A polgárok által beküldött probléma-megoldás párokhoz tartozó nagyméretű multimédiás fájlok (fotók, videók) feltöltése során számítani kell a mobilnet gyakori megszakadására. A rendszernek robusztus, darabolt és hiba esetén automatikusan folytatható adatátvitelt kell alkalmaznia, hogy a feltöltés ne vesszen el egy pillanatnyi térerőhiány miatt.
 
 ## Elaszticitás

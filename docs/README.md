@@ -1,49 +1,41 @@
-# Starlight Starter Kit: Basics
+# A dokumentációs oldal
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+Ez a könyvtár tartalmazza a Community Choice projekt Astro + Starlight alapú dokumentációs oldalát.
 
-```
-npm create astro@latest -- --template starlight
-```
+## Könyvtárszerkezet
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro + Starlight project, you'll see the following folders and files:
-
-```
+```text
 .
 ├── public/
 ├── src/
 │   ├── assets/
+│   ├── components/
 │   ├── content/
 │   │   └── docs/
+│   ├── community-choice.c4
 │   └── content.config.ts
 ├── astro.config.mjs
 ├── package.json
 └── tsconfig.json
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+- A `src/content/docs/` könyvtár tartalmazza az oldalak tartalmát `.md` és `.mdx` fájlokban.
+- A `src/community-choice.c4` fájl írja le a megjelenített C4 diagramokat.
+- Az `src/components/` könyvtárban találhatók az egyedi Astro komponensek.
+- A `public/` könyvtár statikus fájlokat, például ikont tartalmaz.
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+## Parancsok
 
-Static assets, like favicons, can be placed in the `public/` directory.
+A parancsokat a `docs/` könyvtárból érdemes futtatni:
 
-## 🧞 Commands
+| Parancs | Jelentés |
+| :------- | :------- |
+| `npm install` | Függőségek telepítése |
+| `npm run dev` | Helyi fejlesztői kiszolgáló indítása a `localhost:4321` címen |
+| `npm run build` | A statikus oldal előállítása a `dist/` könyvtárba |
+| `npm run preview` | A lefordított oldal helyi előnézete |
+| `npm run astro -- --help` | Az Astro CLI súgójának megnyitása |
 
-All commands are run from the root of the project, from a terminal:
+## Megjegyzés
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+A projekt elsődleges nyelve a magyar. Az ADR-ek kivételével minden felhasználó számára látható tartalom magyarul szerepel, a technológiák és tulajdonnevek eredeti alakjukban maradnak.
