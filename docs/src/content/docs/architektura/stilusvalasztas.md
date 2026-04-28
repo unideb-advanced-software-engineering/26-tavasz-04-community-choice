@@ -35,7 +35,7 @@ A projekt igényei alapján három stílus maradt: a **moduláris monolit**, a *
 * **Miért merült fel?** Kiváló a reszponzivitása és a robusztussága.
 * **Mire használjuk?** A teljes rendszert nem építjük erre, mert a szavazás (F-SZAV-01) azonnali, szinkron adatbázis-választ igényel. Ugyanakkor három területen **kizárólag eseményvezérelten (Event-Driven)** valósítható meg hatékonyan a funkció:
   * **Médiafeldolgozás (*Campaign & Idea Service*):** Amikor egy lakos feltölt egy videót, egy esemény kerül a sorba, amit egy aszinkron háttérfolyamat (worker) dolgoz fel. Így a videótömörítés nem akasztja meg a webes/szavazó szálakat.
-  * **Értesítések (*Notification Service*):** Kampányállapot-változáskor (pl. pályázat lezárása, eredményhirdetés) a rendszer domain eseményeket bocsát ki, amelyeket a Notification Service aszinkron fogyaszt és kézbesíti az érintett lakósoknak. Az értesítés küldése nem lehet a szavazási kérés kritikus útján.
+  * **Értesítések (*Notification Service*):** Kampányállapot-változáskor (pl. pályázat lezárása, eredményhirdetés) a rendszer domain eseményeket bocsát ki, amelyeket a Notification Service aszinkron fogyaszt és kézbesíti az érintett lakosoknak. Az értesítés küldése nem lehet a szavazási kérés kritikus útján.
   * **Auditnapló (*Audit Service*):** Minden szignifikáns domain esemény (szavazat leadása, ötlet beküldése, adminisztrátori beavatkozás) egy megváltoztathatatlan eseménynaplóba kerül. Az Audit Service ezeket az eseményeket aszinkron fogyasztja, így az auditnaplózás semmilyen körülmények között nem lassítja a felhasználói kérések kiszolgálását.
 
 ---
