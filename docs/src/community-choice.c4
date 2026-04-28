@@ -46,7 +46,7 @@ specification {
 		style {
 			shape queue
 			color red
-			icon tech:rabbitmq
+			icon tech:kafka
 		}
 	}
 
@@ -112,10 +112,10 @@ model {
 			}
 		}
 
-		messageBroker = queue 'Message Broker' 'Aszinkron eseménysor médiafeldolgozáshoz' 'RabbitMQ' {
+		messageBroker = queue 'Message Broker' 'Aszinkron eseménysor médiafeldolgozáshoz és domain eseményekhez' 'Apache Kafka' {
 			style {
 				color red
-				icon tech:rabbitmq
+				icon tech:kafka
 			}
 		}
 
@@ -146,15 +146,33 @@ model {
 			}
 		}
 
+		notificationService = service 'Notification Service' 'Domain eseményeket fogyaszt és értesítéseket küld az érintett állampolgároknak' 'Node.js + NestJS' {
+			style {
+				color indigo
+				icon tech:nestjs
+			}
+		}
+
+		auditService = service 'Audit Service' 'Domain eseményeket fogyaszt és megváltoztathatatlan auditnaplót épít' 'Node.js + NestJS' {
+			style {
+				color indigo
+				icon tech:nestjs
+			}
+		}
+
 		webApp -> votingService 'Szavaz' '' 'HTTPS + REST/JSON'
 		webApp -> campaignAdminService 'Pályázatok, ötletek és admin műveletek' '' 'HTTPS + REST/JSON'
 		webApp -> zamundaOne 'Hitelesítés és lakcímellenőrzés' '' 'OAuth2 / OpenID Connect'
-		campaignAdminService -> messageBroker 'Médiaesemény küldése' '' 'RabbitMQ AMQP 0-9-1'
-		messageBroker -> mediaWorker 'Feldolgozási feladat' '' 'RabbitMQ AMQP 0-9-1'
+		campaignAdminService -> messageBroker 'Médiaesemény és domain esemény küldése' '' 'Apache Kafka'
+		votingService -> messageBroker 'Domain esemény küldése' '' 'Apache Kafka'
+		messageBroker -> mediaWorker 'Médiafeldolgozási feladat' '' 'Apache Kafka'
+		messageBroker -> notificationService 'Domain esemény' '' 'Apache Kafka'
+		messageBroker -> auditService 'Domain esemény' '' 'Apache Kafka'
 		mediaWorker -> mediaStorage 'Tömörített fájl tárolása' '' 'MinIO S3 API'
 		mediaStorage -> cdn 'Tartalom replikálása' '' 'Cloudflare HTTPS'
 		votingService -> database 'Szavazatokat ír/olvas' '' 'PostgreSQL wire protocol'
 		campaignAdminService -> database 'Pályázatokat, ötleteket és admin adatokat ír/olvas' '' 'PostgreSQL wire protocol'
+		auditService -> database 'Auditnaplót ír' '' 'PostgreSQL wire protocol'
 		votingService -> cache 'Idempotency és rate limit kulcsok' '' 'Redis protocol'
 		campaignAdminService -> cache 'Session és rate limit kulcsok' '' 'Redis protocol'
 	}

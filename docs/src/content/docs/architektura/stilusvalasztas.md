@@ -33,7 +33,10 @@ A projekt igényei alapján három stílus maradt: a **Modular Monolith**, a **S
 ### 2.2. Kiegészítő stílus: Event-Driven Architecture (EDA)
 
 * **Miért merült fel?** Kiváló a reszponzivitása és a robusztussága.
-* **Mire használjuk?** A teljes rendszert nem építjük erre, mert a szavazás (F-SZAV-01) azonnali, szinkron adatbázis-választ igényel. Ugyanakkor az *F-OB-03 (Multimédia feltöltés és automatikus tömörítés)* funkció **kizárólag eseményvezérelten (Event-Driven)** valósítható meg hatékonyan. Amikor egy lakos feltölt egy videót, egy esemény (Message/Event) kerül a sorba, amit egy aszinkron háttérfolyamat (worker) dolgoz fel. Így a videófeldolgozás nem akasztja meg a webes/szavazó szálakat.
+* **Mire használjuk?** A teljes rendszert nem építjük erre, mert a szavazás (F-SZAV-01) azonnali, szinkron adatbázis-választ igényel. Ugyanakkor három területen **kizárólag eseményvezérelten (Event-Driven)** valósítható meg hatékonyan a funkció:
+  * **Médiafeldolgozás (*Campaign & Idea Service*):** Amikor egy lakos feltölt egy videót, egy esemény kerül a sorba, amit egy aszinkron háttérfolyamat (worker) dolgoz fel. Így a videótömörítés nem akasztja meg a webes/szavazó szálakat.
+  * **Értesítések (*Notification Service*):** Kampányállapot-változáskor (pl. pályázat lezárása, eredményhirdetés) a rendszer domain eseményeket bocsát ki, amelyeket a Notification Service aszinkron fogyaszt és kézbesíti az érintett lakósoknak. Az értesítés küldése nem lehet a szavazási kérés kritikus útján.
+  * **Auditnapló (*Audit Service*):** Minden szignifikáns domain esemény (szavazat leadása, ötlet beküldése, adminisztrátori beavatkozás) egy megváltoztathatatlan eseménynaplóba kerül. Az Audit Service ezeket az eseményeket aszinkron fogyasztja, így az auditnaplózás semmilyen körülmények között nem lassítja a felhasználói kérések kiszolgálását.
 
 ---
 
@@ -50,6 +53,6 @@ Amikor szavazási csúcsidőszak van, elég kizárólag a kisméretű *Voting Se
 2. **Közös adatbázis = Maximális adatintegritás:**
 Mivel a Microservices-szel ellentétben itt osztozhatnak a szolgáltatások egyetlen, robusztus relációs adatbázison, az *F-SZAV-01 (Megmásíthatatlan szavazatok)* követelmény egyszerűen, adatbázis-szintű triggerekkel és tranzakciókkal megvalósítható. Nincs szükség bonyolult, energiaigényes és megbízhatatlan elosztott tranzakciókra.
 3. **Kiváló Robusztusság a hibrid Event-Driven elemmel:**
-A *Campaign & Idea Service* fogadja a darabolt (chunked) videókat, de a tényleges tömörítést már nem a webes kérést kiszolgáló API végzi, hanem egy eseménysoron (message brokeren) keresztül átadja egy dedikált aszinkron workernek. Ez garantálja, hogy a rendszer a legrosszabb hálózati viszonyok és legnagyobb terhelés mellett is stabil marad.
+A *Campaign & Idea Service* fogadja a darabolt (chunked) videókat, de a tényleges tömörítést már nem a webes kérést kiszolgáló API végzi, hanem egy eseménysoron (message brokeren) keresztül átadja egy dedikált aszinkron workernek. Ugyanígy a *Notification Service* és az *Audit Service* is aszinkron event consumerként működik: hibájuk vagy lassulásuk nem gyűrűzik vissza a szavazási és kampánykezelési folyamatokba. Ez garantálja, hogy a rendszer a legrosszabb hálózati viszonyok és legnagyobb terhelés mellett is stabil marad.
 4. **Egyszerűsített üzemeltetés (Takarékosság):**
 Az SBA a mikroszolgáltatásokhoz képest lényegesen kevesebb mozgó alkatrészt (deployment unit) tartalmaz. Nem igényel masszív DevOps infrastruktúrát, komplex service mesh-t vagy folyamatos mikromenedzsmentet, ami radikálisan csökkenti mind a fejlesztési, mind a hosszú távú üzemeltetési költségeket. Ez tökéletes választássá teszi az erőforrásokat ésszerűen felhasználó, takarékos állami (ZDR) projektek számára.
