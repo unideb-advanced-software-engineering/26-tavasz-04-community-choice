@@ -46,7 +46,7 @@ specification {
 		style {
 			shape queue
 			color red
-			icon tech:rabbitmq
+			icon tech:kafka
 		}
 	}
 
@@ -138,8 +138,11 @@ model {
             uploadManager -> eventPublisher 'Feltöltés kész esemény generálása'
 		}
 
-		messageBroker = queue 'Üzenetközvetítő' 'Aszinkron eseménysor a médiafeldolgozáshoz' 'RabbitMQ' {
-			style { color red; icon tech:rabbitmq }
+		messageBroker = queue 'Message Broker' 'Aszinkron eseménysor médiafeldolgozáshoz és domain eseményekhez' 'Apache Kafka' {
+			style {
+				color red
+				icon tech:kafka
+			}
 		}
 
 		mediaWorker = worker 'Médiafeldolgozó háttérfolyamat' 'Képek és videók átméretezése és tömörítése' 'Node.js háttérfolyamat' {
@@ -168,29 +171,35 @@ model {
 			style { color amber }
 		}
 
-        // Webalkalmazás a belső komponensek felé
-		webApp -> votingService.votingController 'Szavazat leadása' 'HTTPS/JSON'
-		webApp -> campaignAdminService.publicApi 'Pályázatok és ötletek böngészése' 'HTTPS/JSON'
-        webApp -> campaignAdminService.ideaApi 'Ötletek és média feltöltése' 'HTTPS / TUS'
-        webApp -> campaignAdminService.adminApi 'Adminisztrációs műveletek' 'HTTPS/JSON'
-		webApp -> zamundaOne 'Hitelesítés' 'OAuth2 / OpenID Connect'
+		notificationService = service 'Notification Service' 'Domain eseményeket fogyaszt és értesítéseket küld az érintett állampolgároknak' 'Node.js + NestJS' {
+			style {
+				color indigo
+				icon tech:nestjs
+			}
+		}
 
-        // Szavazási szolgáltatás az infrastruktúra felé
-        votingService.voteZamundaClient -> zamundaOne 'Lakcím lekérdezése' 'REST'
-        votingService.voteRepo -> database 'Szavazatok mentése (csak hozzáfűzhető)' 'PostgreSQL protokoll'
-        votingService.rateLimiter -> cache 'Forgalomkorlátozási kulcsok' 'Redis protokoll'
+		auditService = service 'Audit Service' 'Domain eseményeket fogyaszt és megváltoztathatatlan auditnaplót épít' 'Node.js + NestJS' {
+			style {
+				color indigo
+				icon tech:nestjs
+			}
+		}
 
-        // Pályázat- és adminisztrációkezelő szolgáltatás az infrastruktúra felé
-        campaignAdminService.campaignRepo -> database 'Adatok mentése és olvasása' 'PostgreSQL protokoll'
-        campaignAdminService.publicApi -> cache 'Lekérdezések gyorsítótárazása' 'Redis protokoll'
-        campaignAdminService.eventPublisher -> messageBroker 'Médiaesemény küldése' 'AMQP 0-9-1'
-
-        // Háttérfolyamat az infrastruktúra felé
-        mediaWorker.consumer -> messageBroker 'Feldolgozási feladat fogadása' 'AMQP 0-9-1'
-        mediaWorker.storageUploader -> mediaStorage 'Tömörített fájl tárolása' 'S3 API'
-
-        // Tároló a CDN felé
-		mediaStorage -> cdn 'Tartalom replikálása' 'HTTPS'
+		webApp -> votingService 'Szavaz' '' 'HTTPS + REST/JSON'
+		webApp -> campaignAdminService 'Pályázatok, ötletek és admin műveletek' '' 'HTTPS + REST/JSON'
+		webApp -> zamundaOne 'Hitelesítés és lakcímellenőrzés' '' 'OAuth2 / OpenID Connect'
+		campaignAdminService -> messageBroker 'Médiaesemény és domain esemény küldése' '' 'Apache Kafka'
+		votingService -> messageBroker 'Domain esemény küldése' '' 'Apache Kafka'
+		messageBroker -> mediaWorker 'Médiafeldolgozási feladat' '' 'Apache Kafka'
+		messageBroker -> notificationService 'Domain esemény' '' 'Apache Kafka'
+		messageBroker -> auditService 'Domain esemény' '' 'Apache Kafka'
+		mediaWorker -> mediaStorage 'Tömörített fájl tárolása' '' 'MinIO S3 API'
+		mediaStorage -> cdn 'Tartalom replikálása' '' 'Cloudflare HTTPS'
+		votingService -> database 'Szavazatokat ír/olvas' '' 'PostgreSQL wire protocol'
+		campaignAdminService -> database 'Pályázatokat, ötleteket és admin adatokat ír/olvas' '' 'PostgreSQL wire protocol'
+		auditService -> database 'Auditnaplót ír' '' 'PostgreSQL wire protocol'
+		votingService -> cache 'Idempotency és rate limit kulcsok' '' 'Redis protocol'
+		campaignAdminService -> cache 'Session és rate limit kulcsok' '' 'Redis protocol'
 	}
 
 	allampol -> cc.webApp 'Böngész, ötletet javasol, szavaz, médiát tölt fel' '' 'HTTPS'

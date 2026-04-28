@@ -33,7 +33,10 @@ A projekt igényei alapján három stílus maradt: a **moduláris monolit**, a *
 ### 2.2. Kiegészítő stílus: Eseményvezérelt architektúra (EDA)
 
 * **Miért merült fel?** Kiváló a reszponzivitása és a robusztussága.
-* **Mire használjuk?** A teljes rendszert nem építjük erre, mert a szavazás (F-SZAV-01) azonnali, szinkron adatbázis-választ igényel. Ugyanakkor az *F-OB-03 (Multimédia feltöltés és automatikus tömörítés)* funkció kizárólag eseményvezérelten valósítható meg hatékonyan. Amikor egy lakos feltölt egy videót, egy esemény kerül az üzenetsorba, amit egy aszinkron háttérfolyamat dolgoz fel. Így a videófeldolgozás nem akasztja meg a webes és szavazási kéréseket.
+* **Mire használjuk?** A teljes rendszert nem építjük erre, mert a szavazás (F-SZAV-01) azonnali, szinkron adatbázis-választ igényel. Ugyanakkor három területen **kizárólag eseményvezérelten (Event-Driven)** valósítható meg hatékonyan a funkció:
+  * **Médiafeldolgozás (*Campaign & Idea Service*):** Amikor egy lakos feltölt egy videót, egy esemény kerül a sorba, amit egy aszinkron háttérfolyamat (worker) dolgoz fel. Így a videótömörítés nem akasztja meg a webes/szavazó szálakat.
+  * **Értesítések (*Notification Service*):** Kampányállapot-változáskor (pl. pályázat lezárása, eredményhirdetés) a rendszer domain eseményeket bocsát ki, amelyeket a Notification Service aszinkron fogyaszt és kézbesíti az érintett lakósoknak. Az értesítés küldése nem lehet a szavazási kérés kritikus útján.
+  * **Auditnapló (*Audit Service*):** Minden szignifikáns domain esemény (szavazat leadása, ötlet beküldése, adminisztrátori beavatkozás) egy megváltoztathatatlan eseménynaplóba kerül. Az Audit Service ezeket az eseményeket aszinkron fogyasztja, így az auditnaplózás semmilyen körülmények között nem lassítja a felhasználói kérések kiszolgálását.
 
 ---
 
@@ -45,11 +48,11 @@ A Zamunda Community Choice projekt dedikált architektúrája a **szolgáltatás
 
 A szolgáltatásalapú architektúra (SBA) egy makroszolgáltatás-alapú megközelítés. Nincsenek több tucatnyi mikroszolgáltatások, hanem a rendszer néhány jól körülhatárolt, önállóan futtatható doménszolgáltatásra van bontva, amelyek jellemzően **egy közös, monolitikus adatbázison** osztoznak.
 
-1. **Célzott elaszticitás (takarékosság és klímabarát működés):**
-Amikor szavazási csúcsidőszak van, elég kizárólag a szavazási szolgáltatást felskálázni. Nem kell a teljes rendszert többszörözni, így az erőforrás-kihasználás (CPU, RAM) minimális marad. Ez tökéletesen teljesíti az elaszticitás és a hatékonyság architekturális karakterisztikáit.
-2. **Közös adatbázis = maximális adatintegritás:**
-Mivel a mikroszolgáltatás-architektúrával ellentétben itt a szolgáltatások egyetlen, robusztus relációs adatbázison osztozhatnak, az *F-SZAV-01 (Megmásíthatatlan szavazatok)* követelmény egyszerűen, adatbázisszintű triggerekkel és tranzakciókkal megvalósítható. Nincs szükség bonyolult, energiaigényes és megbízhatatlan elosztott tranzakciókra.
-3. **Kiváló robusztusság a hibrid eseményvezérelt elemmel:**
-A pályázat- és adminisztrációkezelő szolgáltatás fogadja a darabolt videókat, de a tényleges tömörítést már nem a webes kérést kiszolgáló API végzi, hanem egy üzenetközvetítőn keresztül átadja egy dedikált aszinkron háttérfolyamatnak. Ez garantálja, hogy a rendszer a legrosszabb hálózati viszonyok és legnagyobb terhelés mellett is stabil marad.
-4. **Egyszerűsített üzemeltetés (takarékosság):**
-Az SBA a mikroszolgáltatásokhoz képest lényegesen kevesebb mozgó alkatrészt, vagyis telepítési egységet tartalmaz. Nem igényel masszív DevOps infrastruktúrát, komplex szolgáltatáshálót vagy folyamatos mikromenedzsmentet, ami radikálisan csökkenti mind a fejlesztési, mind a hosszú távú üzemeltetési költségeket. Ez kiváló választássá teszi az erőforrásokat ésszerűen felhasználó, takarékos állami (ZDR) projektek számára.
+1. **Célzott Elaszticitás (Takarékosság és Klímabarát működés):**
+Amikor szavazási csúcsidőszak van, elég kizárólag a kisméretű *Voting Service*-t felskálázni. Nem kell a teljes rendszert többszörözni, így az erőforrás-kihasználás (CPU, RAM) minimális marad. Ez tökéletesen teljesíti az Elaszticitás és a Hatékonyság AC-ket.
+2. **Közös adatbázis = Maximális adatintegritás:**
+Mivel a Microservices-szel ellentétben itt osztozhatnak a szolgáltatások egyetlen, robusztus relációs adatbázison, az *F-SZAV-01 (Megmásíthatatlan szavazatok)* követelmény egyszerűen, adatbázis-szintű triggerekkel és tranzakciókkal megvalósítható. Nincs szükség bonyolult, energiaigényes és megbízhatatlan elosztott tranzakciókra.
+3. **Kiváló Robusztusság a hibrid Event-Driven elemmel:**
+A *Campaign & Idea Service* fogadja a darabolt (chunked) videókat, de a tényleges tömörítést már nem a webes kérést kiszolgáló API végzi, hanem egy eseménysoron (message brokeren) keresztül átadja egy dedikált aszinkron workernek. Ugyanígy a *Notification Service* és az *Audit Service* is aszinkron event consumerként működik: hibájuk vagy lassulásuk nem gyűrűzik vissza a szavazási és kampánykezelési folyamatokba. Ez garantálja, hogy a rendszer a legrosszabb hálózati viszonyok és legnagyobb terhelés mellett is stabil marad.
+4. **Egyszerűsített üzemeltetés (Takarékosság):**
+Az SBA a mikroszolgáltatásokhoz képest lényegesen kevesebb mozgó alkatrészt (deployment unit) tartalmaz. Nem igényel masszív DevOps infrastruktúrát, komplex service mesh-t vagy folyamatos mikromenedzsmentet, ami radikálisan csökkenti mind a fejlesztési, mind a hosszú távú üzemeltetési költségeket. Ez tökéletes választássá teszi az erőforrásokat ésszerűen felhasználó, takarékos állami (ZDR) projektek számára.
