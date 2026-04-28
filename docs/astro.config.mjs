@@ -29,6 +29,10 @@ export default defineConfig({
 					slug: 'esettanulmany',
 				},
 				{
+					label: 'SRS',
+					slug: 'srs',
+				},
+				{
 					label: 'Architektúra',
 					items: [
 						{ label: 'Karakterisztikák', slug: 'architektura/karakterisztikak' },
