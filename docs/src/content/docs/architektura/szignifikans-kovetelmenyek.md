@@ -1,6 +1,6 @@
 ---
 title: Architekturálisan szignifikáns követelmények
-description: A Community Choice rendszer ASR-jeinek leírása
+description: A Community Choice rendszer architekturálisan szignifikáns követelményeinek leírása
 ---
 
 ## ZDR általános követelmények
@@ -27,8 +27,8 @@ A rendszer kép- és videófeltöltési lehetőséget biztosít az ötletekhez (
 **Miért ASR?**
 
 * A rossz zamundai hálózati lefedettség miatt a nagyméretű médiafájlok feltöltése hagyományos módszerekkel megszakadna, ezért az architektúrának egy robusztus, darabolt és megszakítás esetén folytatható feltöltési mechanizmust kell biztosítania (pl. [TUS protokoll](https://tus.io/) segítségével).
-* A szerveroldali videó/kép tömörítés jelentős és hirtelen CPU terhelést okoz. Ezt az alaprendszertől független, aszinkron háttérfolyamatként (background worker/queue) kell megtervezni, hogy egy tömeges feltöltési hullám ne lassítsa le a teljes webes felületet és a szavazást.
-* Jelentős hatással van a CDN (Content Delivery Network) és a fájltárolási stratégiára a hálózat-optimalizálás érdekében.
+* A szerveroldali videó- és képtömörítés jelentős és hirtelen CPU-terhelést okoz. Ezt az alaprendszertől független, aszinkron háttérfolyamattal és üzenetsorral kell megtervezni, hogy egy tömeges feltöltési hullám ne lassítsa le a teljes webes felületet és a szavazást.
+* Jelentős hatással van a CDN-re (Content Delivery Network, tartalomelosztó hálózat) és a fájltárolási stratégiára a hálózat optimalizálása érdekében.
 
 ### F-PK-03: Alacsony hálózati terhelésű publikus listanézet
 
@@ -36,5 +36,5 @@ A rendszer publikus, optimalizált (alacsony hálózati terhelésű) listanézet
 
 **Miért ASR?**
 
-* Az alacsony sávszélesség miatt a hagyományos, teljes oldalakat letöltő architektúra (SSR) itt nem lesz hatékony.
-* Az API tervezésénél gyorsítótárazást és minimalizált adatátvitelt (pl. csak a szükséges JSON mezők küldése, lapozás/lazy loading) kell a rendszer legalsó rétegeibe is beépíteni.
+* Az alacsony sávszélesség miatt a hagyományos, teljes oldalakat letöltő szerveroldali renderelés (SSR) itt nem lesz hatékony.
+* Az API tervezésénél gyorsítótárazást és minimalizált adatátvitelt kell a rendszer legalsó rétegeibe is beépíteni, például csak a szükséges JSON-mezők küldésével, lapozással és lusta betöltéssel.

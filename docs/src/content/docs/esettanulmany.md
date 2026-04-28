@@ -3,7 +3,7 @@ title: Esettanulmány
 description: Community Choice – Zamunda közösségi ötletplatform esettanulmánya
 ---
 
-# 04: Community Choice 
+# 04: Community Choice
 
 ## Háttér
 
@@ -19,11 +19,11 @@ Ez a digitális transzformációs program a Zamunda Digitális Reneszánsz (ZDR)
 
 - Mivel egy állami programról van szó, ezért nagyon fontos, hogy minden projekthez megfelelő mennyiségű és minőségű dokumentáció készüljön.
 - Zamunda nem szegény ország, de feleslegesen nem is akarja szórni a pénzt: a projektek tervezésénél törekedni kell a takarékosságra. Szintén ezt igénylik a klímabarát célok!
-- Figyelembe kell venni, hogy az ország bizonyos területeienek internetlefedettsége hagy némi kívánnivalót maga után. Ahol van internet, ott is előfordulhatnak magasabb késleltetések, alacsonyabb sávszélességek.
+- Figyelembe kell venni, hogy az ország bizonyos területeinek internetlefedettsége hagy némi kívánnivalót maga után. Ahol van internet, ott is előfordulhat magasabb késleltetés és alacsonyabb sávszélesség.
 
 ## Leírás
 
-Zamunda szeretne lehetőséget  biztosítani arra, hogy  kezdeményezhessenek helyi szintű, kisebb-nagyobb projekteket. Ilyen lehet például új zöldfelületek kialakítása, közösségi terek létrehozása, vagy egyszerűen csak padok, kerékpártárolók kihelyezése.
+Zamunda szeretne lehetőséget biztosítani arra, hogy a lakosok helyi szintű, kisebb-nagyobb projekteket kezdeményezhessenek. Ilyen lehet például új zöldfelületek kialakítása, közösségi terek létrehozása vagy egyszerűen csak padok és kerékpártárolók kihelyezése.
 
 ### Valós kapcsolódás
 

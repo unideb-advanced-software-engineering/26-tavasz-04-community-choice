@@ -8,27 +8,14 @@ interface Props {
 const { viewId } = Astro.props;
 ---
 
-<div class="likec4-view not-content">
-	<ReactLikeC4View
-		viewId={viewId}
-		controls
-		pannable
-		zoomable
-		background="solid"
-		browser={false}
-		style={{ width: '100%', height: '100%' }}
-		client:only="react"
-	/>
-</div>
-
-<style>
-	.likec4-view {
-		height: min(72vh, 46rem);
-		min-height: 28rem;
-		overflow: hidden;
-		border: 1px solid var(--sl-color-hairline);
-		border-radius: 0.5rem;
-		background: var(--sl-color-bg-sidebar);
-		margin: 1.5rem 0;
-	}
-</style>
+<ReactLikeC4View
+  viewId={viewId}
+  {/* Configure view */}
+  controls={false}
+  browser={{
+    // options for likec4 browser
+    enableFocusMode: false,
+    enableSearch: false,
+  }}
+  client:only="react">
+</ReactLikeC4View>
