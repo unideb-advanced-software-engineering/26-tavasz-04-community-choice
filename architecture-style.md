@@ -12,7 +12,7 @@ A mérlegelés első körében az alábbi stílusokat azonnal elvetettük, mivel
 
 * **Rétegelt (Layered) és csővezetékes (Pipeline) architektúra:** Ezek technológiailag particionált stílusok, amelyeknél a kód rétegekbe (megjelenítés, üzleti logika, adatbázis) van szervezve. Bár az indulás olcsó, a módosítások nehézkesek, és az elaszticitásuk rendkívül alacsony.
 * **Mikromag-architektúra (Microkernel):** Bár jó kiegészítő rendszerekhez, a mi platformunk nem egy alaprendszerre és bővítményekre épülő architektúrát igényel.
-* **Térelemekre épülő architektúra (Space-Based):** Bár az elaszticitása és a teljesítménye maximális a memóriában végzett feldolgozás miatt, az üzemeltetése méregdrága, ráadásul az *F-SZAV-01 (Megmásíthatatlan szavazatok)* szigorú, csak hozzáfűzhető adatintegritási igényeivel nehezen vagy csak komoly tranzakciós kompromisszumokkal lenne összeegyeztethető.
+* **Térelemekre épülő architektúra (Space-Based):** Bár az elaszticitása és a teljesítménye maximális a memóriában végzett feldolgozás miatt, az üzemeltetése méregdrága, ráadásul az *F-SZ-01 (Megmásíthatatlan szavazatok)* szigorú, csak hozzáfűzhető adatintegritási igényeivel nehezen vagy csak komoly tranzakciós kompromisszumokkal lenne összeegyeztethető.
 * **Mikroszolgáltatás-architektúra (Microservices):** Bár divatos és extrém jól skálázható, a ZDR klímabarát és takarékossági ASR-jeivel teljesen ellentétes. A mikroszolgáltatások hálózati többletterhelése, a komplex üzemeltetés és az elosztott tranzakciók kezelése indokolatlanul drágává és energiaigényessé tenné a projektet.
 * **Szolgáltatásorientált architektúra (SOA):** Túl monolitikus, elavult.
 
@@ -30,7 +30,7 @@ A projekt igényei alapján három stílus maradt: a **moduláris monolit**, a *
 ### 2.2. Kiegészítő stílus: Eseményvezérelt architektúra (EDA)
 
 * **Miért merült fel?** Kiváló a reszponzivitása és a robusztussága.
-* **Mire használjuk?** A teljes rendszert nem építjük erre, mert a szavazás (F-SZAV-01) azonnali, szinkron adatbázis-választ igényel. Ugyanakkor az *F-OB-03 (Multimédia feltöltés és automatikus tömörítés)* funkció kizárólag eseményvezérelten valósítható meg hatékonyan. Amikor egy lakos feltölt egy videót, egy esemény kerül az üzenetsorba, amit egy aszinkron háttérfolyamat dolgoz fel. Így a videófeldolgozás nem akasztja meg a webes és szavazási kéréseket.
+* **Mire használjuk?** A teljes rendszert nem építjük erre, mert a szavazás (F-SZ-01) azonnali, szinkron adatbázis-választ igényel. Ugyanakkor az *F-OB-03 (Multimédia feltöltés és automatikus tömörítés)* funkció kizárólag eseményvezérelten valósítható meg hatékonyan. Amikor egy lakos feltölt egy videót, egy esemény kerül az üzenetsorba, amit egy aszinkron háttérfolyamat dolgoz fel. Így a videófeldolgozás nem akasztja meg a webes és szavazási kéréseket.
 
 ---
 
@@ -45,7 +45,7 @@ A szolgáltatásalapú architektúra (SBA) egy makroszolgáltatás-alapú megkö
 1. **Célzott elaszticitás (takarékosság és klímabarát működés):**
 Amikor szavazási csúcsidőszak van, elég kizárólag a szavazási szolgáltatást felskálázni. Nem kell a teljes rendszert többszörözni, így az erőforrás-kihasználás (CPU, RAM) minimális marad. Ez tökéletesen teljesíti az elaszticitás és a hatékonyság architekturális karakterisztikáit.
 2. **Közös adatbázis = maximális adatintegritás:**
-Mivel a mikroszolgáltatás-architektúrával ellentétben itt a szolgáltatások egyetlen, robusztus relációs adatbázison osztozhatnak, az *F-SZAV-01 (Megmásíthatatlan szavazatok)* követelmény egyszerűen, adatbázisszintű triggerekkel és tranzakciókkal megvalósítható. Nincs szükség bonyolult, energiaigényes és megbízhatatlan elosztott tranzakciókra.
+Mivel a mikroszolgáltatás-architektúrával ellentétben itt a szolgáltatások egyetlen, robusztus relációs adatbázison osztozhatnak, az *F-SZ-01 (Megmásíthatatlan szavazatok)* követelmény egyszerűen, adatbázisszintű triggerekkel és tranzakciókkal megvalósítható. Nincs szükség bonyolult, energiaigényes és megbízhatatlan elosztott tranzakciókra.
 3. **Kiváló robusztusság a hibrid eseményvezérelt elemmel:**
 A pályázat- és adminisztrációkezelő szolgáltatás fogadja a darabolt videókat, de a tényleges tömörítést már nem a webes kérést kiszolgáló API végzi, hanem egy üzenetközvetítőn keresztül átadja egy dedikált aszinkron háttérfolyamatnak. Ez garantálja, hogy a rendszer a legrosszabb hálózati viszonyok és legnagyobb terhelés mellett is stabil marad.
 4. **Egyszerűsített üzemeltetés (takarékosság):**
