@@ -33,6 +33,11 @@ export default defineConfig({
 					slug: 'srs',
 				},
 				{
+					label: 'Fogalomtár',
+					slug: 'fogalomtar',
+				},
+
+				{
 					label: 'Architektúra',
 					items: [
 						{ label: 'Karakterisztikák', slug: 'architektura/karakterisztikak' },

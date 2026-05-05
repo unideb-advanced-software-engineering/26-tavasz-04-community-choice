@@ -38,6 +38,8 @@ A projekt igényei alapján három stílus maradt: a **moduláris monolit**, a *
   * **Értesítések (*Notification Service*):** Kampányállapot-változáskor (pl. pályázat lezárása, eredményhirdetés) a rendszer domain eseményeket bocsát ki, amelyeket a Notification Service aszinkron fogyaszt és kézbesíti az érintett lakosoknak. Az értesítés küldése nem lehet a szavazási kérés kritikus útján.
   * **Auditnapló (*Audit Service*):** Minden szignifikáns domain esemény (szavazat leadása, ötlet beküldése, adminisztrátori beavatkozás) egy megváltoztathatatlan eseménynaplóba kerül. Az Audit Service ezeket az eseményeket aszinkron fogyasztja, így az auditnaplózás semmilyen körülmények között nem lassítja a felhasználói kérések kiszolgálását.
 
+Fontos: a szavazás elsődleges, erős konzisztenciát igénylő része nem eseményvezérelt módon „épül fel”, hanem a *Voting Service* szinkron PostgreSQL tranzakcióban rögzíti a szavazatot egy csak hozzáfűzhető szavazati tranzakciónaplóban. A Kafka itt audit/integrációs eseményfolyam, nem a szavazatok elsődleges igazságforrása.
+
 ---
 
 ## 3. A győztes választás: Hibrid szolgáltatásalapú architektúra (SBA)

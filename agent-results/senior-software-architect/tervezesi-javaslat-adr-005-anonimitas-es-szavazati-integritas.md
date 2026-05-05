@@ -97,7 +97,7 @@ Kriptografikusan láncolt, ledger jellegű tárolás.
 
 Az ADR-005-ben az architekturális döntés legyen:
 
-> A Community Choice rendszer nem teljesen anonim, hanem **pszeudonimizált szavazati tárolást** alkalmaz. A szavazatok elsődleges igazságforrása egy PostgreSQL-ben vezetett, csak hozzáfűzhető vote ledger. A Voting Service a Zamunda One által biztosított stabil felhasználói azonosítóból és a kampánykontextusból determinisztikus, HMAC-alapú `voter_key` értéket képez. A szavazati rekord nem tartalmaz nyers személyes azonosítót. Az „egy felhasználó egy ötletre egyszer” szabályt adatbázis-szintű unique constraint biztosítja. A szavazatok UPDATE és DELETE műveletei adatbázis-szinten tiltottak. A Kafka felé kibocsátott esemény audit és integrációs célú, nem a szavazat elsődleges adatforrása.
+> A Community Choice rendszer nem teljesen anonim, hanem **pszeudonimizált szavazati tárolást** alkalmaz. A szavazatok elsődleges igazságforrása egy PostgreSQL-ben vezetett, csak hozzáfűzhető szavazati tranzakciónapló. A Voting Service a Zamunda One által biztosított stabil felhasználói azonosítóból és a kampánykontextusból determinisztikus, HMAC-alapú `voter_key` értéket képez. A szavazati rekord nem tartalmaz nyers személyes azonosítót. Az „egy felhasználó egy ötletre egyszer” szabályt adatbázis-szintű unique constraint biztosítja. A szavazatok UPDATE és DELETE műveletei adatbázis-szinten tiltottak. A Kafka felé kibocsátott esemény audit és integrációs célú, nem a szavazat elsődleges adatforrása.
 
 ## Indoklás
 
@@ -107,7 +107,7 @@ A dokumentációban ezért nem szabad azt állítani, hogy a szavazat teljesen a
 
 - a rendszer a szavazatot **pszeudonimizáltan** tárolja;
 - a szavazati rekordból közvetlenül nem derül ki a szavazó személyazonossága;
-- a rendszer nem tárol nyers személyes azonosítót a vote ledgerben;
+- a rendszer nem tárol nyers személyes azonosítót a szavazati tranzakciónaplóban;
 - a duplikált szavazat kizárásához szükséges minimális technikai azonosító megmarad;
 - a titkosságot HMAC-alapú pszeudonim kulcs, secret-kezelés és hozzáférés-korlátozás védi.
 
@@ -177,7 +177,7 @@ ADR-005: Szavazatok integritása és pszeudonimizált tárolása
 
 A döntés fő állításai:
 
-- PostgreSQL append-only vote ledger;
+- PostgreSQL append-only szavazati tranzakciónapló;
 - HMAC-alapú `voter_key`;
 - nyers személyes azonosító nincs a szavazati rekordban;
 - unique constraint a duplikált szavazat ellen;
@@ -202,12 +202,12 @@ F-SZ-05: A rendszer a szavazatokat pszeudonimizált szavazói kulccsal kapcsolja
 Az `F-SZ-04` jelenlegi „append-only / blokklánc-jellegű” megfogalmazását is érdemes pontosítani, mert a blokklánc irányt nem választjuk:
 
 ```text
-F-SZ-04: A rendszer a leadott szavazatokat PostgreSQL-alapú, csak hozzáfűzhető vote ledgerben tárolja. A módosítást és törlést adatbázis-szintű jogosultságokkal és védelmi mechanizmusokkal tiltja.
+F-SZ-04: A rendszer a leadott szavazatokat PostgreSQL-alapú, csak hozzáfűzhető szavazati tranzakciónaplóban tárolja. A módosítást és törlést adatbázis-szintű jogosultságokkal és védelmi mechanizmusokkal tiltja.
 ```
 
 A Security Requirements részbe érdemes felvenni:
 
-- a vote ledger nem tartalmaz nyers `user_id`-t;
+- a szavazati tranzakciónapló nem tartalmaz nyers `user_id`-t;
 - a HMAC secret csak a Voting Service számára hozzáférhető;
 - adminisztratív felületen nincs szavazatmódosítási vagy törlési funkció;
 - közvetlen adatbázis-hozzáférést üzemeltetési szabályok korlátozzák.
@@ -281,7 +281,7 @@ Az ADR-004 jelenleg Event Sourcing mintát említ. Ezt javasolt finomítani:
 A szavazási szolgáltatás leírását érdemes pontosítani:
 
 ```text
-Ez a szolgáltatás felel a jogosult, pszeudonimizált és megváltoztathatatlan szavazatok rögzítéséért. A Zamunda One alapján ellenőrzi a lakóhelyet, majd PostgreSQL-ben, csak hozzáfűzhető vote ledgerben tárolja a szavazatot.
+Ez a szolgáltatás felel a jogosult, pszeudonimizált és megváltoztathatatlan szavazatok rögzítéséért. A Zamunda One alapján ellenőrzi a lakóhelyet, majd PostgreSQL-ben, csak hozzáfűzhető szavazati tranzakciónaplóban tárolja a szavazatot.
 ```
 
 ### 10. C4 modell (`docs/src/community-choice.c4`) – későbbi, külön C4 feladat
@@ -290,7 +290,7 @@ A senior architect skill szabályai alapján itt nem módosítok C4 fájlt, de d
 
 - `voteRepo` leírásában szerepeljen a pszeudonimizált `voter_key`;
 - a Voting Logic komponensnél szerepeljen a HMAC-alapú kulcsképzés;
-- az adatbázis kapcsolatnál szerepeljen az append-only vote ledger;
+- az adatbázis kapcsolatnál szerepeljen az append-only szavazati tranzakciónapló;
 - a Kafka kapcsolatnál szerepeljen, hogy audit/domain esemény, nem elsődleges szavazati tárolás.
 
 ### 11. Fogalomtár / terminológia
@@ -298,7 +298,7 @@ A senior architect skill szabályai alapján itt nem módosítok C4 fájlt, de d
 A dokumentációban egységesen ezeket a kifejezéseket javasolt használni:
 
 - **pszeudonimizált szavazói kulcs**,
-- **vote ledger** vagy „szavazati napló/tábla”,
+- **Szavazati tranzakciónapló** vagy „szavazati napló/tábla”,
 - **csak hozzáfűzhető tárolás**,
 - **adatbázis-szintű egyediségi constraint**,
 - **audit/integrációs eseményfolyam**.
@@ -323,7 +323,7 @@ Kerülendő vagy pontosítandó kifejezések:
 - olyan tárolási modellre, amely egyszerre biztosítja a duplikált szavazatok kizárását, a szavazatok megváltoztathatatlanságát és a szavazói személyazonosság védelmét; teljes anonimitás mellett a duplikációellenőrzés nem lenne megbízható, nyers user_id tárolása mellett pedig túl erős lenne a személyesadat-kitettség
 
 **We decided for**
-- PostgreSQL-alapú, csak hozzáfűzhető vote ledger alkalmazása pszeudonimizált szavazói kulccsal. A Voting Service a Zamunda One stabil felhasználói azonosítójából és a kampánykontextusból HMAC-alapú voter_key értéket képez. A vote ledger nem tartalmaz nyers személyes azonosítót. Az egy ötletre egyszeri szavazást adatbázis-szintű unique constraint garantálja. A szavazati rekordok UPDATE és DELETE műveletei adatbázis-szinten tiltottak. Kafka felé audit/integrációs esemény kerül publikálásra, de Kafka nem a szavazat elsődleges igazságforrása.
+- PostgreSQL-alapú, csak hozzáfűzhető szavazati tranzakciónapló alkalmazása pszeudonimizált szavazói kulccsal. A Voting Service a Zamunda One stabil felhasználói azonosítójából és a kampánykontextusból HMAC-alapú voter_key értéket képez. A szavazati tranzakciónapló nem tartalmaz nyers személyes azonosítót. Az egy ötletre egyszeri szavazást adatbázis-szintű unique constraint garantálja. A szavazati rekordok UPDATE és DELETE műveletei adatbázis-szinten tiltottak. Kafka felé audit/integrációs esemény kerül publikálásra, de Kafka nem a szavazat elsődleges igazságforrása.
 
 **Achieving**
 - a szavazat érvényességének elsődleges forrása a PostgreSQL tranzakciós tároló marad

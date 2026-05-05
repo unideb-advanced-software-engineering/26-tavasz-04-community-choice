@@ -23,7 +23,8 @@ description: A Community Choice rendszer architekturális karakterisztikáinak l
 **Miért fontos?**
 
 * A rendszer legkritikusabb funkciója a lakossági szavazás. A platformba vetett állampolgári bizalom megköveteli, hogy a szavazatokat utólagosan senki ne tudja módosítani vagy törölni, még a legmagasabb szintű rendszeradminisztrátorok sem.
-* A szavazatok megbízhatóságát és a pályázatok tisztaságát technológiai garanciákkal kell védeni az illetéktelen beavatkozások ellen.
+* Az integritás része az is, hogy ugyanaz a felhasználó ugyanarra az ötletre ne adhasson le több szavazatot; ezt a rendszer adatbázis-szintű egyediségi constrainttel biztosítja.
+* A szavazatok megbízhatóságát és a pályázatok tisztaságát technológiai garanciákkal kell védeni az illetéktelen beavatkozások ellen, a szavazói személyazonosságot pedig pszeudonimizált tárolással kell minimalizálni.
 
 ## Robusztusság
 

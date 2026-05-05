@@ -28,7 +28,7 @@ A fő szakmai feszültség: a teljes anonimitás nehezen egyeztethető össze az
 
 ## Vizsgált alternatívák
 
-### A. PostgreSQL append-only vote ledger pszeudonimizált szavazói kulccsal
+### A. PostgreSQL append-only szavazati tranzakciónapló pszeudonimizált szavazói kulccsal
 
 Leírás:
 
@@ -151,7 +151,7 @@ Ellenérvek:
 
 ## Források
 
-- `agent-results/senior-software-architect/tervezesi-javaslat-jelenlegi-dokumentacio-es-architektura.md` – az ADR-005 javasolt témája, a pszeudonimizált szavazói kulcs, PostgreSQL append-only vote ledger, unique constraint, UPDATE/DELETE tiltás és Kafka audit esemény iránya.
+- `agent-results/senior-software-architect/tervezesi-javaslat-jelenlegi-dokumentacio-es-architektura.md` – az ADR-005 javasolt témája, a pszeudonimizált szavazói kulcs, PostgreSQL append-only szavazati tranzakciónapló, unique constraint, UPDATE/DELETE tiltás és Kafka audit esemény iránya.
 - `docs/src/content/docs/srs.md` – a hitelesített szavazás, lakcím-alapú jogosultság, egy ötletre egyszeri szavazás, immutable tárolás és anonimizált kapcsolás követelményei.
 - `docs/src/content/docs/esettanulmany.md` – az eredeti esettanulmány szavazási üzleti szabályai: csak helyi lakos szavazhat, egy ötletre egyszer, adminisztrátori módosítás/törlés nem lehet megoldható.
 - `docs/src/content/docs/architektura/karakterisztikak.md` – az Integritás, Hatékonyság, Robusztusság és Elaszticitás architekturális karakterisztikái.
@@ -179,7 +179,7 @@ Ellenérvek:
 
 Ez nem végleges döntés, csak kutatási alap.
 
-A jelenlegi repóbeli kontextus alapján a legerősebben vizsgálandó irány az **A alternatíva**: PostgreSQL-alapú, append-only vote ledger pszeudonimizált szavazói kulccsal, adatbázis-szintű unique constrainttel, UPDATE/DELETE tiltással és Kafka felé publikált audit/domain eseménnyel.
+A jelenlegi repóbeli kontextus alapján a legerősebben vizsgálandó irány az **A alternatíva**: PostgreSQL-alapú, append-only szavazati tranzakciónapló pszeudonimizált szavazói kulccsal, adatbázis-szintű unique constrainttel, UPDATE/DELETE tiltással és Kafka felé publikált audit/domain eseménnyel.
 
 Az ADR-ben érdemes külön kimondani:
 

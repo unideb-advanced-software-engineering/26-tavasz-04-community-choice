@@ -185,7 +185,7 @@ ADR-005: Szavazatok megváltoztathatatlan és pszeudonimizált tárolása
 
 Fő döntés:
 
-- PostgreSQL append-only vote ledger,
+- PostgreSQL append-only szavazati tranzakciónapló,
 - egyedi constraint a duplikált szavazat ellen,
 - pszeudonimizált szavazói kulcs,
 - UPDATE/DELETE tiltás adatbázis-szinten,

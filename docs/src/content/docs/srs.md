@@ -255,8 +255,8 @@ Kritikus prioritás. A szavazás és a jogosultságkezelés a rendszer lelke. A 
 * F-SZ-01: A rendszer integrálódik a Zamunda One API-val az autentikáció (bejelentkezés) és az autorizáció (hivatalos lakcímadatok lekérése) céljából.  
 * F-SZ-02: A rendszer szűri a hozzáférést: a felhasználó csak a saját bejelentett lakóhelye szerinti önkormányzat pályázatain adhat be ötletet és szavazhat.  
 * F-SZ-03: A rendszer lehetővé teszi, hogy egy felhasználó egy pályázaton belül korlátlan számú különböző ötletre szavazzon, de egy konkrét ötletre csak egyetlen szavazatot adhat le.  
-* F-SZ-04: A rendszer a leadott szavazatokat megváltoztathatatlan (pl. append-only / blokklánc-jellegű logolás) adatszerkezetben tárolja, így garantálva, hogy a szavazatokat senki – még az adminisztrátorok sem – módosíthatja vagy törölheti.  
-* F-SZ-05: A rendszer a szavazatokat anonimizálva kapcsolja az ötletekhez, biztosítva a szavazás titkosságát.
+* F-SZ-04: A rendszer a leadott szavazatokat PostgreSQL-alapú, csak hozzáfűzhető szavazati tranzakciónaplóban tárolja. A módosítást és törlést adatbázis-szintű jogosultságokkal és védelmi mechanizmusokkal tiltja.  
+* F-SZ-05: A rendszer a szavazatokat **pszeudonimizált szavazói kulccsal** kapcsolja az ötletekhez. A szavazati rekord nem tartalmaz nyers személyes azonosítót, ugyanakkor a pszeudonim kulcs lehetővé teszi az egy ötletre egyszeri szavazás adatbázis-szintű ellenőrzését.
 
 5. # **Other Nonfunctional Requirements**
 
@@ -277,7 +277,9 @@ Kritikus prioritás. A szavazás és a jogosultságkezelés a rendszer lelke. A 
 
 * Csak bejelentkezett és hitelesített felhasználó tud egy ötletre egy szavazatot leadni.  
 * A rendszernek szigorúan korlátozni kell a szavazáshoz való hozzáférést.  
-* A szavazatok adatbázis-szintű védettséget kell, hogy élvezzenek. A rendszer adminisztrátorai számára alkalmazás-szinten tilos, és technológiailag lehetetlen kell legyen a leadott szavazatok módosítása vagy törlése.
+* A szavazatok adatbázis-szintű védettséget kell, hogy élvezzenek; a módosítás és törlés technológiai szinten tiltott.  
+* A szavazati tranzakciónapló nem tartalmaz nyers személyes azonosítót, a duplikált szavazat kizárásához a rendszer pszeudonimizált szavazói kulcsot használ.  
+* A pszeudonimizáláshoz szükséges titok (HMAC secret) csak a *Voting Service* számára hozzáférhető.
 
 *\<Specify any requirements regarding security or privacy issues surrounding use of the product or protection of the data used or created by the product. Define any user identity authentication requirements. Refer to any external policies or regulations containing security issues that affect the product. Define any security or privacy certifications that must be satisfied.\>*
 
@@ -312,7 +314,7 @@ Kritikus prioritás. A szavazás és a jogosultságkezelés a rendszer lelke. A 
 
 **Appendix A: Glossary**
 
-*\<Define all the terms necessary to properly interpret the SRS, including acronyms and abbreviations. You may wish to build a separate glossary that spans multiple projects or the entire organization, and just include terms specific to a single project in each SRS.\>*
+A projekt egységes fogalomtárát lásd: **[Fogalomtár](../fogalomtar/)**.
 
 **Appendix B: Analysis Models**
 

@@ -24,7 +24,7 @@ A konténerszint megmutatja a rendszer futtatható egységeit, például a szolg
 A komponens szintű nézetek részletezik az egyes konténerek belső működését és felelősségi köreit.
 
 ### Szavazási szolgáltatás
-Ez a szolgáltatás felel a szavazatok biztonságos rögzítéséért. Tartalmazza a lakóhely-ellenőrző klienst (Zamunda One) és a csak hozzáfűzhető adatrögzítést biztosító logikát.
+Ez a szolgáltatás felel a jogosult, pszeudonimizált és megváltoztathatatlan szavazatok rögzítéséért. Tartalmazza a lakóhely-ellenőrző klienst (Zamunda One), pszeudonimizált szavazói kulcsot képez, majd a szavazatot PostgreSQL-ben, csak hozzáfűzhető szavazati tranzakciónaplóban tárolja.
 
 <LikeC4View viewId="compVoting" />
 
