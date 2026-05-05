@@ -1,0 +1,11 @@
+{
+  "enableSkillCommands": true,
+  "compaction": {
+    "enabled": true,
+    "keepRecentTokens": 20000,
+    "reserveTokens": 16384
+  },
+  "warnings": {
+    "anthropicExtraUsage": true
+  }
+}

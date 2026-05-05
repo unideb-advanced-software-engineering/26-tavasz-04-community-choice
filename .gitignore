@@ -1,0 +1,8 @@
+# Pi local runtime state
+.pi/sessions/
+
+# OS/editor
+.DS_Store
+
+# Logs
+*.log
