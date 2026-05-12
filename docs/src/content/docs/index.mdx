@@ -1,38 +1,203 @@
 ---
-title: Community Choice – Zamunda
-description: A Zamunda Digitális Reneszánsz program közösségi ötletplatformjának dokumentációja
+title: Community Choice
+description: Zamundra polgárainak közösségi ötletplatformja – javasolj, szavazz, változtass
 template: splash
 hero:
-  tagline: Közösségi ötletplatform Zamunda polgárainak
+  tagline: Javasolj • Szavazz • Megvalósulj
   actions:
-    - text: Esettanulmány
+    - text: Megismerem a platformot
       link: esettanulmany/
       icon: right-arrow
-    - text: Architekturális döntések
-      link: adrs/adr-001/
-      icon: document
-      variant: minimal
+      variant: primary
+    - text: Architektúra
+      link: architektura/stilusvalasztas/
+      icon: right-arrow
+      variant: secondary
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Dokumentáció áttekintése
+<div class="landing">
+
+{/* ──────────── Kiemelt mondat ──────────── */}
+<div class="lp-lead">
+
+**A Community Choice** a Zamunda Digitális Reneszánsz programjának nyilvános platformja.
+A lakosok helyi közösségi fejlesztési ötleteket javasolhatnak, és hiteles lakcímük alapján
+szavazhatnak egymás javaslataira. A szavazatok megmásíthatatlanok, a rendszer integritása kritikus.
+
+</div>
+
+{/* ──────────── Három lépés ──────────── */}
+<div class="lp-steps">
+
+<div class="lp-step">
+  <div class="lp-step-num">1</div>
+  <div class="lp-step-body">
+    <h3>Javasolj</h3>
+    <p>A lakosok bejelentkeznek Zamunda One azonosítással, és ötleteket nyújtanak be problémára és megoldásra egyaránt.</p>
+  </div>
+</div>
+
+<div class="lp-step">
+  <div class="lp-step-num">2</div>
+  <div class="lp-step-body">
+    <h3>Szavazz</h3>
+    <p>A helyi közösség demokratikusan szavaz a beküldött javaslatokra. Szavazatellenőrzés, átláthatóság, integritás.</p>
+  </div>
+</div>
+
+<div class="lp-step">
+  <div class="lp-step-num">3</div>
+  <div class="lp-step-body">
+    <h3>Megvalósul</h3>
+    <p>A nyertes ötletek kiértékelésre kerülnek, majd az önkormányzat megvalósítja — a közösség szava számít.</p>
+  </div>
+</div>
+
+</div>
+
+{/* ──────────── Oszlopok (értékek) ──────────── */}
+<div class="lp-pillars">
 
 <CardGrid stagger>
-	<Card title="Esettanulmány" icon="open-book">
-		A projekt háttere, a Zamunda Digitális Reneszánsz (ZDR) program és a platform követelményei.
-		[Olvasd el](esettanulmany/)
-	</Card>
-	<Card title="Architekturális karakterisztikák" icon="star">
-		Hatékonyság, Integritás, Robusztusság és Elaszticitás – a rendszer minőségi jellemzői.
-		[Olvasd el](architektura/karakterisztikak/)
-	</Card>
-	<Card title="Szignifikáns követelmények" icon="list-format">
-		Az architektúrát meghatározó funkcionális és nem-funkcionális követelmények.
-		[Olvasd el](architektura/szignifikans-kovetelmenyek/)
-	</Card>
-	<Card title="Stílusválasztás" icon="puzzle">
-		Miért a Hibrid SBA + EDA a nyerő architektúra a Community Choice platformhoz.
-		[Olvasd el](architektura/stilusvalasztas/)
-	</Card>
+
+<Card title="Közösség és demokrácia" icon="approve-check-circle">
+A szavazat egyenlő, átlátható, megmásíthatatlan. Minden lakos hangja számít.
+</Card>
+
+<Card title="Bizalom és integritás" icon="star">
+Hitelesített lakcím, ellenőrzött szavazat, átlátható folyamat — állami szolgálati szint.
+</Card>
+
+<Card title="Modern digitális állam" icon="laptop">
+Klímabarát, takarékos, előretekintő. A ZDR program része.
+</Card>
+
+<Card title="Nyitottság és befogadás" icon="open-book">
+Nagy kattintási felületek, magas kontraszt, érthető folyamatok — kor és képesség független.
+</Card>
+
 </CardGrid>
+
+</div>
+
+{/* ──────────── Kiemelt funkciók ──────────── */}
+<div class="lp-features">
+
+<div class="lp-feature">
+  <svg class="lp-feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+  <div>
+    <h3>Egyszavazatos rendszer</h3>
+    <p>Minden hitelesített lakos egyetlen szavazattal rendelkezik kampányonként — nincs többszörös szavazás.</p>
+  </div>
+</div>
+
+<div class="lp-feature">
+  <svg class="lp-feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  <div>
+    <h3>Lakcím-hitelesítés</h3>
+    <p>Zamunda One OAuth 2.0 alapú azonosítás — csak valós lakos szavazhat valós javaslatokra.</p>
+  </div>
+</div>
+
+<div class="lp-feature">
+  <svg class="lp-feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  <div>
+    <h3>Megmásíthatatlan szavazat</h3>
+    <p>A szavazat rögzítése után nem módosítható — a rendszer integritása érdekében.</p>
+  </div>
+</div>
+
+<div class="lp-feature">
+  <svg class="lp-feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+  <div>
+    <h3>Átlátható folyamat</h3>
+    <p>A kampány életciklusa nyomon követhető: tervezés, beküldés, szavazás, kiértékelés, megvalósulás.</p>
+  </div>
+</div>
+
+<div class="lp-feature">
+  <svg class="lp-feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <div>
+    <h3>Közösségi visszajelzés</h3>
+    <p>A lakosok kommentelhetik, értékelhetik és megosztják az ötleteket — a párbeszéd építi a bizalmat.</p>
+  </div>
+</div>
+
+<div class="lp-feature">
+  <svg class="lp-feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8M12 17v4"/></svg>
+  <div>
+    <h3>Alacsony sávszélesség</h3>
+    <p>Mobile-first, reszponzív, erőforrás-tudatos — lassú hálózaton is működik.</p>
+  </div>
+</div>
+
+</div>
+
+{/* ──────────── Dokumentáció ──────────── */}
+<h2 class="lp-section-title">Dokumentáció</h2>
+
+<CardGrid>
+
+<Card title="Esettanulmány" icon="open-book">
+A projekt háttere, a ZDR program és a platform követelményei.
+[Olvasd el →](esettanulmany/)
+</Card>
+
+<Card title="SRS" icon="document">
+A szoftver követelményspecifikációja — funkcionális és nem-funkcionális követelmények.
+[Olvasd el →](srs/)
+</Card>
+
+<Card title="Fogalomtár" icon="list-format">
+Architekturális és domain-specifikus fogalmak szótára.
+[Olvasd el →](fogalomtar/)
+</Card>
+
+<Card title="Stílusválasztás" icon="puzzle">
+Miért a Hibrid SBA + EDA a nyerő architektúra a Community Choice platformhoz.
+[Olvasd el →](architektura/stilusvalasztas/)
+</Card>
+
+<Card title="Architekturális döntések" icon="forward-slash">
+ADR-ek — Architekturális Döntési Rekordok.
+[Olvasd el →](adrs/adr-001/)
+</Card>
+
+<Card title="Brand specifikáció" icon="star">
+Vizuális identitás, színek, tipográfia, design tokenek és használati szabályok.
+[Olvasd el →](brand-spec/)
+</Card>
+
+</CardGrid>
+
+{/* ──────────── Technológiai alapok ──────────── */}
+<div class="lp-tech">
+
+<div class="lp-tech-label">Technológiai alapok</div>
+
+<div class="lp-tech-badges">
+  <span class="lp-badge">React / TypeScript</span>
+  <span class="lp-badge">Node.js / NestJS</span>
+  <span class="lp-badge">PostgreSQL</span>
+  <span class="lp-badge">Redis</span>
+  <span class="lp-badge">Apache Kafka</span>
+  <span class="lp-badge">MinIO / CDN</span>
+  <span class="lp-badge">Zamunda One OAuth 2.0</span>
+</div>
+
+</div>
+
+{/* ──────────── CTA ──────────── */}
+<div class="lp-cta">
+
+<div class="lp-cta-text">
+Csatlakozz a közösséghez — az első lépés a változás felé.
+</div>
+
+<a href="esettanulmany/" class="lp-cta-button">Megismerem az esettanulmányt →</a>
+
+</div>
+
+</div>
