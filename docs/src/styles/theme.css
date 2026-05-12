@@ -1,0 +1,186 @@
+/*
+ * ══════════════════════════════════════════════════════════════════════
+ * Community Choice Zamunda — Starlight Theme
+ * ══════════════════════════════════════════════════════════════════════
+ *
+ * Forráskód: design/brand-spec.md v1.0.0
+ * Ez a fájl KIZÁRÓLAG Starlight standard --sl-* tokeneket használn.
+ * Minden, ami nem lehetséges ezekkel, dokumentálva van
+ * a brand-spec.md „Starlight korlátok" fejezetében.
+ *
+ * Szín-paletta: Savanna (zöld), River (kék), Sun (arany),
+ *               Neutral (meleg szürke), Earth (földszín)
+ * ══════════════════════════════════════════════════════════════════════
+ */
+
+/* ──────────────────────────────────────────────────────────────
+   DARK MODE  (root / default)
+   ────────────────────────────────────────────────────────────── */
+:root,
+::backdrop {
+	/* ── Szürke skála (meleg Neutral) ──
+	   gray-1 = legvilágosabb (fő szöveg)
+	   gray-6 = legsötétebb (nav/sidebar háttér)                     */
+	--sl-color-white:    #ffffff; /* inverted szöveg pl. gomb szöveg */
+	--sl-color-black:    #0c0a09; /* page bg — cc-neutral-950 */
+	--sl-color-gray-1:   #fafaf9; /* cc-neutral-50  — fő szöveg */
+	--sl-color-gray-2:   #e7e5e4; /* cc-neutral-200 — bekezdés szöveg */
+	--sl-color-gray-3:   #d6d3d1; /* cc-neutral-300 — tompa szöveg */
+	--sl-color-gray-4:   #a8a29e; /* cc-neutral-400 — ToC / segédszöveg */
+	--sl-color-gray-5:   #44403c; /* cc-neutral-700 — inline-code bg, hajlékvonal */
+	--sl-color-gray-6:   #292524; /* cc-neutral-800 — nav/sidebar bg */
+
+	/* ── Accent (Savanna zöld) ──
+	   A zöld a márka elsődleges akcentszíne.
+	   Starlight az accent-ot linkeknél és aktív navigációnál használja. */
+	--sl-color-accent-low:  #052e16; /* cc-green-950  — sötét akcent háttér */
+	--sl-color-accent:      #4ade80; /* cc-green-400  — link, aktív elem */
+	--sl-color-accent-high: #86efac; /* cc-green-300  — kiemelt szöveg     */
+
+	/* ── Zöld aside (tip/success) ── */
+	--sl-color-green-low:  #052e16; /* cc-green-950 */
+	--sl-color-green:      #4ade80; /* cc-green-400 */
+	--sl-color-green-high: #86efac; /* cc-green-300 */
+
+	/* ── Kék aside (note) ── */
+	--sl-color-blue-low:  #1e3a8a; /* cc-blue-900 */
+	--sl-color-blue:      #60a5fa; /* cc-blue-400 */
+	--sl-color-blue-high: #93c5fd; /* cc-blue-300 */
+
+	/* ── Vörös aside (danger) ── */
+	--sl-color-red-low:  #450a0a; /* tailwind red-950 */
+	--sl-color-red:      #f87171; /* tailwind red-400 */
+	--sl-color-red-high: #fca5a5; /* tailwind red-300 */
+
+	/* ── Narancs / „Sun" aside (caution) ──
+	   A brand-spec palettában nincs narancs;
+	   az arany (Sun) családot használjuk a caution-hoz.               */
+	--sl-color-orange-low:  #713f12; /* cc-gold-900 */
+	--sl-color-orange:      #fbbf24; /* cc-gold-300 */
+	--sl-color-orange-high: #fde047; /* cc-gold-200 */
+
+	/* ── Lila aside (note variáns) ──
+	   A brand-spec palettában NINCS lila.
+	   Ez az egyetlen szín, amely a palettán kívül esik;
+	   a „note" aside kompatibilitás miatt megtartjuk.                */
+	--sl-color-purple-low:  #3b0764; /* tailwind purple-950 */
+	--sl-color-purple:      #c084fc; /* tailwind purple-400 */
+	--sl-color-purple-high: #d8b4fe; /* tailwind purple-300 */
+
+	/* ── Szöveg (szemantikus) ── */
+	--sl-color-text:         var(--sl-color-gray-2);
+	--sl-color-text-accent:  var(--sl-color-accent-high);
+	--sl-color-text-invert:  var(--sl-color-accent-low);
+
+	/* ── Felületek (szemantikus) ── */
+	--sl-color-bg:             var(--sl-color-black);
+	--sl-color-bg-nav:         var(--sl-color-gray-6);
+	--sl-color-bg-sidebar:     var(--sl-color-gray-6);
+	--sl-color-bg-inline-code: var(--sl-color-gray-5);
+	--sl-color-bg-accent:      var(--sl-color-accent-high);
+	--sl-color-hairline-light: var(--sl-color-gray-5);
+	--sl-color-hairline:       var(--sl-color-gray-5);
+	--sl-color-hairline-shade: var(--sl-color-black);
+
+	--sl-color-backdrop-overlay: hsla(25, 55%, 5%, 0.66);
+
+	/* ── Árnyékok ── */
+	--sl-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+	--sl-shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+	--sl-shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   LIGHT MODE
+   ────────────────────────────────────────────────────────────── */
+:root[data-theme='light'],
+[data-theme='light'] ::backdrop {
+	/* ── Szürke skála (meleg Neutral, invertált) ──
+	   Light mode-ban gray-1 = legsötétebb (szöveg),
+	   gray-7 = legvilágosabb (háttér)                               */
+	--sl-color-white:    #1c1917; /* cc-neutral-900 — inverted szöveg */
+	--sl-color-black:    #ffffff; /* page bg */
+	--sl-color-gray-1:   #1c1917; /* cc-neutral-900 — fő szöveg */
+	--sl-color-gray-2:   #292524; /* cc-neutral-800 — bekezdés */
+	--sl-color-gray-3:   #44403c; /* cc-neutral-700 — tompa szöveg */
+	--sl-color-gray-4:   #57534e; /* cc-neutral-600 — segédszöveg */
+	--sl-color-gray-5:   #a8a29e; /* cc-neutral-400 — inline-code bg, hajlékvonal */
+	--sl-color-gray-6:   #e7e5e4; /* cc-neutral-200 — border */
+	--sl-color-gray-7:   #f5f5f4; /* cc-neutral-100 — nav háttér */
+
+	/* ── Accent (Savanna zöld) ──
+	   green-700 szükséges a WCAG AA 4.5:1 kontraszthoz fehérön.
+	   (green-600 #16a34a csak 3.30:1 → nem AA normál szövegre.)     */
+	--sl-color-accent-low:  #dcfce7; /* cc-green-100 */
+	--sl-color-accent:      #15803d; /* cc-green-700 — 5.02:1 on white ✅ AA */
+	--sl-color-accent-high: #14532d; /* cc-green-900 */
+
+	/* ── Zöld aside ── */
+	--sl-color-green-low:  #dcfce7; /* cc-green-100 */
+	--sl-color-green:      #16a34a; /* cc-green-600 */
+	--sl-color-green-high: #166534; /* cc-green-800 */
+
+	/* ── Kék aside ── */
+	--sl-color-blue-low:  #dbeafe; /* cc-blue-100 */
+	--sl-color-blue:      #2563eb; /* cc-blue-600 */
+	--sl-color-blue-high: #1e40af; /* cc-blue-800 */
+
+	/* ── Vörös aside ── */
+	--sl-color-red-low:  #fef2f2;
+	--sl-color-red:      #dc2626;
+	--sl-color-red-high: #991b1b;
+
+	/* ── Arany / Narancs aside ── */
+	--sl-color-orange-low:  #fef9c3; /* cc-gold-100 */
+	--sl-color-orange:      #ca8a04; /* cc-gold-600 */
+	--sl-color-orange-high: #854d0e; /* cc-gold-800 */
+
+	/* ── Lila aside (palettán kívüli) ── */
+	--sl-color-purple-low:  #faf5ff;
+	--sl-color-purple:      #9333ea;
+	--sl-color-purple-high: #581c87;
+
+	/* ── Szöveg (szemantikus) ── */
+	--sl-color-text-accent:  var(--sl-color-accent);
+	--sl-color-text-invert:  var(--sl-color-black);
+	--sl-color-bg-nav:       var(--sl-color-gray-7);
+	--sl-color-bg-sidebar:   var(--sl-color-bg);
+	--sl-color-bg-inline-code: var(--sl-color-gray-6);
+	--sl-color-bg-accent:    var(--sl-color-accent);
+	--sl-color-hairline-light: var(--sl-color-gray-6);
+	--sl-color-hairline-shade: var(--sl-color-gray-6);
+
+	--sl-color-backdrop-overlay: hsla(25, 9%, 36%, 0.66);
+
+	/* ── Árnyékok ── */
+	--sl-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+	--sl-shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+	--sl-shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   TIPOGRÁFIA
+   ────────────────────────────────────────────────────────────── */
+:root {
+	--sl-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+		'Helvetica Neue', 'Noto Sans', Arial, sans-serif,
+		'Apple Color Emoji', 'Segoe UI Emoji';
+	--sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo,
+		Monoaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   WCAG CONTRAST REFERENCE
+   ──────────────────────────────────────────────────────────────
+   Light mode:
+     - accent (green-700 #15803d) on white   = 5.02:1  ✅ AA normál
+     - gray-2   (neutral-800)   on gray-7  = 14.52:1 ✅ AAA
+     - gray-4   (neutral-600)   on gray-7  =  7.30:1 ✅ AAA
+     - text-invert (white)       on accent  =  5.02:1 ✅ AA
+   Dark mode:
+     - accent      (green-400)   on black   = 11.34:1 ✅ AAA
+     - accent-high (green-300)   on gray-6  = 10.80:1 ✅ AAA
+     - gray-2      (neutral-200) on black   = 15.73:1 ✅ AAA
+     - gray-4      (neutral-400) on gray-6  =  6.01:1 ✅ AA
+     - gray-2      (neutral-200) on gray-5  =  8.18:1 ✅ AAA  (inline code)
+   ────────────────────────────────────────────────────────────── */

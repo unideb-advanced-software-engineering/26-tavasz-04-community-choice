@@ -15,6 +15,17 @@ export default defineConfig({
 		starlight({
 			title: 'Community Choice',
 			description: 'Zamunda Digitális Reneszánsz – közösségi ötletplatform dokumentációja',
+			customCss: [
+				// Inter: 400, 600, 700, 800 súlyok (Fontsource, auto-subset)
+				'@fontsource/inter/400.css',
+				'@fontsource/inter/600.css',
+				'@fontsource/inter/700.css',
+				'@fontsource/inter/800.css',
+				// JetBrains Mono: 400 súly
+				'@fontsource/jetbrains-mono/400.css',
+				// Brand téma (Starlight --sl-* tokenek)
+				'./src/styles/theme.css',
+			],
 			defaultLocale: 'hu',
 			locales: {
 				root: {
@@ -45,6 +56,10 @@ export default defineConfig({
 						{ label: 'Stílusválasztás', slug: 'architektura/stilusvalasztas' },
 						{ label: 'C4 modell', slug: 'architektura/c4-modell' },
 					],
+				},
+				{
+					label: 'Brand specifikáció',
+					slug: 'brand-spec',
 				},
 				{
 					label: 'Architekturális döntések (ADR)',

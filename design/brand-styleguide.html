@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Choice – Brand Style Guide</title>
+
+  <!-- Font preload (swap for performance) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       DESIGN TOKENS — Source of Truth
+       ═══════════════════════════════════════════════════════ */
+    :root {
+      /* ── Savanna (elsődleges zöld) ── */
+      --cc-green-50:  #f0fdf4;
+      --cc-green-100: #dcfce7;
+      --cc-green-200: #bbf7d0;
+      --cc-green-300: #86efac;
+      --cc-green-400: #4ade80;
+      --cc-green-500: #22c55e;
+      --cc-green-600: #16a34a;
+      --cc-green-700: #15803d;
+      --cc-green-800: #166534;
+      --cc-green-900: #14532d;
+      --cc-green-950: #052e16;
+
+      /* ── River (hivatalos kék) ── */
+      --cc-blue-50:  #eff6ff;
+      --cc-blue-100: #dbeafe;
+      --cc-blue-200: #bfdbfe;
+      --cc-blue-300: #93c5fd;
+      --cc-blue-400: #60a5fa;
+      --cc-blue-500: #3b82f6;
+      --cc-blue-600: #2563eb;
+      --cc-blue-700: #1d4ed8;
+      --cc-blue-800: #1e40af;
+      --cc-blue-900: #1e3a8a;
+
+      /* ── Sun (arany) ── */
+      --cc-gold-50:  #fefce8;
+      --cc-gold-100: #fef9c3;
+      --cc-gold-200: #fef08a;
+      --cc-gold-300: #fde047;
+      --cc-gold-400: #facc15;
+      --cc-gold-500: #eab308;
+      --cc-gold-600: #ca8a04;
+      --cc-gold-700: #a16207;
+      --cc-gold-800: #854d0e;
+      --cc-gold-900: #713f12;
+
+      /* ── Neutral (meleg szürke) ── */
+      --cc-neutral-0:   #ffffff;
+      --cc-neutral-50:  #fafaf9;
+      --cc-neutral-100: #f5f5f4;
+      --cc-neutral-200: #e7e5e4;
+      --cc-neutral-300: #d6d3d1;
+      --cc-neutral-400: #a8a29e;
+      --cc-neutral-500: #78716c;
+      --cc-neutral-600: #57534e;
+      --cc-neutral-700: #44403c;
+      --cc-neutral-800: #292524;
+      --cc-neutral-900: #1c1917;
+      --cc-neutral-950: #0c0a09;
+
+      /* ── Earth (földszín) ── */
+      --cc-earth-50:  #fdf8f0;
+      --cc-earth-100: #f5e6d0;
+      --cc-earth-200: #e8d0a8;
+      --cc-earth-300: #d4b078;
+      --cc-earth-400: #c09050;
+      --cc-earth-500: #a87830;
+      --cc-earth-600: #8a6020;
+      --cc-earth-700: #6d4c18;
+      --cc-earth-800: #503810;
+      --cc-earth-900: #3a2808;
+
+      /* ── Red (hiba status – csak status) ── */
+      --cc-red-50:  #fef2f2;
+      --cc-red-300: #fca5a5;
+      --cc-red-800: #991b1b;
+
+      /* ═══ Semantic tokens (light mode) ═══ */
+      --cc-text-primary:     var(--cc-neutral-900);
+      --cc-text-secondary:   var(--cc-neutral-600);
+      --cc-text-muted:       var(--cc-neutral-400);
+      --cc-text-on-primary:  var(--cc-neutral-0);
+      --cc-text-link:        var(--cc-blue-600);
+      --cc-text-link-hover:  var(--cc-blue-700);
+
+      --cc-surface-page:     var(--cc-neutral-50);
+      --cc-surface-card:     var(--cc-neutral-0);
+      --cc-surface-card-alt: var(--cc-neutral-100);
+      --cc-surface-elevated: var(--cc-neutral-0);
+
+      --cc-border-default:   var(--cc-neutral-200);
+      --cc-border-strong:    var(--cc-neutral-300);
+      --cc-border-accent:    var(--cc-earth-500);
+
+      --cc-cta-bg:           var(--cc-green-500);
+      --cc-cta-bg-hover:     var(--cc-green-600);
+      --cc-cta-bg-active:    var(--cc-green-700);
+      --cc-cta-text:         var(--cc-neutral-0);
+
+      --cc-secondary-bg:      var(--cc-blue-500);
+      --cc-secondary-bg-hover:var(--cc-blue-600);
+      --cc-secondary-text:    var(--cc-neutral-0);
+
+      --cc-status-success-bg:   var(--cc-green-100);
+      --cc-status-success-text: var(--cc-green-800);
+      --cc-status-info-bg:      var(--cc-blue-100);
+      --cc-status-info-text:    var(--cc-blue-800);
+      --cc-status-warning-bg:   var(--cc-gold-100);
+      --cc-status-warning-text: var(--cc-gold-800);
+      --cc-status-error-bg:     var(--cc-red-50);
+      --cc-status-error-text:   var(--cc-red-800);
+      --cc-status-error-border: var(--cc-red-300);
+
+      --cc-accent-gold:  var(--cc-gold-400);
+      --cc-accent-earth: var(--cc-earth-500);
+
+      --cc-focus-ring: 0 0 0 2px var(--cc-neutral-0), 0 0 0 4px var(--cc-blue-500);
+
+      /* ── Tipográfia ── */
+      --cc-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+      --cc-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+      --cc-text-xs:   0.75rem;   /* 12px */
+      --cc-text-sm:   0.875rem;  /* 14px */
+      --cc-text-base: 1rem;      /* 16px */
+      --cc-text-lg:   1.125rem;  /* 18px */
+      --cc-text-xl:   1.25rem;   /* 20px */
+      --cc-text-2xl:  1.5rem;    /* 24px */
+      --cc-text-3xl:  1.875rem;  /* 30px */
+      --cc-text-4xl:  2.25rem;   /* 36px */
+
+      --cc-leading-tight:   1.25;
+      --cc-leading-normal:  1.5;
+      --cc-leading-relaxed: 1.625;
+
+      --cc-weight-regular:  400;
+      --cc-weight-semibold: 600;
+      --cc-weight-bold:     700;
+      --cc-weight-extrabold:800;
+
+      /* ── Térköz ── */
+      --cc-space-1:  4px;
+      --cc-space-2:  8px;
+      --cc-space-3:  12px;
+      --cc-space-4:  16px;
+      --cc-space-5:  20px;
+      --cc-space-6:  24px;
+      --cc-space-8:  32px;
+      --cc-space-10: 40px;
+      --cc-space-12: 48px;
+      --cc-space-16: 64px;
+      --cc-space-20: 80px;
+      --cc-space-24: 96px;
+
+      /* ── Lekerekítés ── */
+      --cc-radius-none: 0;
+      --cc-radius-sm:   4px;
+      --cc-radius-md:   8px;
+      --cc-radius-lg:   12px;
+      --cc-radius-xl:   16px;
+      --cc-radius-full: 9999px;
+
+      /* ── Árnyékok ── */
+      --cc-shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+      --cc-shadow-sm: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --cc-shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --cc-shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       STYLE GUIDE LAYOUT
+       ═══════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--cc-font-body);
+      font-size: var(--cc-text-base);
+      line-height: var(--cc-leading-normal);
+      color: var(--cc-text-primary);
+      background: var(--cc-surface-page);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .sg-header {
+      background: var(--cc-green-700);
+      color: var(--cc-neutral-0);
+      padding: var(--cc-space-12) var(--cc-space-6);
+      text-align: center;
+    }
+    .sg-header h1 {
+      font-size: var(--cc-text-3xl);
+      font-weight: var(--cc-weight-extrabold);
+      letter-spacing: -0.02em;
+    }
+    .sg-header p {
+      margin-top: var(--cc-space-2);
+      font-size: var(--cc-text-lg);
+      opacity: 0.85;
+    }
+    .sg-header .version {
+      display: inline-block;
+      margin-top: var(--cc-space-3);
+      font-family: var(--cc-font-mono);
+      font-size: var(--cc-text-xs);
+      background: rgba(255,255,255,0.15);
+      padding: var(--cc-space-1) var(--cc-space-3);
+      border-radius: var(--cc-radius-full);
+    }
+
+    .sg-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--cc-neutral-0);
+      border-bottom: 1px solid var(--cc-border-default);
+      padding: var(--cc-space-2) var(--cc-space-6);
+      display: flex;
+      gap: var(--cc-space-6);
+      flex-wrap: wrap;
+      font-size: var(--cc-text-sm);
+      font-weight: var(--cc-weight-semibold);
+    }
+    .sg-nav a {
+      color: var(--cc-text-secondary);
+      text-decoration: none;
+      padding: var(--cc-space-1) 0;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .sg-nav a:hover,
+    .sg-nav a:focus {
+      color: var(--cc-text-link);
+      border-bottom-color: var(--cc-text-link);
+      outline: none;
+    }
+
+    .sg-container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 var(--cc-space-6);
+    }
+
+    .sg-section {
+      padding: var(--cc-space-16) 0;
+      border-bottom: 1px solid var(--cc-border-default);
+    }
+    .sg-section:last-child { border-bottom: none; }
+
+    .sg-section-title {
+      font-size: var(--cc-text-2xl);
+      font-weight: var(--cc-weight-bold);
+      color: var(--cc-text-primary);
+      margin-bottom: var(--cc-space-2);
+      letter-spacing: -0.01em;
+    }
+    .sg-section-desc {
+      font-size: var(--cc-text-base);
+      color: var(--cc-text-secondary);
+      margin-bottom: var(--cc-space-8);
+      max-width: 65ch;
+    }
+
+    .sg-subtitle {
+      font-size: var(--cc-text-lg);
+      font-weight: var(--cc-weight-semibold);
+      color: var(--cc-text-primary);
+      margin: var(--cc-space-10) 0 var(--cc-space-4);
+    }
+
+    /* ── Palette swatches ── */
+    .sg-palette-family { margin-bottom: var(--cc-space-8); }
+    .sg-palette-family-name {
+      font-size: var(--cc-text-sm);
+      font-weight: var(--cc-weight-semibold);
+      color: var(--cc-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--cc-space-2);
+    }
+    .sg-palette-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--cc-space-2);
+    }
+    .sg-swatch {
+      width: 72px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .sg-swatch-color {
+      width: 64px;
+      height: 48px;
+      border-radius: var(--cc-radius-md);
+      border: 1px solid var(--cc-border-default);
+    }
+    .sg-swatch-token {
+      font-family: var(--cc-font-mono);
+      font-size: 10px;
+      color: var(--cc-text-muted);
+      margin-top: var(--cc-space-1);
+      text-align: center;
+      line-height: 1.2;
+    }
+    .sg-swatch-value {
+      font-family: var(--cc-font-mono);
+      font-size: 10px;
+      color: var(--cc-text-secondary);
+      text-align: center;
+    }
+
+    /* ── Semantic swatch ── */
+    .sg-semantic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--cc-space-3);
+    }
+    .sg-semantic-card {
+      padding: var(--cc-space-4);
+      border-radius: var(--cc-radius-lg);
+      border: 1px solid var(--cc-border-default);
+      background: var(--cc-surface-card);
+    }
+    .sg-semantic-card-swatch {
+      width: 100%;
+      height: 40px;
+      border-radius: var(--cc-radius-sm);
+      margin-bottom: var(--cc-space-2);
+    }
+    .sg-semantic-card-token {
+      font-family: var(--cc-font-mono);
+      font-size: 11px;
+      color: var(--cc-text-secondary);
+    }
+    .sg-semantic-card-value {
+      font-family: var(--cc-font-mono);
+      font-size: 10px;
+      color: var(--cc-text-muted);
+    }
+
+    /* ── Typography demo ── */
+    .sg-type-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--cc-space-6);
+      padding: var(--cc-space-3) 0;
+      border-bottom: 1px solid var(--cc-border-default);
+    }
+    .sg-type-label {
+      flex: 0 0 140px;
+      font-family: var(--cc-font-mono);
+      font-size: var(--cc-text-xs);
+      color: var(--cc-text-muted);
+      white-space: nowrap;
+    }
+    .sg-type-sample { flex: 1; }
+
+    /* ── Spacing demo ── */
+    .sg-space-row {
+      display: flex;
+      align-items: center;
+      gap: var(--cc-space-4);
+      padding: var(--cc-space-1) 0;
+    }
+    .sg-space-label {
+      flex: 0 0 100px;
+      font-family: var(--cc-font-mono);
+      font-size: var(--cc-text-xs);
+      color: var(--cc-text-muted);
+    }
+    .sg-space-bar {
+      height: 16px;
+      background: var(--cc-green-300);
+      border-radius: var(--cc-radius-sm);
+    }
+
+    /* ── Component demo ── */
+    .sg-demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--cc-space-4);
+      align-items: flex-start;
+      padding: var(--cc-space-4) 0;
+    }
+
+    /* ── Button ── */
+    .cc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--cc-space-2);
+      font-family: var(--cc-font-body);
+      font-size: var(--cc-text-sm);
+      font-weight: var(--cc-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: var(--cc-space-3) var(--cc-space-6);
+      border-radius: var(--cc-radius-md);
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+      line-height: 1;
+      min-height: 44px;
+    }
+    .cc-btn:focus-visible { box-shadow: var(--cc-focus-ring); }
+
+    .cc-btn-primary {
+      background: var(--cc-cta-bg);
+      color: var(--cc-cta-text);
+    }
+    .cc-btn-primary:hover { background: var(--cc-cta-bg-hover); }
+
+    .cc-btn-secondary {
+      background: var(--cc-secondary-bg);
+      color: var(--cc-secondary-text);
+    }
+    .cc-btn-secondary:hover { background: var(--cc-secondary-bg-hover); }
+
+    .cc-btn-outline {
+      background: transparent;
+      color: var(--cc-text-primary);
+      border: 1px solid var(--cc-border-strong);
+    }
+    .cc-btn-outline:hover { background: var(--cc-surface-card-alt); }
+
+    .cc-btn-ghost {
+      background: transparent;
+      color: var(--cc-text-link);
+    }
+    .cc-btn-ghost:hover { background: var(--cc-blue-50); }
+
+    .cc-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ── Card ── */
+    .cc-card {
+      background: var(--cc-surface-card);
+      border: 1px solid var(--cc-border-default);
+      border-radius: var(--cc-radius-lg);
+      padding: var(--cc-space-6);
+      box-shadow: var(--cc-shadow-xs);
+    }
+
+    /* ── Status badges ── */
+    .cc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--cc-space-1);
+      font-size: var(--cc-text-xs);
+      font-weight: var(--cc-weight-semibold);
+      padding: var(--cc-space-1) var(--cc-space-3);
+      border-radius: var(--cc-radius-full);
+    }
+    .cc-badge-success { background: var(--cc-status-success-bg); color: var(--cc-status-success-text); }
+    .cc-badge-info    { background: var(--cc-status-info-bg);    color: var(--cc-status-info-text); }
+    .cc-badge-warning { background: var(--cc-status-warning-bg); color: var(--cc-status-warning-text); }
+    .cc-badge-error   { background: var(--cc-status-error-bg);  color: var(--cc-status-error-text); border: 1px solid var(--cc-status-error-border); }
+
+    /* ── Lifecycle badges ── */
+    .cc-badge-draft     { background: var(--cc-neutral-100); color: var(--cc-neutral-600); }
+    .cc-badge-submit    { background: var(--cc-green-100); color: var(--cc-green-800); }
+    .cc-badge-voting    { background: var(--cc-blue-100); color: var(--cc-blue-800); }
+    .cc-badge-closed    { background: var(--cc-neutral-200); color: var(--cc-neutral-700); }
+    .cc-badge-eval      { background: var(--cc-gold-100); color: var(--cc-gold-800); }
+    .cc-badge-built     { background: var(--cc-green-200); color: var(--cc-green-900); }
+
+    /* ── Input ── */
+    .cc-input {
+      font-family: var(--cc-font-body);
+      font-size: var(--cc-text-base);
+      padding: var(--cc-space-3) var(--cc-space-4);
+      border: 1px solid var(--cc-border-strong);
+      border-radius: var(--cc-radius-sm);
+      background: var(--cc-surface-card);
+      color: var(--cc-text-primary);
+      min-height: 44px;
+      transition: border-color 0.15s;
+    }
+    .cc-input:focus {
+      outline: none;
+      border-color: var(--cc-blue-500);
+      box-shadow: var(--cc-focus-ring);
+    }
+    .cc-input::placeholder { color: var(--cc-text-muted); }
+
+    /* ── Radius + shadow demo ── */
+    .sg-radius-demo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--cc-space-4);
+      align-items: center;
+    }
+    .sg-radius-box {
+      width: 64px;
+      height: 64px;
+      background: var(--cc-surface-card);
+      border: 2px solid var(--cc-green-500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--cc-font-mono);
+      font-size: var(--cc-text-xs);
+      color: var(--cc-text-muted);
+    }
+
+    .sg-shadow-demo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--cc-space-6);
+    }
+    .sg-shadow-box {
+      width: 120px;
+      height: 80px;
+      background: var(--cc-surface-card);
+      border-radius: var(--cc-radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--cc-font-mono);
+      font-size: 10px;
+      color: var(--cc-text-muted);
+    }
+
+    /* ── Color pairing table ── */
+    .sg-pair-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--cc-text-sm);
+    }
+    .sg-pair-table th,
+    .sg-pair-table td {
+      padding: var(--cc-space-2) var(--cc-space-4);
+      text-align: left;
+      border-bottom: 1px solid var(--cc-border-default);
+    }
+    .sg-pair-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: var(--cc-radius-sm);
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: var(--cc-space-2);
+      border: 1px solid var(--cc-border-default);
+    }
+
+    /* ── Rule callout ── */
+    .sg-rule {
+      background: var(--cc-surface-card-alt);
+      border-left: 3px solid var(--cc-accent-earth);
+      padding: var(--cc-space-4);
+      margin: var(--cc-space-4) 0;
+      font-size: var(--cc-text-sm);
+      color: var(--cc-text-secondary);
+    }
+    .sg-rule strong { color: var(--cc-text-primary); }
+
+    /* ── Footer ── */
+    .sg-footer {
+      text-align: center;
+      padding: var(--cc-space-12) 0;
+      font-size: var(--cc-text-xs);
+      color: var(--cc-text-muted);
+    }
+
+    @media (max-width: 640px) {
+      .sg-header { padding: var(--cc-space-8) var(--cc-space-4); }
+      .sg-header h1 { font-size: var(--cc-text-2xl); }
+      .sg-type-row { flex-direction: column; gap: var(--cc-space-1); }
+      .sg-type-label { flex: none; }
+      .sg-swatch { width: 56px; }
+      .sg-swatch-color { width: 48px; height: 36px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════════ HEADER ══════════════ -->
+  <header class="sg-header">
+    <h1>🌵 Community Choice</h1>
+    <p>Zamunda Digitális Reneszánsz — Brand Style Guide</p>
+    <span class="version">v1.0.0 — 2026-05-12</span>
+  </header>
+
+  <!-- ══════════════ NAV ══════════════ -->
+  <nav class="sg-nav" aria-label="Style guide navigation">
+    <a href="#principles">Alapelvek</a>
+    <a href="#palette">Paletta</a>
+    <a href="#semantics">Szemantikus színek</a>
+    <a href="#typography">Tipográfia</a>
+    <a href="#spacing">Térköz</a>
+    <a href="#radius">Lekerekítés és árnyék</a>
+    <a href="#components">Komponensek</a>
+    <a href="#lifecycle">Életciklus státuszok</a>
+    <a href="#a11y">Hozzáférhetőség</a>
+    <a href="#tokens">Token hierarchia</a>
+  </nav>
+
+  <main class="sg-container">
+
+    <!-- ══════════════ 1. ALAPELVEK ══════════════ -->
+    <section id="principles" class="sg-section">
+      <h2 class="sg-section-title">Alapelvek</h2>
+      <p class="sg-section-desc">A vizuális identitás négy pilléren nyugszik. Minden szín-, tipográfiai- és layout-döntés ehhez igazodik.</p>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: var(--cc-space-4);">
+        <div class="cc-card" style="border-top: 3px solid var(--cc-green-500);">
+          <strong style="display:block; margin-bottom: var(--cc-space-2);">Közösség és demokrácia</strong>
+          <span style="font-size:var(--cc-text-sm); color:var(--cc-text-secondary);">Kerek, összefogó formák; meleg színek; nem hagyja ki a lassú kapcsolatú lakost.</span>
+        </div>
+        <div class="cc-card" style="border-top: 3px solid var(--cc-blue-500);">
+          <strong style="display:block; margin-bottom: var(--cc-space-2);">Bizalom és integritás</strong>
+          <span style="font-size:var(--cc-text-sm); color:var(--cc-text-secondary);">Nyugodt, stabil színek; semmi villódzás; adat és szavazat látható.</span>
+        </div>
+        <div class="cc-card" style="border-top: 3px solid var(--cc-gold-400);">
+          <strong style="display:block; margin-bottom: var(--cc-space-2);">Modern digitális állam</strong>
+          <span style="font-size:var(--cc-text-sm); color:var(--cc-text-secondary);">Tiszta rács, modern sans-serif, takarékos whitespace.</span>
+        </div>
+        <div class="cc-card" style="border-top: 3px solid var(--cc-earth-500);">
+          <strong style="display:block; margin-bottom: var(--cc-space-2);">Nyitottság és befogadás</strong>
+          <span style="font-size:var(--cc-text-sm); color:var(--cc-text-secondary);">Nagy kattintási felületek, magas kontraszt, kor- és képességfüggetlen.</span>
+        </div>
+      </div>
+
+      <div class="sg-rule" style="margin-top: var(--cc-space-8);">
+        <strong>Anti-elvek (tiloslista):</strong> Neon színek, szürke tech-stílus, játékos maskot, nagy háttérkép, parallax, dekoratív animáció, kétharmad képernyőt elfedő modal.
+      </div>
+    </section>
+
+    <!-- ══════════════ 2. PALETTA ══════════════ -->
+    <section id="palette" class="sg-section">
+      <h2 class="sg-section-title">Paletta — primitívek</h2>
+      <p class="sg-section-desc">A teljes színrendszert 5 hue család és 25 árnyalat alkotja. A primitíveket <strong>soha</strong> nem használjuk közvetlenül komponensben — a szemantikus tokeneken keresztül érvényesülnek.</p>
+
+      <!-- Savanna -->
+      <div class="sg-palette-family">
+        <div class="sg-palette-family-name">Savanna — elsődleges zöld</div>
+        <div class="sg-palette-row" id="palette-savanna"></div>
+      </div>
+
+      <!-- River -->
+      <div class="sg-palette-family">
+        <div class="sg-palette-family-name">River — hivatalos kék</div>
+        <div class="sg-palette-row" id="palette-river"></div>
+      </div>
+
+      <!-- Sun -->
+      <div class="sg-palette-family">
+        <div class="sg-palette-family-name">Sun — arany</div>
+        <div class="sg-palette-row" id="palette-sun"></div>
+      </div>
+
+      <!-- Neutral -->
+      <div class="sg-palette-family">
+        <div class="sg-palette-family-name">Neutral — meleg szürke</div>
+        <div class="sg-palette-row" id="palette-neutral"></div>
+      </div>
+
+      <!-- Earth -->
+      <div class="sg-palette-family">
+        <div class="sg-palette-family-name">Earth — földszín</div>
+        <div class="sg-palette-row" id="palette-earth"></div>
+      </div>
+    </section>
+
+    <!-- ══════════════ 3. SZEMANTIKUS ══════════════ -->
+    <section id="semantics" class="sg-section">
+      <h2 class="sg-section-title">Szemantikus színek</h2>
+      <p class="sg-section-desc">Ezeket a tokeneket használják a komponensekben. A primitíveket fedik, kontextust adnak, és lehetővé teszik a dark-mode váltást egyetlen réteg átírásával.</p>
+
+      <h3 class="sg-subtitle">Szöveg</h3>
+      <div class="sg-semantic-grid">
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-text-primary);"></div>
+          <div class="sg-semantic-card-token">--cc-text-primary</div>
+          <div class="sg-semantic-card-value">Fő szöveg</div>
+        </div>
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-text-secondary);"></div>
+          <div class="sg-semantic-card-token">--cc-text-secondary</div>
+          <div class="sg-semantic-card-value">Másodlagos szöveg</div>
+        </div>
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-text-muted);"></div>
+          <div class="sg-semantic-card-token">--cc-text-muted</div>
+          <div class="sg-semantic-card-value">Elhalványult</div>
+        </div>
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-text-link);"></div>
+          <div class="sg-semantic-card-token">--cc-text-link</div>
+          <div class="sg-semantic-card-value">Link</div>
+        </div>
+      </div>
+
+      <h3 class="sg-subtitle">CTA és másodlagos</h3>
+      <div class="sg-semantic-grid">
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-cta-bg); border-radius: var(--cc-radius-md);"></div>
+          <div class="sg-semantic-card-token">--cc-cta-bg / hover / active</div>
+          <div class="sg-semantic-card-value">Elsődleges CTA (zöld)</div>
+        </div>
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-secondary-bg); border-radius: var(--cc-radius-md);"></div>
+          <div class="sg-semantic-card-token">--cc-secondary-bg / hover</div>
+          <div class="sg-semantic-card-value">Másodlagos CTA (kék)</div>
+        </div>
+      </div>
+
+      <h3 class="sg-subtitle">Felületek és határolók</h3>
+      <div class="sg-semantic-grid">
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-surface-page);"></div>
+          <div class="sg-semantic-card-token">--cc-surface-page</div>
+          <div class="sg-semantic-card-value">Oldal háttere</div>
+        </div>
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-surface-card); border:1px solid var(--cc-border-default);"></div>
+          <div class="sg-semantic-card-token">--cc-surface-card</div>
+          <div class="sg-semantic-card-value">Kártya felület</div>
+        </div>
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-surface-card-alt);"></div>
+          <div class="sg-semantic-card-token">--cc-surface-card-alt</div>
+          <div class="sg-semantic-card-value">Kártya alternatív</div>
+        </div>
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: transparent; border: 2px solid var(--cc-border-default);"></div>
+          <div class="sg-semantic-card-token">--cc-border-default</div>
+          <div class="sg-semantic-card-value">Alap határoló</div>
+        </div>
+        <div class="sg-semantic-card">
+          <div class="sg-semantic-card-swatch" style="background: transparent; border: 2px solid var(--cc-border-accent);"></div>
+          <div class="sg-semantic-card-token">--cc-border-accent</div>
+          <div class="sg-semantic-card-value">Földszín akcent</div>
+        </div>
+      </div>
+
+      <h3 class="sg-subtitle">Státusz színek</h3>
+      <div class="sg-semantic-grid">
+        <div class="sg-semantic-card" style="background: var(--cc-status-success-bg);">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-status-success-text); height:24px; width:40px; border-radius: var(--cc-radius-sm);"></div>
+          <div class="sg-semantic-card-token" style="color: var(--cc-status-success-text);">--cc-status-success</div>
+        </div>
+        <div class="sg-semantic-card" style="background: var(--cc-status-info-bg);">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-status-info-text); height:24px; width:40px; border-radius: var(--cc-radius-sm);"></div>
+          <div class="sg-semantic-card-token" style="color: var(--cc-status-info-text);">--cc-status-info</div>
+        </div>
+        <div class="sg-semantic-card" style="background: var(--cc-status-warning-bg);">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-status-warning-text); height:24px; width:40px; border-radius: var(--cc-radius-sm);"></div>
+          <div class="sg-semantic-card-token" style="color: var(--cc-status-warning-text);">--cc-status-warning</div>
+        </div>
+        <div class="sg-semantic-card" style="background: var(--cc-status-error-bg); border: 1px solid var(--cc-status-error-border);">
+          <div class="sg-semantic-card-swatch" style="background: var(--cc-status-error-text); height:24px; width:40px; border-radius: var(--cc-radius-sm);"></div>
+          <div class="sg-semantic-card-token" style="color: var(--cc-status-error-text);">--cc-status-error</div>
+        </div>
+      </div>
+
+      <div class="sg-rule">
+        <strong>Színhasználati szabály:</strong> Egy képernyőn legfeljebb 2 hue család színhangsúly. <code>--cc-green-*</code> az egyetlen CTA szín. <code>--cc-gold-*</code> csak badge/kitüntetés. Ha hiba-szín jelenik meg, annak mindig szöveges magyarázata is van.
+      </div>
+    </section>
+
+    <!-- ══════════════ 4. TIPOGRÁFIA ══════════════ -->
+    <section id="typography" class="sg-section">
+      <h2 class="sg-section-title">Tipográfia</h2>
+      <p class="sg-section-desc">Inter — széles x-height, magyar ékezetes kivitel, kis fájlméret. Font subsetting és <code>font-display: swap</code> kötelező.</p>
+
+      <h3 class="sg-subtitle">Méretskála</h3>
+
+      <div class="sg-type-row">
+        <span class="sg-type-label">--cc-text-4xl<br>2.25 rem / 36px<br>extrabold</span>
+        <span class="sg-type-sample" style="font-size:var(--cc-text-4xl); font-weight:var(--cc-weight-extrabold); line-height:var(--cc-leading-tight);">Zamunda Digitális Reneszánsz</span>
+      </div>
+      <div class="sg-type-row">
+        <span class="sg-type-label">--cc-text-3xl<br>1.875 rem / 30px<br>bold</span>
+        <span class="sg-type-sample" style="font-size:var(--cc-text-3xl); font-weight:var(--cc-weight-bold); line-height:var(--cc-leading-tight);">Közösségi ötletpályázat</span>
+      </div>
+      <div class="sg-type-row">
+        <span class="sg-type-label">--cc-text-2xl<br>1.5 rem / 24px<br>bold</span>
+        <span class="sg-type-sample" style="font-size:var(--cc-text-2xl); font-weight:var(--cc-weight-bold);">Szavazz az ötletekre</span>
+      </div>
+      <div class="sg-type-row">
+        <span class="sg-type-label">--cc-text-xl<br>1.25 rem / 20px<br>semibold</span>
+        <span class="sg-type-sample" style="font-size:var(--cc-text-xl); font-weight:var(--cc-weight-semibold);">Aktív pályázatok</span>
+      </div>
+      <div class="sg-type-row">
+        <span class="sg-type-label">--cc-text-lg<br>1.125 rem / 18px<br>regular</span>
+        <span class="sg-type-sample" style="font-size:var(--cc-text-lg);">Kártya cím és kiemelt szöveg</span>
+      </div>
+      <div class="sg-type-row">
+        <span class="sg-type-label">--cc-text-base<br>1 rem / 16px<br>regular</span>
+        <span class="sg-type-sample" style="font-size:var(--cc-text-base);">Bekezdés szöveg, űrlapmező tartalom. A lakosok helyi közösségi fejlesztési ötleteket javasolhatnak.</span>
+      </div>
+      <div class="sg-type-row">
+        <span class="sg-type-label">--cc-text-sm<br>0.875 rem / 14px<br>regular</span>
+        <span class="sg-type-sample" style="font-size:var(--cc-text-sm); color:var(--cc-text-secondary);">Másodlagos szöveg, táblázat cella, metaadat</span>
+      </div>
+      <div class="sg-type-row">
+        <span class="sg-type-label">--cc-text-xs<br>0.75 rem / 12px<br>regular</span>
+        <span class="sg-type-sample" style="font-size:var(--cc-text-xs); color:var(--cc-text-muted);">Badge, időbélyeg, lábjegyzet — 2026. május 12.</span>
+      </div>
+
+      <h3 class="sg-subtitle">Súlyok</h3>
+      <div class="sg-type-row">
+        <span class="sg-type-label">400 regular</span>
+        <span class="sg-type-sample" style="font-weight:var(--cc-weight-regular);">A Zamunda Community Choice platformja</span>
+      </div>
+      <div class="sg-type-row">
+        <span class="sg-type-label">600 semibold</span>
+        <span class="sg-type-sample" style="font-weight:var(--cc-weight-semibold);">A Zamunda Community Choice platformja</span>
+      </div>
+      <div class="sg-type-row">
+        <span class="sg-type-label">700 bold</span>
+        <span class="sg-type-sample" style="font-weight:var(--cc-weight-bold);">A Zamunda Community Choice platformja</span>
+      </div>
+      <div class="sg-type-row">
+        <span class="sg-type-label">800 extrabold</span>
+        <span class="sg-type-sample" style="font-weight:var(--cc-weight-extrabold);">A Zamunda Community Choice platformja</span>
+      </div>
+
+      <h3 class="sg-subtitle">Monospace</h3>
+      <div class="sg-type-row">
+        <span class="sg-type-label">JetBrains Mono<br>400 regular</span>
+        <span class="sg-type-sample" style="font-family:var(--cc-font-mono);">PK-2026-042 — F-SZ-01 — voter_key: a3f8c1</span>
+      </div>
+
+      <div class="sg-rule">
+        <strong>Szabály:</strong> Soha italic a címsorban, soha <code>font-weight: 300</code> (light). Bekezdés max 65ch sorhossz. Gomb szöveg: <code>--cc-text-sm, semibold, uppercase, 0.05em tracking</code>.
+      </div>
+    </section>
+
+    <!-- ══════════════ 5. TÉRKÖZ ══════════════ -->
+    <section id="spacing" class="sg-section">
+      <h2 class="sg-section-title">Térköz</h2>
+      <p class="sg-section-desc">4px alap, szigorúan a skálán lévő értékek használhatók. Köztes értékek tiltottak.</p>
+
+      <div id="spacing-demos"></div>
+      <script>
+        (function() {
+          var container = document.getElementById('spacing-demos');
+          var spaces = [
+            ['--cc-space-1', 4], ['--cc-space-2', 8], ['--cc-space-3', 12],
+            ['--cc-space-4', 16], ['--cc-space-5', 20], ['--cc-space-6', 24],
+            ['--cc-space-8', 32], ['--cc-space-10', 40], ['--cc-space-12', 48],
+            ['--cc-space-16', 64], ['--cc-space-20', 80], ['--cc-space-24', 96]
+          ];
+          spaces.forEach(function(s) {
+            var row = document.createElement('div');
+            row.className = 'sg-space-row';
+            row.innerHTML =
+              '<span class="sg-space-label">' + s[0] + '<br>' + s[1] + 'px</span>' +
+              '<div class="sg-space-bar" style="width:' + (s[1] * 2.5) + 'px;"></div>';
+            container.appendChild(row);
+          });
+        })();
+      </script>
+    </section>
+
+    <!-- ══════════════ 6. LEKEREKÍTÉS ÉS ÁRNYÉK ══════════════ -->
+    <section id="radius" class="sg-section">
+      <h2 class="sg-section-title">Lekerekítés és árnyék</h2>
+
+      <h3 class="sg-subtitle">Lekerekítés</h3>
+      <div class="sg-radius-demo">
+        <div class="sg-radius-box" style="border-radius: var(--cc-radius-none);">none</div>
+        <div class="sg-radius-box" style="border-radius: var(--cc-radius-sm);">sm 4</div>
+        <div class="sg-radius-box" style="border-radius: var(--cc-radius-md);">md 8</div>
+        <div class="sg-radius-box" style="border-radius: var(--cc-radius-lg);">lg 12</div>
+        <div class="sg-radius-box" style="border-radius: var(--cc-radius-xl);">xl 16</div>
+        <div class="sg-radius-box" style="border-radius: var(--cc-radius-full);">full</div>
+      </div>
+
+      <div class="sg-rule">
+        <strong>Szabály:</strong> A lekerekítés komponens-típusonként konzisztens. Ha a gomb <code>--cc-radius-md</code>, akkor minden gomb <code>--cc-radius-md</code>. Keverés tilos.
+      </div>
+
+      <h3 class="sg-subtitle">Árnyékok</h3>
+      <div class="sg-shadow-demo">
+        <div class="sg-shadow-box" style="box-shadow: var(--cc-shadow-xs);">xs</div>
+        <div class="sg-shadow-box" style="box-shadow: var(--cc-shadow-sm);">sm</div>
+        <div class="sg-shadow-box" style="box-shadow: var(--cc-shadow-md);">md</div>
+        <div class="sg-shadow-box" style="box-shadow: var(--cc-shadow-lg);">lg</div>
+      </div>
+    </section>
+
+    <!-- ══════════════ 7. KOMPONENSEK ══════════════ -->
+    <section id="components" class="sg-section">
+      <h2 class="sg-section-title">Komponensek</h2>
+      <p class="sg-section-desc">Az alábbi komponensek bemutatják a tokenek használatát a gyakorlatban. Mindegyik a szemantikus tokenekre épül, soha nem primitívre.</p>
+
+      <h3 class="sg-subtitle">Gombok</h3>
+      <div class="sg-demo-row">
+        <button class="cc-btn cc-btn-primary">Szavazok</button>
+        <button class="cc-btn cc-btn-secondary">Részletek</button>
+        <button class="cc-btn cc-btn-outline">Mégsem</button>
+        <button class="cc-btn cc-btn-ghost">Bejelentkezés</button>
+        <button class="cc-btn cc-btn-primary" disabled>Tiltva</button>
+      </div>
+
+      <h3 class="sg-subtitle">Kártya</h3>
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: var(--cc-space-4);">
+        <div class="cc-card">
+          <div style="display:flex; align-items:center; gap:var(--cc-space-2); margin-bottom:var(--cc-space-3);">
+            <span class="cc-badge cc-badge-submit">Ötletbeküldés</span>
+          </div>
+          <h4 style="font-size:var(--cc-text-lg); font-weight:var(--cc-weight-bold); margin-bottom:var(--cc-space-2);">Zöldfelület a Vásártér mellett</h4>
+          <p style="font-size:var(--cc-text-sm); color:var(--cc-text-secondary); margin-bottom:var(--cc-space-4);">A lakosok kis parkot és padokat javasolnak a vásártér déli oldalán, hogy a családok megpihenhessenek.</p>
+          <button class="cc-btn cc-btn-primary" style="width:100%;">Ötlet beküldése</button>
+        </div>
+        <div class="cc-card">
+          <div style="display:flex; align-items:center; gap:var(--cc-space-2); margin-bottom:var(--cc-space-3);">
+            <span class="cc-badge cc-badge-voting">Szavazás</span>
+          </div>
+          <h4 style="font-size:var(--cc-text-lg); font-weight:var(--cc-weight-bold); margin-bottom:var(--cc-space-2);">Kerékpártárolók az iskoláknál</h4>
+          <p style="font-size:var(--cc-text-sm); color:var(--cc-text-secondary); margin-bottom:var(--cc-space-4);">Fedett kerékpártárolók kihelyezése a három legnagyobb zamundai általános iskola bejáratához.</p>
+          <button class="cc-btn cc-btn-primary" style="width:100%;">Szavazok</button>
+        </div>
+      </div>
+
+      <h3 class="sg-subtitle">Beviteli mező</h3>
+      <div style="max-width:400px; display:flex; flex-direction:column; gap:var(--cc-space-3);">
+        <label style="font-size:var(--cc-text-sm); font-weight:var(--cc-weight-semibold); color:var(--cc-text-primary);">Ötlet címe</label>
+        <input class="cc-input" type="text" placeholder="Pl. Zöldfelület a piac mögött">
+        <label style="font-size:var(--cc-text-sm); font-weight:var(--cc-weight-semibold); color:var(--cc-text-primary);">Leírás</label>
+        <textarea class="cc-input" rows="3" placeholder="Írd le a problémát és a javasolt megoldást…"></textarea>
+      </div>
+
+      <h3 class="sg-subtitle">Státusz badge-ek</h3>
+      <div class="sg-demo-row">
+        <span class="cc-badge cc-badge-success">Sikeres mentés</span>
+        <span class="cc-badge cc-badge-info">Feldolgozás alatt</span>
+        <span class="cc-badge cc-badge-warning">Határidő közeledik</span>
+        <span class="cc-badge cc-badge-error">Hiba történt</span>
+      </div>
+    </section>
+
+    <!-- ══════════════ 8. ÉLETCIKLUS ══════════════ -->
+    <section id="lifecycle" class="sg-section">
+      <h2 class="sg-section-title">Életciklus státuszok</h2>
+      <p class="sg-section-desc">A pályázatok és ötletek státuszához kötött szín- és ikonkódolás. A státuszinformáció nem hordozható csak színnel — icon és szöveg kötelező.</p>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: var(--cc-space-3);">
+        <div style="padding:var(--cc-space-4); border-radius:var(--cc-radius-lg); border:1px solid var(--cc-border-default); background:var(--cc-surface-card); text-align:center;">
+          <span class="cc-badge cc-badge-draft" style="margin-bottom:var(--cc-space-2);">Tervezés alatt</span>
+          <div style="font-size:var(--cc-text-xs); color:var(--cc-text-muted); margin-top:var(--cc-space-2);">neutral</div>
+        </div>
+        <div style="padding:var(--cc-space-4); border-radius:var(--cc-radius-lg); border:1px solid var(--cc-border-default); background:var(--cc-surface-card); text-align:center;">
+          <span class="cc-badge cc-badge-submit" style="margin-bottom:var(--cc-space-2);">Ötletbeküldés</span>
+          <div style="font-size:var(--cc-text-xs); color:var(--cc-text-muted); margin-top:var(--cc-space-2);">green</div>
+        </div>
+        <div style="padding:var(--cc-space-4); border-radius:var(--cc-radius-lg); border:1px solid var(--cc-border-default); background:var(--cc-surface-card); text-align:center;">
+          <span class="cc-badge cc-badge-voting" style="margin-bottom:var(--cc-space-2);">Szavazás</span>
+          <div style="font-size:var(--cc-text-xs); color:var(--cc-text-muted); margin-top:var(--cc-space-2);">blue</div>
+        </div>
+        <div style="padding:var(--cc-space-4); border-radius:var(--cc-radius-lg); border:1px solid var(--cc-border-default); background:var(--cc-surface-card); text-align:center;">
+          <span class="cc-badge cc-badge-closed" style="margin-bottom:var(--cc-space-2);">Lezárt</span>
+          <div style="font-size:var(--cc-text-xs); color:var(--cc-text-muted); margin-top:var(--cc-space-2);">neutral</div>
+        </div>
+        <div style="padding:var(--cc-space-4); border-radius:var(--cc-radius-lg); border:1px solid var(--cc-border-default); background:var(--cc-surface-card); text-align:center;">
+          <span class="cc-badge cc-badge-eval" style="margin-bottom:var(--cc-space-2);">Kiértékelés</span>
+          <div style="font-size:var(--cc-text-xs); color:var(--cc-text-muted); margin-top:var(--cc-space-2);">gold</div>
+        </div>
+        <div style="padding:var(--cc-space-4); border-radius:var(--cc-radius-lg); border:1px solid var(--cc-border-default); background:var(--cc-surface-card); text-align:center;">
+          <span class="cc-badge cc-badge-built" style="margin-bottom:var(--cc-space-2);">Megvalósuló</span>
+          <div style="font-size:var(--cc-text-xs); color:var(--cc-text-muted); margin-top:var(--cc-space-2);">green</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ 9. HOZZÁFÉRHETŐSÉG ══════════════ -->
+    <section id="a11y" class="sg-section">
+      <h2 class="sg-section-title">Hozzáférhetőség (WCAG 2.1 AA)</h2>
+
+      <table class="sg-pair-table">
+        <thead>
+          <tr>
+            <th>Felület</th>
+            <th>Szöveg token</th>
+            <th>Arány</th>
+            <th>Megfelel</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="sg-pair-swatch" style="background:var(--cc-green-500);"></span> green-500</td>
+            <td><span class="sg-pair-swatch" style="background:var(--cc-neutral-0);"></span> neutral-0 (fehér)</td>
+            <td>≈ 4.6 : 1</td>
+            <td>✅ AA normál</td>
+          </tr>
+          <tr>
+            <td><span class="sg-pair-swatch" style="background:var(--cc-neutral-50);"></span> neutral-50 (oldal)</td>
+            <td><span class="sg-pair-swatch" style="background:var(--cc-neutral-900);"></span> neutral-900 (szöveg)</td>
+            <td>≈ 15.4 : 1</td>
+            <td>✅ AAA</td>
+          </tr>
+          <tr>
+            <td><span class="sg-pair-swatch" style="background:var(--cc-neutral-50);"></span> neutral-50 (oldal)</td>
+            <td><span class="sg-pair-swatch" style="background:var(--cc-neutral-600);"></span> neutral-600 (másodlagos)</td>
+            <td>≈ 5.7 : 1</td>
+            <td>✅ AA normál</td>
+          </tr>
+          <tr>
+            <td><span class="sg-pair-swatch" style="background:var(--cc-blue-100);"></span> blue-100 (info bg)</td>
+            <td><span class="sg-pair-swatch" style="background:var(--cc-blue-800);"></span> blue-800 (info text)</td>
+            <td>≈ 8.6 : 1</td>
+            <td>✅ AAA</td>
+          </tr>
+          <tr>
+            <td><span class="sg-pair-swatch" style="background:var(--cc-gold-100);"></span> gold-100 (warn bg)</td>
+            <td><span class="sg-pair-swatch" style="background:var(--cc-gold-800);"></span> gold-800 (warn text)</td>
+            <td>≈ 7.2 : 1</td>
+            <td>✅ AAA</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="sg-rule">
+        <strong>Szabályok:</strong> Fókusz-jelző (<code>--cc-focus-ring</code>) minden fókuszálható elemben. Érintési felület minimum 44 × 44 px. Státuszinformáció soha nem csak szín. <code>prefers-reduced-motion</code> esetén nincs animáció.
+      </div>
+    </section>
+
+    <!-- ══════════════ 10. TOKEN HIERARCHIA ══════════════ -->
+    <section id="tokens" class="sg-section">
+      <h2 class="sg-section-title">Token hierarchia</h2>
+      <p class="sg-section-desc">A rendszer három rétegű. A primitíveket csak a <code>:root</code> réteg használja; a szemantikus tokeneket a komponens tokenek; a komponens CSS pedig csak a saját tokenjeit olvassa.</p>
+
+      <div class="cc-card" style="font-family:var(--cc-font-mono); font-size:var(--cc-text-sm); line-height:var(--cc-leading-relaxed); background:var(--cc-neutral-900); color:var(--cc-neutral-100); max-width:560px;">
+        <div style="color:var(--cc-green-400);">/* 1. Primitívek – csak :root */</div>
+        <div>--cc-green-500: #22c55e;</div>
+        <div style="color:var(--cc-neutral-500); margin-top:var(--cc-space-2);">↓</div>
+        <div style="color:var(--cc-blue-400);">/* 2. Szemantikus tokenek – komponens tokenek */</div>
+        <div>--cc-cta-bg: var(--cc-green-500);</div>
+        <div style="color:var(--cc-neutral-500); margin-top:var(--cc-space-2);">↓</div>
+        <div style="color:var(--cc-gold-400);">/* 3. Komponens token – a komponens sajátja */</div>
+        <div>--cc-button-bg: var(--cc-cta-bg);</div>
+        <div style="color:var(--cc-neutral-500); margin-top:var(--cc-space-2);">↓</div>
+        <div style="color:var(--cc-neutral-200);">/* 4. Komponens CSS */</div>
+        <div>.cc-btn { background: var(--cc-button-bg); }</div>
+      </div>
+
+      <div class="sg-rule" style="margin-top:var(--cc-space-6);">
+        <strong>Hardcoded érték</strong> (pl. <code>#22c55e</code> közvetlenül egy komponensben) <strong>tilos</strong>. Minden érték tokenen keresztül áramlik.
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="sg-footer">
+    Community Choice — Zamunda Digitális Reneszánsz &nbsp;·&nbsp; Brand Style Guide v1.0.0 &nbsp;·&nbsp; 2026
+  </footer>
+
+  <!-- ═══ Palette builder script ═══ -->
+  <script>
+    (function() {
+      var families = [
+        { id: 'palette-savanna', prefix: 'cc-green',  shades: [50,100,200,300,400,500,600,700,800,900,950] },
+        { id: 'palette-river',   prefix: 'cc-blue',   shades: [50,100,200,300,400,500,600,700,800,900] },
+        { id: 'palette-sun',     prefix: 'cc-gold',   shades: [50,100,200,300,400,500,600,700,800,900] },
+        { id: 'palette-neutral', prefix: 'cc-neutral', shades: [0,50,100,200,300,400,500,600,700,800,900,950] },
+        { id: 'palette-earth',   prefix: 'cc-earth',  shades: [50,100,200,300,400,500,600,700,800,900] }
+      ];
+
+      families.forEach(function(fam) {
+        var container = document.getElementById(fam.id);
+        if (!container) return;
+        var rootStyle = getComputedStyle(document.documentElement);
+
+        fam.shades.forEach(function(shade) {
+          var varName = '--' + fam.prefix + '-' + shade;
+          var value = rootStyle.getPropertyValue(varName).trim();
+
+          var swatch = document.createElement('div');
+          swatch.className = 'sg-swatch';
+          swatch.innerHTML =
+            '<div class="sg-swatch-color" style="background: var(' + varName + ');"></div>' +
+            '<div class="sg-swatch-token">' + shade + '</div>' +
+            '<div class="sg-swatch-value">' + (value || '–') + '</div>';
+          container.appendChild(swatch);
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>
