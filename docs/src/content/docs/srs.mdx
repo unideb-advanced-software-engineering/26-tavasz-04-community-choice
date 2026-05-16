@@ -3,9 +3,11 @@ title: SRS
 description: A Community Choice rendszer szoftverkövetelmény-specifikációja
 ---
 
+import Mermaid from '../../components/Mermaid.astro';
+
 # Community Choice – szoftverkövetelmény-specifikáció
 
-**Verzió:** 1.0  
+**Verzió:** 1.1  
 **Projekt:** Zamunda Digitális Reneszánsz – Community Choice  
 **Dokumentum típusa:** Szoftverkövetelmény-specifikáció
 
@@ -14,6 +16,7 @@ description: A Community Choice rendszer szoftverkövetelmény-specifikációja
 | Verzió | Dátum | Változás |
 | --- | --- | --- |
 | 1.0 | 2026-05-05 | Első beadandó-kompatibilis SRS-verzió |
+| 1.1 | 2026-05-16 | Követelmények pontosítása, mérhetőbb nemfunkcionális követelmények és implementációs részletek különválasztása |
 
 ## 1. Bevezetés
 
@@ -93,9 +96,9 @@ A fejlesztés során kötelező a klímabarát és sávszélesség-takarékos te
 ### 2.5. Tervezési és implementációs korlátok
 
 - A felhasználók autentikációjához és lakcím-alapú autorizációjához a Zamunda One szolgáltatást kell használni.
-- A személyes adatok kezelésénél GDPR-kompatibilis és adatminimalizáló megközelítést kell alkalmazni.
+- A személyes adatok kezelésénél a GDPR-hoz hasonló alapelveket lehet alapul venni.
 - A szavazati rekordok nem tartalmazhatnak nyers személyes azonosítót.
-- A leadott szavazat módosítása és törlése technológiai szinten tiltott kell legyen.
+- A leadott szavazat utólagos módosítását és törlését a rendszernek meg kell akadályoznia.
 - A médiatartalmak kezelésénél sávszélesség- és tárhelytakarékos formátumokat kell használni.
 
 ### 2.6. Felhasználói dokumentáció
@@ -105,7 +108,7 @@ A rendszer beépített online súgót és rövid, kontextusérzékeny útmutató
 ### 2.7. Feltételezések és függőségek
 
 - A Zamunda One megbízhatóan biztosítja a bejelentkezett felhasználó hitelesített profilját és bejelentett lakóhelyét.
-- A Zamunda One pontos technikai API-szerződése implementációs fázisban pontosítandó, de a rendszer biztonságos HTTPS-alapú, tokenes integrációval számol.
+- A Zamunda One pontos technikai API-szerződése implementációs fázisban pontosítandó, de a rendszer biztonságos, titkosított integrációval számol.
 - A pályázati költségvetési keretek kezelése és a keretek kimerülésének nyomon követése nem része az első verzió hatókörének.
 
 ## 3. Külső interfészkövetelmények
@@ -126,16 +129,14 @@ A rendszer nem igényel közvetlen, speciális hardverinterfészt. A felhasznál
 
 A rendszer a felhasználók autentikációjához és autorizációjához a Zamunda One API-t használja. Bejelentkezéskor a rendszer ezen az interfészen keresztül kapja meg a felhasználó hitelesített profiladatait, különösen a bejelentett állandó lakóhelyet. Ez az adatcsere képezi annak alapját, hogy kizárólag a helyi lakosok szavazhassanak vagy küldhessenek be ötletet az adott önkormányzat pályázatához.
 
-A pontos protokollokat és adatszerkezeteket a Zamunda One hivatalos technikai specifikációjának ismeretében kell véglegesíteni. A tervezett integráció biztonságos HTTPS-kapcsolaton és token-alapú, iparági szabványokra épülő megoldáson, például OAuth 2.0 / OpenID Connect jellegű folyamaton alapul.
+A pontos protokollokat és adatszerkezeteket a Zamunda One hivatalos technikai specifikációjának ismeretében kell véglegesíteni. A tervezett integrációnak biztonságos, titkosított kapcsolaton és iparági szabványokra épülő azonosítási megoldáson kell alapulnia.
 
 ### 3.4. Kommunikációs interfészek
 
 - A webes kliensalkalmazás és a backend HTTPS-en keresztül kommunikál.
-- A kliens és a backend várhatóan RESTful API-kon keresztül, JSON üzenetformátummal cserél adatot.
 - Az API-válaszokat a hálózati forgalom csökkentése érdekében tömöríteni kell.
-- A magas hálózati késleltetés és az alacsony sávszélesség ellensúlyozására a rendszernek támogatnia kell a modern HTTP-képességeket, például HTTP/2 vagy HTTP/3 használatát, ha az üzemeltetési környezet ezt lehetővé teszi.
 - A pályázati értesítések e-mailben és push notification formában is megvalósíthatók.
-- A fotók és videók feltöltése során a rendszer darabolt, megszakítás után folytatható adatátvitelt alkalmaz.
+- A fotók és videók feltöltését a rendszernek instabil hálózati kapcsolat esetén is hibatűrő módon kell kezelnie.
 
 ## 4. Rendszerfunkciók
 
@@ -147,19 +148,65 @@ A pontos protokollokat és adatszerkezeteket a Zamunda One hivatalos technikai s
 
 A rendszer lehetővé teszi a zamundai önkormányzatok adminisztrátorai számára, hogy tetszőleges időközönként új ötletpályázatokat hozzanak létre, menedzseljenek és végigkísérjék azok teljes életciklusát.
 
-A pályázati életciklus például az alábbi állapotokat tartalmazhatja: tervezés alatt, ötletbeküldési szakasz, szavazási szakasz, lezárt, kiértékelés alatt, megvalósuló.
+A pályázati életciklus az alábbi állapotokból áll:
+
+| Állapot | Jelentés |
+| --- | --- |
+| `tervezes_alatt` | A pályázat adminisztrátori előkészítés alatt áll, publikus művelet még nem érhető el. |
+| `otletbekuldes` | A jogosult lakosok ötleteket küldhetnek be. |
+| `szavazas` | A jogosult lakosok a közzétett ötletekre szavazhatnak. |
+| `lezart` | A szavazási határidő lejárt, új szavazat nem adható le. |
+| `kiertekeles` | Az adminisztrátorok ellenőrzik és előkészítik az eredményeket. |
+| `megvalositas_alatt` | A nyertes vagy kiválasztott ötletek megvalósítási nyomon követés alatt állnak. |
+| `megvalositva` | A megvalósítás lezárult, az eredmény publikus státuszban visszakereshető. |
+
+Állapotátmeneti modell:
+
+<Mermaid
+	title="Pályázati életciklus – pályázati szakasz"
+	chart={`
+flowchart LR
+	tervezes_alatt["tervezés"]
+	otletbekuldes["ötletbeküldés"]
+	szavazas["szavazás"]
+	lezart["lezárt"]
+
+	tervezes_alatt -->|"Publikálás"| otletbekuldes
+	otletbekuldes -->|"Beküldés lezárva"| szavazas
+	szavazas -->|"Szavazás lezárva"| lezart
+
+	classDef ccState fill:#dcfce7,stroke:#15803d,color:#14532d,stroke-width:1px;
+	class tervezes_alatt,otletbekuldes,szavazas,lezart ccState;
+	`}
+/>
+
+<Mermaid
+	title="Pályázati életciklus – utókövetés"
+	chart={`
+flowchart LR
+	kiertekeles["kiértékelés"]
+	megvalositas_alatt["megvalósítás alatt"]
+	megvalositva["megvalósítva"]
+
+	kiertekeles -->|"Jóváhagyás"| megvalositas_alatt
+	megvalositas_alatt -->|"Lezárás"| megvalositva
+
+	classDef ccState fill:#dcfce7,stroke:#15803d,color:#14532d,stroke-width:1px;
+	class kiertekeles,megvalositas_alatt,megvalositva ccState;
+	`}
+/>
 
 #### 4.1.2. Stimulus/Response szekvenciák
 
 - Az adminisztrátor új pályázatot hoz létre; a rendszer elmenti, majd a megadott időpontban publikálja.
 - Az adminisztrátor módosítja a pályázat életciklus-státuszát; a rendszer rögzíti a változást, és például lezárt szavazási szakasz esetén letiltja a további szavazatokat.
-- A felhasználó megtekinti a pályázatok listáját; a rendszer alacsony sávszélességre optimalizált, lapozható formában jeleníti meg az aktuális és múltbeli kampányokat.
+- A felhasználó megtekinti a pályázatok listáját; a rendszer lapozható formában jeleníti meg az aktuális és múltbeli kampányokat.
 
 #### 4.1.3. Funkcionális követelmények
 
 - **F-PK-01:** A rendszer felületet biztosít az adminisztrátorok számára új pályázatok létrehozására cím, leírás, határidők és érintett önkormányzat megadásával.
 - **F-PK-02:** A rendszer támogatja a pályázatok és ötletek teljes életciklus-kezelését, beleértve a státuszok nyilvántartását és módosítását.
-- **F-PK-03:** A rendszer publikus, optimalizált, alacsony hálózati terhelésű listanézetet biztosít a felhasználók számára a pályázatok böngészéséhez.
+- **F-PK-03:** A rendszer publikus listanézetet biztosít a felhasználók számára az aktuális és múltbeli pályázatok böngészéséhez.
 - **F-PK-04:** A rendszer automatikusan megnyitja és lezárja az ötletbeküldési és szavazási szakaszokat a pályázathoz beállított határidők alapján.
 
 ### 4.2. Ötletbeküldés multimédiás támogatással
@@ -197,27 +244,27 @@ A szavazás és a jogosultságkezelés a rendszer legfontosabb integritási ter�
 - A felhasználó bejelentkezik; a rendszer a Zamunda One API-n keresztül elvégzi az autentikációt, és lekéri a bejelentett lakóhelyet.
 - A felhasználó szavazatot ad le egy helyi ötletre; a rendszer ellenőrzi, hogy még nem szavazott-e az adott ötletre, majd megváltoztathatatlan módon rögzíti a szavazatot.
 - A felhasználó megpróbál szavazni vagy ötletet beküldeni egy másik önkormányzat pályázatán; a rendszer jogosultság hiányára hivatkozva elutasítja a műveletet.
-- Egy adminisztrátor megpróbál törölni egy leadott szavazatot; a rendszer adatbázis-szintű védelmi mechanizmusokkal meggátolja a tranzakciót.
+- Egy adminisztrátor megpróbál törölni vagy módosítani egy leadott szavazatot; a rendszer elutasítja a műveletet, és az esemény auditálható marad.
 
 #### 4.3.3. Funkcionális követelmények
 
 - **F-SZ-01:** A rendszer integrálódik a Zamunda One API-val az autentikáció és a hivatalos lakcímadatokra épülő autorizáció céljából.
 - **F-SZ-02:** A rendszer szűri a hozzáférést: a felhasználó csak a saját bejelentett lakóhelye szerinti önkormányzat pályázatain adhat be ötletet és szavazhat.
 - **F-SZ-03:** A rendszer lehetővé teszi, hogy egy felhasználó egy pályázaton belül korlátlan számú különböző ötletre szavazzon, de egy konkrét ötletre csak egyetlen szavazatot adhat le.
-- **F-SZ-04:** A rendszer a leadott szavazatokat PostgreSQL-alapú, csak hozzáfűzhető szavazati tranzakciónaplóban tárolja. A módosítást és törlést adatbázis-szintű jogosultságokkal és védelmi mechanizmusokkal tiltja.
-- **F-SZ-05:** A rendszer a szavazatokat pszeudonimizált szavazói kulccsal kapcsolja az ötletekhez. A szavazati rekord nem tartalmaz nyers személyes azonosítót, ugyanakkor a pszeudonim kulcs lehetővé teszi az egy ötletre egyszeri szavazás adatbázis-szintű ellenőrzését.
+- **F-SZ-04:** A rendszer megakadályozza a leadott szavazatok utólagos módosítását és törlését, beleértve az adminisztrátori felületről indított műveleteket is.
+- **F-SZ-05:** A rendszer a szavazatokat pszeudonimizált szavazói kulccsal kapcsolja az ötletekhez. A szavazati rekord nem tartalmaz nyers személyes azonosítót, ugyanakkor a pszeudonim kulcs lehetővé teszi az egy ötletre egyszeri szavazás technológiai ellenőrzését.
 
 ## 5. Egyéb nemfunkcionális követelmények
 
 ### 5.1. Teljesítmény- és hatékonysági követelmények
 
-- A webes felület célzott First Contentful Paint értéke a 75. percentilisnél legfeljebb 1,8 másodperc legyen a támogatott, átlagos hálózati környezetekben.
-- A publikus listanézetek lapozottak, gyorsítótárazhatók és csak a megjelenítéshez szükséges mezőket adják vissza.
-- A rendszer a feltöltött videókat és képeket szerveroldalon optimalizált webes formátumokra alakítja, például WebM és WebP változatokra.
-- A kliensoldali webalkalmazás képek és videók esetében lazy loading technikát alkalmaz, hogy elkerülje az indokolatlan hálózati forgalmat.
-- A statikus erőforrásokat, például CSS, JavaScript, betűtípusok és logók, szabványos HTTP Cache-Control fejlécekkel kell gyorsítótárazni.
-- A felhasználók által feltöltött és optimalizált médiatartalmak kiszolgálása CDN-en keresztül történik.
-- A gyakran lekérdezett, ritkán változó publikus adatokat, például nyitott pályázatok listáját vagy településlistákat, szerveroldali memóriagyorsítótárból, például Redisből kell kiszolgálni, ahol ez konzisztensen megtehető.
+- A publikus kezdőoldalnak, az aktív pályázatok listanézetének, egy konkrét pályázati kiírás oldalának, valamint egy konkrét ötlet leírását tartalmazó oldalnak a célzott First Contentful Paint értéke a 75. percentilisnél támogatott, átlagos hálózati környezetben legfeljebb 1,8 másodperc legyen.
+- Támogatott átlagos hálózati környezetnek a legalább 10 Mbit/s letöltési sávszélességű, legfeljebb 100 ms körüli késleltetésű mobil- vagy vezetékes kapcsolat számít.
+- Alacsony sávszélességű környezetben, legfeljebb 1 Mbit/s letöltési sávszélesség és 300 ms körüli késleltetés mellett, az aktív pályázatok listanézetének első tartalmi elemei 5 másodpercen belül jelenjenek meg a 75. percentilisnél.
+- A publikus listanézetek lapozott választ adnak. Egy listaoldal válaszmérete médiafájlok nélkül legfeljebb 100 KB lehet.
+- A publikus listanézetek csak a megjelenítéshez szükséges adatmezőket adják vissza; részletes leírásokat, teljes médiagalériákat és adminisztratív mezőket csak részletnézetben lehet lekérni.
+- A rendszer a feltöltött képeket és animációkat automatikusan optimalizált, modern webes formátumokba konvertálja. Az optimalizált képfájl célzott mérete legfeljebb az eredeti fájlméret ~70%-a, amit vizuálisan veszteségmentes tömörítési beállításokkal kell elérni.
+- A médiafeltöltés nem akadályozhatja a szavazási és pályázatböngészési funkciók kiszolgálását.
 
 ### 5.2. Üzembiztonsági követelmények
 
@@ -227,20 +274,21 @@ A rendszer nem vezérel fizikai biztonságkritikus folyamatot, ezért klasszikus
 
 - Csak bejelentkezett és hitelesített felhasználó tud szavazatot leadni.
 - A rendszernek szigorúan korlátoznia kell a szavazáshoz és ötletbeküldéshez való hozzáférést a bejelentett lakcím alapján.
-- A szavazatok adatbázis-szintű védettséget élveznek; a módosítás és törlés technológiai szinten tiltott.
-- A szavazati tranzakciónapló nem tartalmaz nyers személyes azonosítót.
+- A szavazatok védettséget élveznek; a módosítás és törlés technológiai szinten tiltott.
+- A szavazati rekordok nem tartalmaznak nyers személyes azonosítót.
 - A duplikált szavazat kizárásához a rendszer determinisztikus, pszeudonimizált szavazói kulcsot használ.
-- A pszeudonimizáláshoz szükséges titok, például HMAC secret, csak a Szavazási szolgáltatás számára hozzáférhető.
+- A pszeudonimizáláshoz szükséges titkok csak az erre kijelölt szavazási komponens számára lehetnek hozzáférhetők.
 - A személyes adatok kezelésénél az adatminimalizálás és célhoz kötöttség elvét kell követni.
 
 ### 5.4. Szoftverminőségi attribútumok
 
 - **Elérhetőség:** a publikus böngészésnek és a szavazásnak szavazási időszakban részleges háttérfolyamat-hiba esetén is működőképesnek kell maradnia.
-- **Hatékonyság:** a publikus listanézetek lapozottak, gyorsítótárazhatók és csak a szükséges mezőket adják vissza; a médiatartalmak optimalizált formában kerülnek kiszolgálásra.
-- **Integritás:** a szavazati rekordokon `UPDATE` és `DELETE` művelet adatbázis-szinten tiltott, és az egy ötletre egyszeri szavazást egyediségi constraint védi.
+- **Hatékonyság:** a publikus listanézetek lapozottak, méretkorlátot teljesítenek és csak a szükséges mezőket adják vissza; a médiatartalmak optimalizált formában kerülnek kiszolgálásra.
+- **Integritás:** a leadott szavazatok utólag nem módosíthatók és nem törölhetők; az egy ötletre egyszeri szavazást a rendszer technológiai garanciával védi.
 - **Biztonság:** a szavazáshoz és ötletbeküldéshez Zamunda One alapú hitelesítés és lakcím-alapú jogosultságellenőrzés szükséges.
-- **Robusztusság:** a médiafeltöltés darabolt és megszakítás után folytatható; a médiafeldolgozás aszinkron háttérfolyamatként fut.
+- **Robusztusság:** a médiafeltöltés hálózati megszakítás esetén is folytatható; a médiafeldolgozás hibája nem akadályozhatja a szavazást vagy a pályázatok böngészését.
 - **Használhatóság:** a rendszer reszponzív webes felületet és kontextusérzékeny útmutatókat biztosít.
+- **Akadálymentesség:** a publikus és szavazási felületeknek biztosítaniuk kell, hogy Zamunda állampolgárai azonos feltételek mellett férjenek hozzá a fő funkciókhoz, különösen billentyűzettel, képernyőolvasóval és megfelelő kontraszttal.
 - **Bővíthetőség:** az aszinkron eseményfolyamhoz új fogyasztók, például későbbi analitikai komponensek kapcsolhatók a meglévő producerek módosítása nélkül.
 - **Elaszticitás:** szavazási csúcsterhelés esetén a Szavazási szolgáltatás önállóan skálázható.
 - **Skálázhatóság:** a szavazási, médiafeldolgozási és értesítési terhelés külön kezelhető.

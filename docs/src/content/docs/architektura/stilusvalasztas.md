@@ -15,7 +15,7 @@ A mérlegelés első körében az alábbi stílusokat azonnal elvetettük, mivel
 
 * **Rétegelt (Layered) és csővezetékes (Pipeline) architektúra:** Ezek technológiailag particionált stílusok, amelyeknél a kód rétegekbe (megjelenítés, üzleti logika, adatbázis) van szervezve. Bár az indulás olcsó, a módosítások nehézkesek, és az elaszticitásuk rendkívül alacsony.
 * **Mikromag-architektúra (Microkernel):** Bár jó kiegészítő rendszerekhez, a mi platformunk nem egy alaprendszerre és bővítményekre épülő architektúrát igényel.
-* **Térelemekre épülő architektúra (Space-Based):** Bár az elaszticitása és a teljesítménye maximális a memóriában végzett feldolgozás miatt, az üzemeltetése méregdrága, ráadásul az *F-SZ-04 (Megmásíthatatlan szavazatok)* szigorú, csak hozzáfűzhető adatintegritási igényeivel nehezen vagy csak komoly tranzakciós kompromisszumokkal lenne összeegyeztethető.
+* **Space-Based architektúra:** Bár az elaszticitása és a teljesítménye maximális a memóriában végzett feldolgozás miatt, az üzemeltetése méregdrága, ráadásul az *F-SZ-04 (Megmásíthatatlan szavazatok)* szigorú, csak hozzáfűzhető adatintegritási igényeivel nehezen vagy csak komoly tranzakciós kompromisszumokkal lenne összeegyeztethető.
 * **Mikroszolgáltatás-architektúra (Microservices):** Bár divatos és extrém jól skálázható, a ZDR klímabarát és takarékossági ASR-jeivel teljesen ellentétes. A mikroszolgáltatások hálózati többletterhelése, a komplex üzemeltetés és az elosztott tranzakciók kezelése indokolatlanul drágává és energiaigényessé tenné a projektet.
 * **Szolgáltatásorientált architektúra (SOA):** Túl monolitikus, elavult.
 
@@ -28,7 +28,7 @@ A projekt igényei alapján három stílus maradt: a **moduláris monolit**, a *
 ### 2.1. Második helyezett: Moduláris monolit
 
 * **Miért merült fel?** Nagyon költséghatékony (Takarékosság ASR), és egyszerű üzemeltetni. Egyetlen közös adatbázisa van, ami jelentősen megkönnyíti a szavazatok relációs integritásának védelmét.
-* **Miért vetettük el (részben)?** Az *Elaszticitás* AC miatt bukik el. A kampányok utolsó napján a szavazási forgalom ugrásszerűen megnő. Egy monolit esetében ilyenkor a *teljes* alkalmazást replikálni kellene a szervereken, ami pazarló, rengeteg felesleges memóriát és CPU-t foglal, így sérti a **Klímabarát/Takarékos** működés elvét.
+* **Miért vetettük el (részben)?** Az *Elaszticitás* és a *Robusztusság* AC-k miatt bukik el. A kampányok utolsó napján a szavazási forgalom ugrásszerűen megnő. Egy monolit esetében ilyenkor a *teljes* alkalmazást replikálni kellene a szervereken, ami pazarló, rengeteg felesleges memóriát és CPU-t foglal, így sérti a **Klímabarát/Takarékos** működés elvét. Emellett a moduláris monolit futásidőben továbbra is egyetlen nagy deployment unit, tehát érdemi single point of failure: ha ez a folyamat vagy környezet kiesik, a publikus böngészés, szavazás, adminisztráció és háttérfeldolgozás egyszerre sérülhet.
 
 ### 2.2. Kiegészítő stílus: Eseményvezérelt architektúra (EDA)
 
@@ -46,15 +46,15 @@ Fontos: a szavazás elsődleges, erős konzisztenciát igénylő része nem esem
 
 A Zamunda Community Choice projekt dedikált architektúrája a **szolgáltatásalapú architektúra**, kiegészítve eseményvezérelt aszinkron háttérfolyamatokkal a médiafeldolgozáshoz.
 
-### Miért ez a tökéletes választás?
+### Miért ez a megfelelő választás?
 
 A szolgáltatásalapú architektúra (SBA) egy makroszolgáltatás-alapú megközelítés. Nincsenek több tucatnyi mikroszolgáltatások, hanem a rendszer néhány jól körülhatárolt, önállóan futtatható doménszolgáltatásra van bontva, amelyek jellemzően **egy közös, monolitikus adatbázison** osztoznak.
 
 1. **Célzott Elaszticitás (Takarékosság és Klímabarát működés):**
-Amikor szavazási csúcsidőszak van, elég kizárólag a kisméretű *Szavazási szolgáltatás* példányszámát növelni. Nem kell a teljes rendszert többszörözni, így az erőforrás-kihasználás (CPU, RAM) minimális marad. Ez tökéletesen teljesíti az Elaszticitás és a Hatékonyság AC-ket.
+Amikor szavazási csúcsidőszak van, elég kizárólag a kisméretű *Szavazási szolgáltatás* példányszámát növelni. Nem kell a teljes rendszert többszörözni, így az erőforrás-kihasználás (CPU, RAM) minimális marad. Ez közvetlenül támogatja az Elaszticitás és a Hatékonyság AC-ket.
 2. **Közös adatbázis = Maximális adatintegritás:**
 Mivel a Microservices-szel ellentétben itt osztozhatnak a szolgáltatások egyetlen, robusztus relációs adatbázison, az *F-SZ-04 (Megmásíthatatlan szavazatok)* követelmény egyszerűen, adatbázis-szintű triggerekkel és tranzakciókkal megvalósítható. Nincs szükség bonyolult, energiaigényes és megbízhatatlan elosztott tranzakciókra.
 3. **Kiváló Robusztusság a hibrid Event-Driven elemmel:**
 A *Pályázat- és adminisztrációkezelő szolgáltatás* fogadja a darabolt (chunked) videókat, de a tényleges tömörítést már nem a webes kérést kiszolgáló API végzi, hanem egy eseménysoron, vagyis üzenetbrokeren keresztül átadja egy dedikált aszinkron workernek. Ugyanígy az *Értesítési szolgáltatás* és az *Auditnaplózó szolgáltatás* is aszinkron eseményfogyasztóként működik: hibájuk vagy lassulásuk nem gyűrűzik vissza a szavazási és kampánykezelési folyamatokba. Ez garantálja, hogy a rendszer a legrosszabb hálózati viszonyok és legnagyobb terhelés mellett is stabil marad.
 4. **Egyszerűsített üzemeltetés (Takarékosság):**
-Az SBA a mikroszolgáltatásokhoz képest lényegesen kevesebb mozgó alkatrészt (deployment unit) tartalmaz. Nem igényel masszív DevOps infrastruktúrát, komplex szolgáltatáshálót vagy folyamatos mikromenedzsmentet, ami radikálisan csökkenti mind a fejlesztési, mind a hosszú távú üzemeltetési költségeket. Ez tökéletes választássá teszi az erőforrásokat ésszerűen felhasználó, takarékos állami (ZDR) projektek számára.
+Az SBA a mikroszolgáltatásokhoz képest lényegesen kevesebb mozgó alkatrészt (deployment unit) tartalmaz. Nem igényel masszív DevOps infrastruktúrát, komplex szolgáltatáshálót vagy folyamatos mikromenedzsmentet, ami csökkenti mind a fejlesztési, mind a hosszú távú üzemeltetési költségeket. Ez megfelelő választássá teszi az erőforrásokat ésszerűen felhasználó, takarékos állami (ZDR) projektek számára.

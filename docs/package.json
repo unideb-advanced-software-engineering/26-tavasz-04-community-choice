@@ -16,6 +16,7 @@
     "@fontsource/jetbrains-mono": "^5.2.8",
     "astro": "^6.0.1",
     "likec4": "^1.55.0",
+    "mermaid": "^11.15.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "sharp": "^0.34.2"

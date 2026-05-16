@@ -55,6 +55,7 @@ export default defineConfig({
 						{ label: 'Szignifikáns követelmények', slug: 'architektura/szignifikans-kovetelmenyek' },
 						{ label: 'Stílusválasztás', slug: 'architektura/stilusvalasztas' },
 						{ label: 'C4 modell', slug: 'architektura/c4-modell' },
+						{ label: 'Implementációs javaslatok', slug: 'architektura/implementacios-javaslatok' },
 					],
 				},
 				{
