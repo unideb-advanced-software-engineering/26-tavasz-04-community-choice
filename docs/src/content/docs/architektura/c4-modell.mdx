@@ -15,7 +15,9 @@ A legfelső szint megmutatja, kik használják a rendszert és milyen külső re
 
 ## Konténerdiagram
 
-A konténerszint megmutatja a rendszer futtatható egységeit, például a szolgáltatásokat az SBA-stílus szerint és az aszinkron feldolgozást segítő üzenetsort.
+A konténerszint megmutatja a rendszer futtatható egységeit és adatáramlási határait: a három React/TypeScript webes felületet, az egységes API Gateway / BFF belépési pontot, az SBA-stílus szerinti backend szolgáltatásokat, valamint az aszinkron feldolgozást segítő Kafka topicokat. A diagram a C4 ajánlás szerint nem magát az üzenetbrókert, hanem a logikai topicokat jeleníti meg, mert ezek mutatják meg pontosan a producer és consumer oldali csatolást.
+
+A médiafeltöltési útvonalon a webes kliens nem küld nagy bináris állományt a backend API-n keresztül. A lakossági felület presigned S3-kompatibilis feltöltési URL-t kér, közvetlenül a nyers média bucketbe tölt, majd a backend csak objektumhivatkozást és metaadatot publikál a médiafeldolgozási topicba.
 
 <LikeC4View viewId="containers" />
 
@@ -29,7 +31,7 @@ Ez a szolgáltatás felel a jogosult, pszeudonimizált és megváltoztathatatlan
 <LikeC4View viewId="compVoting" />
 
 ### Pályázat- és adminisztrációkezelő szolgáltatás
-Kezeli a pályázatok életciklusát és a médiafeltöltést. A **TUS protokoll** segítségével biztosítja a robusztus feltöltést instabil hálózat esetén is, valamint alacsony sávszélességre optimalizált API-t nyújt a listanézetekhez.
+Kezeli a pályázatok életciklusát és a médiafeltöltés üzleti oldalát. Presigned S3-kompatibilis feltöltési URL-t ad ki, menti az ötlet- és média-metaadatokat, majd feldolgozási eseményt küld a média topicba. A nagy fájlok nem ezen a szolgáltatáson és nem Kafka üzenetben utaznak.
 
 <LikeC4View viewId="compCampaignAdmin" />
 

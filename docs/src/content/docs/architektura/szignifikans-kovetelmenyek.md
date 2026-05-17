@@ -26,9 +26,9 @@ A rendszer kép- és videófeltöltési lehetőséget biztosít az ötletekhez (
 
 **Miért ASR?**
 
-* A rossz zamundai hálózati lefedettség miatt a nagyméretű médiafájlok feltöltése hagyományos módszerekkel megszakadna, ezért az architektúrának egy robusztus, darabolt és megszakítás esetén folytatható feltöltési mechanizmust kell biztosítania (pl. [TUS protokoll](https://tus.io/) segítségével).
-* A szerveroldali videó- és képtömörítés jelentős és hirtelen CPU-terhelést okoz. Ezt az alaprendszertől független, aszinkron háttérfolyamattal és üzenetsorral kell megtervezni, hogy egy tömeges feltöltési hullám ne lassítsa le a teljes webes felületet és a szavazást.
-* Jelentős hatással van a CDN-re (Content Delivery Network, tartalomelosztó hálózat) és a fájltárolási stratégiára a hálózat optimalizálása érdekében.
+* A rossz zamundai hálózati lefedettség miatt a nagyméretű médiafájlok feltöltése hagyományos módszerekkel megszakadna, ezért az architektúrának robusztus, darabolt és megszakítás esetén folytatható objektumtár-alapú feltöltési mechanizmust kell biztosítania.
+* A szerveroldali videó- és képtömörítés jelentős és hirtelen CPU-terhelést okoz. Ezt az alaprendszertől független, aszinkron háttérfolyamattal és médiafeldolgozási topiccal kell megtervezni, hogy egy tömeges feltöltési hullám ne lassítsa le a teljes webes felületet és a szavazást.
+* Jelentős hatással van a fájltárolási stratégiára és opcionálisan a CDN-re (Content Delivery Network, tartalomelosztó hálózat): a nyers és optimalizált média külön objektumtárban kezelhető, a CDN pedig csak akkor indokolt, ha a forgalmi és költségadatok alapján megtérül.
 
 ### F-SZ-03, F-SZ-04 és F-SZ-05: Egyedi, megváltoztathatatlan és pszeudonimizált szavazatok
 

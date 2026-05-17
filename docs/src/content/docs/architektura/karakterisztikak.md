@@ -63,7 +63,7 @@ description: A Community Choice rendszer architekturális karakterisztikáinak l
 - **Forrás:** lakos, aki ötlethez videót tölt fel mobilhálózaton.
 - **Stimulus:** a feltöltés közben a kapcsolat többször megszakad vagy jelentősen belassul.
 - **Környezet:** instabil internetkapcsolat, nagyméretű videófájl, aktív ötletbeküldési időszak.
-- **Válasz:** a rendszer darabolt, folytatható feltöltést alkalmaz; a sikeresen feltöltött darabokat nem kell újraküldeni. A webes kérés nem végzi el szinkron módon a videótömörítést, hanem eseményt küld a Médiafeldolgozó háttérfolyamatnak.
+- **Válasz:** a rendszer presigned S3-kompatibilis, darabolt és folytatható feltöltést alkalmaz; a sikeresen feltöltött darabokat nem kell újraküldeni. A nagy médiafájl közvetlenül a nyers média bucketbe kerül, a webes kérés nem végzi el szinkron módon a videótömörítést, hanem objektumhivatkozást tartalmazó eseményt küld a Médiafeldolgozó háttérfolyamatnak.
 - **Válaszmérték:** rövid hálózati szakadás után a feltöltés folytatható, nem indul teljesen elölről; a médiafeldolgozás hibája vagy lassulása nem teszi elérhetetlenné az ötletbeküldési vagy szavazási funkciókat.
 - **Kapcsolódó döntések:** [Implementációs javaslatok](./implementacios-javaslatok/), aszinkron médiafeldolgozás, folytatható feltöltési mechanizmus.
 
@@ -84,6 +84,6 @@ description: A Community Choice rendszer architekturális karakterisztikáinak l
 - **Forrás:** nagy létszámú lakosság egy népszerű önkormányzati kampány utolsó órájában.
 - **Stimulus:** a szavazási forgalom rövid idő alatt többszörösére nő.
 - **Környezet:** kampányzárás előtti csúcsterhelés, a publikus böngészés és médiafeltöltés forgalma közben is folytatódik.
-- **Válasz:** az üzemeltetés csak a Szavazási szolgáltatás példányszámát növeli, miközben a Pályázat- és adminisztrációkezelő szolgáltatás, az Értesítési szolgáltatás és a Médiafeldolgozó háttérfolyamat saját terhelésük szerint külön skálázhatók. A szavazási út szinkron része PostgreSQL tranzakcióra támaszkodik, az audit és értesítés Kafka-n keresztül aszinkron történik.
+- **Válasz:** az üzemeltetés csak a Szavazási szolgáltatás példányszámát növeli, miközben a Pályázat- és adminisztrációkezelő szolgáltatás, az Értesítési szolgáltatás és a Médiafeldolgozó háttérfolyamat saját terhelésük szerint külön skálázhatók. A szavazási út szinkron része PostgreSQL tranzakcióra támaszkodik, az audit, értesítés és médiafeldolgozás Kafka topicokon keresztül aszinkron történik.
 - **Válaszmérték:** a szavazási kapacitás célzottan növelhető anélkül, hogy a teljes alkalmazást monolitként kellene replikálni; a csúcsidőszak után a Szavazási szolgáltatás visszaskálázható, csökkentve az üresjárati költséget és energiafogyasztást.
 - **Kapcsolódó döntések:** [ADR-001](../adrs/adr-001/), [ADR-002](../adrs/adr-002/), [ADR-003](../adrs/adr-003/), SBA + EDA hibrid architektúra.

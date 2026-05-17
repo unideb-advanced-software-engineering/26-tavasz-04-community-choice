@@ -68,7 +68,8 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 - **HTTP/2:** Multiplexálás és hatékonyabb kapcsolatkezelés, különösen magas késleltetésnél.
 - **HTTP/3 / QUIC:** UDP-alapú, késleltetésre érzékeny környezetben előnyös protokoll, alternatíva HTTP/2 helyett.
 - **Chunked upload (darabolt feltöltés):** Feltöltés részekre bontva, hogy megszakadás után folytatható legyen.
-- **TUS protokoll:** Resumable upload szabvány; a dokumentáció példaként említi robusztus feltöltésre.
+- **Presigned upload URL:** Időben és jogosultságban korlátozott objektumtár-feltöltési URL, amellyel a kliens közvetlenül S3-kompatibilis bucketbe tölthet nagy médiafájlt.
+- **S3-kompatibilis multipart upload:** Objektumtár-alapú, darabolt és folytatható feltöltési mechanizmus nagy fájlokhoz.
 - **OAuth 2.0 (jellegű):** Várható token-alapú bejelentkezési/engedélyezési megoldás a Zamunda One integrációhoz (a konkrét specifikáció TBD).
 
 ## Teljesítmény és kliensoldali optimalizálás
@@ -82,8 +83,8 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 
 - **PostgreSQL:** Elsődleges relációs adatbázis; a szavazatok igazságforrása és integritás-garanciáinak helye.
 - **Redis / Memcached:** Szerveroldali memóriagyorsítótár jelöltek; a dokumentáció publikus, ritkán változó adatok cache-elésére említi.
-- **CDN (Content Delivery Network):** Multimédia tartalmak elosztott kiszolgálása; csökkenti az origin terhelést és a hálózati költséget.
-- **Edge caching:** CDN peremcsomópontokon történő cache-elés; különösen alacsony sávszélesség és magas késleltetés mellett hasznos.
+- **CDN (Content Delivery Network):** Opcionális multimédia gyorsítóréteg; csökkentheti az origin terhelést és a hálózati költséget, ha a forgalmi adatok indokolják.
+- **Edge caching:** CDN peremcsomópontokon történő cache-elés; alacsony sávszélesség és magas késleltetés mellett hasznos lehet.
 - **Apache Kafka:** Eseményfolyam-platform; itt audit/integrációs célú, tartósan megőrzött domain eseményekkel.
 - **Topic:** Kafka logikai csatorna az események számára (pl. „vote-cast” jellegű események).
 - **Partition:** Kafka topic felosztása párhuzamos feldolgozásra és skálázásra.
@@ -92,6 +93,7 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 - **KRaft:** Kafka beépített konszenzus/metadata rétege (ZooKeeper nélkül); üzemeltetési fogalom az ADR-ben.
 - **RabbitMQ:** Alternatív üzenetközvetítő jelölt; a dokumentáció szerint visszajátszható, tartós eseménytörténethez kevésbé illeszkedik.
 - **Redis Streams:** Alternatív streaming jelölt; könnyűsúlyú, de nagy volumenű tartós eseménytárolásra kevésbé optimális.
+- **pgmq:** PostgreSQL-re épülő üzenetsor; takarékos alternatíva lehet kisebb event volume mellett, de a tranzakciós adatbázis felelősségét növeli.
 
 ## Multimédia és formátumok
 

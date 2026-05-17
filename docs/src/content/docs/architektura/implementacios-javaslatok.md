@@ -22,10 +22,11 @@ Ez az oldal azokat a technológiai részleteket gyűjti, amelyek hasznos tervez�
 
 ## Médiafeltöltés és médiakiszolgálás
 
-- Instabil hálózati kapcsolat esetén a fotók és videók feltöltése darabolt, megszakítás után folytatható mechanizmussal kezelhető.
-- A TUS protokoll jó jelölt a resumable upload igényre.
+- Instabil hálózati kapcsolat esetén a fotók és videók feltöltése darabolt, megszakítás után folytatható S3-kompatibilis multipart upload mechanizmussal kezelhető.
+- A backend csak presigned upload URL-t és objektumkulcsot adjon ki; a kliens a nagy bináris állományt közvetlenül az objektumtárba töltse fel.
+- A Kafka üzenetek csak objektumtárbeli hivatkozást, metaadatot és feldolgozási paramétereket tartalmazzanak, ne magát a médiafájlt.
 - A feltöltött képek WebP, a videók WebM változatra alakíthatók, ha a minőség és böngészőtámogatás alapján ez indokolt.
-- A médiatartalmak kiszolgálását célszerű CDN-en keresztül végezni.
+- A médiatartalmak kiszolgálása történhet közvetlenül az optimalizált média bucketből, vagy forgalmi és költségadatok alapján opcionális CDN / edge cache rétegen keresztül.
 - A médiafeldolgozás fusson a felhasználói kérés kritikus útján kívül, aszinkron háttérfolyamatban.
 
 ## Gyorsítótárazás
@@ -44,6 +45,6 @@ Ez az oldal azokat a technológiai részleteket gyűjti, amelyek hasznos tervez�
 ## Eseménykezelés és audit
 
 - Kafka használható audit és integrációs eseményfolyamként, miközben a szavazatok elsődleges igazságforrása továbbra is a tranzakciós adatbázis marad.
-- A szavazat leadása, ötlet beküldése és adminisztrátori beavatkozás domain eseményként publikálható.
+- A szavazat leadása, ötlet beküldése és adminisztrátori beavatkozás domain eseményként publikálható külön Kafka topicokba.
 - Az audit, értesítés és médiafeldolgozás egymástól független fogyasztóként működhet, hogy ezek lassulása ne akadályozza a szavazási vagy pályázatkezelési kéréseket.
 - A megbízható eseménypublikáláshoz outbox jellegű minta alkalmazható, ha az adatbázis-tranzakció és az eseménykibocsátás konzisztenciáját garantálni kell.
