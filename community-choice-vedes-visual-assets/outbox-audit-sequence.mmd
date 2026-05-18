@@ -1,0 +1,26 @@
+sequenceDiagram
+  autonumber
+  actor Lakos
+  participant Vote as Szavazási szolgáltatás
+  participant DB as PostgreSQL
+  participant Relay as Outbox relay / CDC
+  participant Stream as NATS JetStream / Kafka
+  participant Audit as Auditnaplózó szolgáltatás
+  participant Notify as Értesítési szolgáltatás
+
+  Lakos->>Vote: Szavazat leadása
+  Vote->>DB: BEGIN
+  Vote->>DB: INSERT vote_log append-only
+  Vote->>DB: INSERT outbox_event
+  Vote->>DB: COMMIT
+  Note over Vote,DB: A szavazat és audit-esemény atomikusan keletkezik
+
+  loop háttérben, retry-képesen
+    Relay->>DB: SELECT ... FOR UPDATE SKIP LOCKED
+    DB-->>Relay: outbox rekord
+    Relay->>Stream: publish vote-cast-event
+    Relay->>DB: outbox rekord lezárása
+  end
+
+  Stream-->>Audit: replayelhető audit esemény
+  Stream-->>Notify: független értesítési fogyasztás
