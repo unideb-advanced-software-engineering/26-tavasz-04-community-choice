@@ -15,6 +15,10 @@ export default defineConfig({
 		starlight({
 			title: 'Community Choice',
 			description: 'Zamunda Digitális Reneszánsz – közösségi ötletplatform dokumentációja',
+			logo: {
+				src: './src/assets/logo.png',
+				alt: 'Community Choice logó',
+			},
 			customCss: [
 				// Inter: 400, 600, 700, 800 súlyok (Fontsource, auto-subset)
 				'@fontsource/inter/400.css',
