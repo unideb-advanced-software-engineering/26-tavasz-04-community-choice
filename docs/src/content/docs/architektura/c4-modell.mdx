@@ -45,7 +45,7 @@ Ez a fókusznézet azt mutatja, hogyan kerülnek a nagy médiafájlok a backend 
 A komponens szintű nézetek részletezik az egyes konténerek belső működését és felelősségi köreit.
 
 ### Szavazási szolgáltatás
-Ez a szolgáltatás felel a jogosult, pszeudonimizált és megváltoztathatatlan szavazatok rögzítéséért. Tartalmazza a Zamunda One klienst, amely a lakcímet és - ha az API támogatja - a lakcím-módosítási dátumot/időbélyeget kéri le, valamint a Jogosultságkezelőt, amely a `campaign_eligibility` pillanatképet ellenőrzi vagy létrehozza. Új pillanatkép létrehozásakor a rendszer a nyers Zamunda One azonosítóból védett hash értéket képez, és csak ezt tárolja. A szolgáltatás a jogosultsági pillanatkép kontextusából pszeudonimizált szavazói kulcsot képez, majd a szavazatot PostgreSQL-ben, csak hozzáfűzhető szavazati tranzakciónaplóban tárolja.
+Ez a szolgáltatás felel a jogosult, pszeudonimizált és megváltoztathatatlan szavazatok rögzítéséért. Tartalmazza a Zamunda One klienst, amely a lakcímet és - ha az API támogatja - a lakcím-módosítási dátum/időbélyeget kéri le, valamint a Jogosultságkezelőt, amely a `campaign_eligibility` pillanatképet ellenőrzi vagy létrehozza (lásd [ADR-010](../adrs/adr-010/) és [ADR-007](../adrs/adr-007/)). Új pillanatkép létrehozásakor a rendszer a nyers Zamunda One azonosítóból védett hash értéket képez, és csak ezt tárolja. A szolgáltatás a jogosultsági pillanatkép kontextusából pszeudonimizált szavazói kulcsot képez, majd a szavazatot PostgreSQL-ben, csak hozzáfűzhető szavazati tranzakciónaplóban tárolja.
 Az audit esemény a szavazattal együtt outbox rekordként jön létre, így a broker vagy hálózat hibája nem tudja elszakítani a szavazati commitot az auditfolyamtól.
 
 <LikeC4View viewId="compVoting" />
