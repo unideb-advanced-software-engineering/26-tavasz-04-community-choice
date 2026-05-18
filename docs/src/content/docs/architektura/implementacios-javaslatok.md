@@ -45,7 +45,9 @@ Ez az oldal azokat a technológiai részleteket gyűjti, amelyek hasznos tervez�
 
 - A szavazatok elsődleges igazságforrása PostgreSQL tranzakciós tároló.
 - A leadott szavazatok módosításának és törlésének tiltása csak hozzáfűzhető szavazati tranzakciónaplóval, adatbázis-szintű jogosultságokkal és `UPDATE` / `DELETE` tiltással valósul meg.
-- A kampányhoz kötött lakcímjogosultságot `campaign_eligibility` pillanatkép táblában kell rögzíteni felhasználóazonosító hash, kampányazonosító, önkormányzati azonosító, jogosultsági döntés, snapshot időpont és - ha a Zamunda One API-ból lekérhető - lakcím-módosítási dátum/időbélyeg mezőkkel; nyers lakcímet vagy nyers személyes azonosítót ez a tábla sem tárolhat.
+- A kampányhoz kötött lakcímjogosultságot `campaign_eligibility` pillanatkép táblában kell rögzíteni `user_id_hash`, kampányazonosító, önkormányzati azonosító, jogosultsági döntés, snapshot időpont és - ha a Zamunda One API-ból lekérhető - lakcím-módosítási dátum/időbélyeg mezőkkel; nyers lakcímet vagy nyers személyes azonosítót ez a tábla sem tárolhat.
+- A `user_id_hash` értéket HashiCorp Vault Transit HMAC-kal javasolt képezni egy dedikált, például `zdr-eligibility-pepper` kulccsal. A NestJS BFF vagy a jogosultsági pillanatképet létrehozó NestJS szolgáltatás a nyers Zamunda One ID-t elküldi a Vault Transit HMAC API-nak, majd kizárólag a visszakapott HMAC értéket menti. A pepper nem hagyja el a Vault memóriáját.
+- Ez a szinkron Vault-hívás nem része minden szavazatleadásnak: csak a jogosultsági pillanatkép létrehozásakor történik meg felhasználónként és kampányonként, ezért nem várható szűk keresztmetszetnek a szavazási csúcsidőszakban.
 - Az „egy felhasználó egy ötletre egyszer” szabályt adatbázis-szintű egyediségi szabály védi; particionált szavazati táblánál például `UNIQUE(campaign_id, idea_id, voter_key)`.
 - A nyers személyes azonosító helyett determinisztikus, pszeudonimizált szavazói kulcs használatos.
 - A kampány-mesterkulcs KMS/Vault Transit jellegű kulcskezelésben él; a szavazási kritikus útban a pod illékony memóriában tartott rövid élettartamú kampánykulcsból számolja a HMAC-et.

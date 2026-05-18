@@ -64,7 +64,7 @@ Az SBA a mikroszolgáltatásokhoz képest lényegesen kevesebb mozgó alkatrész
 A hibrid SBA + EDA döntés csak akkor védhető közbizalmi rendszerként, ha a kritikus peremeseteket nem implementációs részletként kezeljük:
 
 - **Integritás:** a szavazási auditfolyam kötelezően transactional outbox + outbox relay mintával készül ([ADR-006](../adrs/adr-006/)), ezért nincs alkalmazásszintű dual-write rés a PostgreSQL tranzakció és az eseménykibocsátás között.
-- **Adatvédelem:** a `voter_key` HMAC kampány-mesterkulcsa KMS/Vault Transit jellegű kulcskezelésben él, a kritikus útban pedig rövid élettartamú kampánykulcs használható ([ADR-007](../adrs/adr-007/)).
+- **Adatvédelem:** a jogosultsági pillanatkép és a szavazói kulcs képzéséhez használt titkok dedikált kulcskezelésben élnek, nem alkalmazáskonfigurációban vagy naplókban. A szavazási csúcsforgalom esetén csak rövid élettartamú operatív kulcs használható, hogy a kulcskezelő ne váljon per-request szűk keresztmetszetté ([ADR-007](../adrs/adr-007/)).
 - **Csúcsterhelés:** a PostgreSQL írási út PgBouncer poololással és `campaign_id` szerinti particionálással védett ([ADR-008](../adrs/adr-008/)).
 - **Takarékos brokerprofil:** az induló profil NATS JetStream, a Kafka csak országos/nagy audit-replay profilnál indokolt ([ADR-004](../adrs/adr-004/)).
 - **Peremvédelem:** a NestJS BFF elé dedikált, implementációfüggetlen Ingress/API Gateway kerül TLS terminációra, rate limitingre és JWT elővalidálásra ([ADR-009](../adrs/adr-009/)).

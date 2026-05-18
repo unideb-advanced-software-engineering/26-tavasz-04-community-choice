@@ -19,6 +19,7 @@ import Mermaid from '../../components/Mermaid.astro';
 | 1.1 | 2026-05-16 | Követelmények pontosítása, mérhetőbb nemfunkcionális követelmények és implementációs részletek különválasztása |
 | 1.2 | 2026-05-18 | Perem gateway, rövid élettartamú kampánykulcs és takarékos outbox relay döntések átvezetése |
 | 1.3 | 2026-05-18 | Jogosultsági pillanatkép bevezetése a kampány közbeni lakcímváltozások kezelésére |
+| 1.4 | 2026-05-18 | A jogosultsági pillanatkép felhasználóazonosító-hashének védett kulcskezelési pontosítása |
 
 ## 1. Bevezetés
 
@@ -105,6 +106,7 @@ A fejlesztés során kötelező a klímabarát és sávszélesség-takarékos te
 - A médiatartalmak kezelésénél sávszélesség- és tárhelytakarékos formátumokat kell használni.
 - A publikus backend elérés dedikált, implementációfüggetlen Ingress/API Gateway rétegen keresztül történik; Traefik vagy Nginx javasolt önmenedzselt megoldás, de nem kötelező termékválasztás.
 - A szavazati tranzakció és a hozzá tartozó audit/integrációs esemény között nem lehet alkalmazásszintű dual-write rés; a szavazási auditfolyam transactional outbox + outbox relay mintával készül.
+- A jogosultsági pillanatképben csak védett kulcskezeléssel képzett felhasználóazonosító-hash tárolható; a képzéshez használt titok nem kerülhet az alkalmazásba, és a nyers Zamunda One ID nem tárolható.
 - A pszeudonimizált szavazói kulcs képzéséhez használt kampány-mesterkulcsot dedikált KMS/Vault Transit jellegű szolgáltatásban kell kezelni; a szavazási kritikus útban pod memóriában tartott rövid élettartamú kampánykulcs használható.
 - A szavazási csúcsterhelésnél a PostgreSQL írási út connection poolinggal és kampány szerinti particionálással védendő.
 
@@ -265,7 +267,7 @@ A szavazás és a jogosultságkezelés a rendszer legfontosabb integritási ter�
 - **F-SZ-04:** A rendszer megakadályozza a leadott szavazatok utólagos módosítását és törlését, beleértve az adminisztrátori felületről indított műveleteket is.
 - **F-SZ-05:** A rendszer a szavazatokat pszeudonimizált szavazói kulccsal kapcsolja az ötletekhez. A szavazati rekord nem tartalmaz nyers személyes azonosítót, ugyanakkor a pszeudonim kulcs lehetővé teszi az egy ötletre egyszeri szavazás technológiai ellenőrzését.
 - **F-SZ-06:** A rendszer a sikeresen rögzített szavazathoz tartozó audit/integrációs eseményt ugyanabban a PostgreSQL tranzakcióban outbox rekordként is rögzíti; a tartós event streambe kerülést outbox relay worker biztosítja.
-- **F-SZ-07:** A rendszer a felhasználó első kampány-interakciójakor, vagy előzetes kampányindítási jogosultság-előkészítés esetén a kampány indulásakor, rögzíti a felhasználó azonosító hash-ét, a kampány azonosítóját, az önkormányzat azonosítóját, a lakcím-módosítási dátumot/időbélyeget, ha az a Zamunda One-ból lekérhető, és a jogosultság tényét egy megváltoztathatatlan `campaign_eligibility` pillanatkép táblában. A kampány során minden további ötletbeküldési és szavazási jogosultság-ellenőrzés ebből a pillanatképből dolgozik, függetlenül a kampány közben történő lakcímváltozásoktól.
+- **F-SZ-07:** A rendszer a felhasználó első kampány-interakciójakor, vagy előzetes kampányindítási jogosultság-előkészítés esetén a kampány indulásakor, rögzíti a felhasználó védett HMAC-kal képzett azonosító-hashét, a kampány azonosítóját, az önkormányzat azonosítóját, a lakcím-módosítási dátumot/időbélyeget, ha az a Zamunda One-ból lekérhető, és a jogosultság tényét egy megváltoztathatatlan `campaign_eligibility` pillanatkép táblában. A hash képzéséhez használt titok nem kerülhet az alkalmazásba, a nyers Zamunda One ID pedig nem kerülhet tartós tárolóba, logba, cache-be vagy eseménybe. A kampány során minden további ötletbeküldési és szavazási jogosultság-ellenőrzés ebből a pillanatképből dolgozik, függetlenül a kampány közben történő lakcímváltozásoktól.
 
 ## 5. Egyéb nemfunkcionális követelmények
 
@@ -290,7 +292,8 @@ A rendszer nem vezérel fizikai biztonságkritikus folyamatot, ezért klasszikus
 - A szavazatok védettséget élveznek; a módosítás és törlés technológiai szinten tiltott.
 - A szavazati rekordok nem tartalmaznak nyers személyes azonosítót.
 - A duplikált szavazat kizárásához a rendszer determinisztikus, pszeudonimizált szavazói kulcsot használ.
-- A pszeudonimizáláshoz szükséges titkok csak az erre kijelölt szavazási komponens számára lehetnek hozzáférhetők.
+- A jogosultsági pillanatkép felhasználóazonosító-hashéhez használt titkos kulcsanyag kizárólag dedikált kulcskezelőben kezelhető; az alkalmazás csak a kész hash értéket kaphatja meg.
+- A pszeudonimizált szavazói kulcshoz szükséges operatív titkok csak az erre kijelölt szavazási komponens számára lehetnek hozzáférhetők.
 - A HMAC kampány-mesterkulcs nem tárolható `.env` fájlban, alkalmazáskonfigurációban vagy CI/CD változóban; a kulcsszármaztatást KMS/Vault Transit jellegű szolgáltatás védi, a szavazási útban pedig rövid élettartamú kampánykulcs használható.
 - A publikus API-kat dedikált gateway védi; a gateway JWT elővalidálása nem helyettesíti a domain szintű jogosultsági döntéseket.
 - A személyes adatok kezelésénél az adatminimalizálás és célhoz kötöttség elvét kell követni.

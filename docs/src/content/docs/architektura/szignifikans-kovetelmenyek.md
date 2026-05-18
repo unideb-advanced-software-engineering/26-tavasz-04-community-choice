@@ -40,9 +40,10 @@ A rendszerben egy felhasználó egy adott ötletre csak egyszer szavazhat (F-SZ-
 * A megváltoztathatatlanság nem csak alkalmazásszintű tiltás: adatbázis-szintű jogosultság- és műveletkorlátozás (append-only tárolás, UPDATE/DELETE tiltás) szükséges.
 * A szavazás titkossága és a duplikációellenőrzés egyszerre csak pszeudonimizált, determinisztikus szavazói kulccsal kezelhető konzisztensen; teljes anonimitás mellett nem lenne megbízható a duplikált szavazatok kizárása.
 * A kampány közbeni lakcímváltozás nem nyithat új jogosultsági körzetet ugyanabban a futó kampányciklusban; ezt jogosultsági pillanatkép és a Zamunda One-ból lekérhető lakcím-módosítási dátum/időbélyeg védi, amennyiben a Zamunda One API ilyen metaadatot biztosít.
+* A jogosultsági pillanatképben tárolt felhasználóazonosító-hash csak védett kulcskezeléssel képezhető; a hash képzéséhez használt titok nem kerülhet az alkalmazás memóriájába, konfigurációjába vagy naplóiba.
 * A szavazat elsődleges igazságforrása a PostgreSQL tranzakciós tároló; az audit és értesítés aszinkron eseményfolyamon keresztül történik, hogy ne lassítsa a szavazás szinkron útját.
 * A szavazati rekord és az audit/integrációs esemény kapcsolatát transactional outbox + outbox relay minta garantálja, nem best-effort alkalmazásszintű publikálás.
-* A HMAC kampány-mesterkulcs kezelése KMS/Vault Transit jellegű külső szolgáltatásban történik, a szavazási kritikus útban pedig rövid élettartamú kampánykulcs használható, hogy a KMS ne legyen per-request szűk keresztmetszet.
+* A pszeudonimizált szavazói kulcshoz használt kampánytitok dedikált külső kulcskezelésben él, a szavazási kritikus útban pedig rövid élettartamú operatív kulcs használható, hogy a kulcskezelő ne legyen per-request szűk keresztmetszet.
 * A szavazási hajrában a PostgreSQL írási út védelme PgBouncer poololást és `campaign_id` szerinti szavazati particionálást igényel.
 * A publikus API-forgalmat dedikált, implementációfüggetlen Ingress/API Gateway védi, hogy a TLS termináció, a durva rate limiting és a JWT elővalidálás ne a NestJS BFF nyers internetes belépési pontján fusson.
 

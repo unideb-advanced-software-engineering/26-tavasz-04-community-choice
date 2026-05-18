@@ -30,7 +30,7 @@ Ez a fókusznézet csak a szavazás kritikus integritási láncát mutatja. A Sz
 1. a szavazati rekordot,
 2. az outbox eseményt.
 
-Az outbox relay worker olvassa az outbox rekordokat `SELECT ... FOR UPDATE SKIP LOCKED` stratégiával, majd publikálja a `vote-cast-events` tartós streambe. Így ha a broker vagy a hálózat átmenetileg hibázik, a szavazati commit nem vész el, és az audit esemény később pótolható. A KMS/Vault Transit a kampány-mesterkulcsot és a rövid élettartamú kulcsok származtatását védi, a PgBouncer pedig az adatbázis-kapcsolatok kontrollját biztosítja.
+Az outbox relay worker olvassa az outbox rekordokat `SELECT ... FOR UPDATE SKIP LOCKED` stratégiával, majd publikálja a `vote-cast-events` tartós streambe. Így ha a broker vagy a hálózat átmenetileg hibázik, a szavazati commit nem vész el, és az audit esemény később pótolható. A kulcskezelő a jogosultsági hash és a szavazói kulcs képzéséhez használt titkokat védi, a PgBouncer pedig az adatbázis-kapcsolatok kontrollját biztosítja.
 
 <LikeC4View viewId="voteIntegrity" />
 
@@ -45,7 +45,7 @@ Ez a fókusznézet azt mutatja, hogyan kerülnek a nagy médiafájlok a backend 
 A komponens szintű nézetek részletezik az egyes konténerek belső működését és felelősségi köreit.
 
 ### Szavazási szolgáltatás
-Ez a szolgáltatás felel a jogosult, pszeudonimizált és megváltoztathatatlan szavazatok rögzítéséért. Tartalmazza a Zamunda One klienst, amely a lakcímet és - ha az API támogatja - a lakcím-módosítási dátumot/időbélyeget kéri le, valamint a Jogosultságkezelőt, amely a `campaign_eligibility` pillanatképet ellenőrzi vagy létrehozza. A szolgáltatás rövid élettartamú kampánykulcsból és a jogosultsági pillanatkép kontextusából pszeudonimizált szavazói kulcsot képez, majd a szavazatot PostgreSQL-ben, csak hozzáfűzhető szavazati tranzakciónaplóban tárolja.
+Ez a szolgáltatás felel a jogosult, pszeudonimizált és megváltoztathatatlan szavazatok rögzítéséért. Tartalmazza a Zamunda One klienst, amely a lakcímet és - ha az API támogatja - a lakcím-módosítási dátumot/időbélyeget kéri le, valamint a Jogosultságkezelőt, amely a `campaign_eligibility` pillanatképet ellenőrzi vagy létrehozza. Új pillanatkép létrehozásakor a rendszer a nyers Zamunda One azonosítóból védett hash értéket képez, és csak ezt tárolja. A szolgáltatás a jogosultsági pillanatkép kontextusából pszeudonimizált szavazói kulcsot képez, majd a szavazatot PostgreSQL-ben, csak hozzáfűzhető szavazati tranzakciónaplóban tárolja.
 Az audit esemény a szavazattal együtt outbox rekordként jön létre, így a broker vagy hálózat hibája nem tudja elszakítani a szavazati commitot az auditfolyamtól.
 
 <LikeC4View viewId="compVoting" />

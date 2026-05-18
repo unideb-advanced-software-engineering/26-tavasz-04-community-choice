@@ -57,11 +57,14 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 - **Lakcím-módosítási dátum/időbélyeg (`address_updated_at` jellegű mező):** A Zamunda One API-ból feltételezetten lekérhető metaadat, amely a polgár állandó lakcímének utolsó hivatalos módosítási időpontját jelzi. Ha a Zamunda One nem ilyen néven vagy nem ilyen formában adja, ekvivalens hivatalos lakcím-érvényességi adat szükséges a kampányidőszak alatti spekulatív átjelentkezések kiszűréséhez.
 - **GDPR:** Adatvédelmi megfelelési keret; a dokumentációban személyes adatok minimalizálásával és pszeudonimizálással kapcsolódik.
 - **Pszeudonimizálás:** Személyes azonosítók helyettesítése visszafejtés nélkül nem egyértelmű kulccsal; itt a duplikáció-ellenőrzés mellett védi a szavazók személyazonosságát.
-- **HMAC secret / HMAC kulcs:** Titok, amellyel determinisztikus pszeudonim (`voter_key`) képezhető; a kampány-mesterkulcs KMS/Vault Transit jellegű szolgáltatásban kezelendő, nem alkalmazáskonfigurációban.
+- **Felhasználóazonosító-hash (`user_id_hash`):** A `campaign_eligibility` táblában tárolt pszeudonim azonosító. Alapja a Zamunda One stabil felhasználói azonosítója, de a nyers azonosító nem kerül tartós tárolóba.
+- **Pepper:** Titkos, rendszerszintű HMAC kulcsanyag, amely nem tárolható az alkalmazásban. A jogosultsági pillanatképhez használt pepper dedikált kulcskezelőben él.
+- **Jogosultsági HMAC titok:** A `campaign_eligibility.user_id_hash` képzésére használt dedikált kulcsanyag; a NestJS alkalmazás csak a kész HMAC értéket kapja vissza, magát a titkot nem.
+- **HMAC secret / HMAC kulcs:** Titok, amellyel determinisztikus pszeudonim (`user_id_hash` vagy `voter_key`) képezhető; a jogosultsági és kampányszintű HMAC titkok dedikált kulcskezelőben kezelendők, nem alkalmazáskonfigurációban.
 - **Rövid élettartamú kampánykulcs:** Rövid élettartamú, pod memóriájában tartott operatív HMAC kulcs, amely kampányhoz és kulcsverzióhoz kötött, és nem írható lemezre vagy logba.
 - **HKDF:** Kulcsszármaztatási minta, amellyel egy védett mesterkulcsból kontextushoz kötött, elkülönített operatív kulcs képezhető.
 - **KMS (Key Management Service):** Dedikált kulcskezelő szolgáltatás, amely a kriptográfiai kulcsokat központilag védi és auditálja.
-- **Vault Transit:** HashiCorp Vault secrets engine, amely kriptográfiai műveleteket végezhet anélkül, hogy az alkalmazás kiolvasná a nyers kulcsot.
+- **Vault Transit:** HashiCorp Vault secrets engine, amely kriptográfiai műveleteket, például HMAC-képzést végezhet anélkül, hogy az alkalmazás kiolvasná a nyers kulcsot.
 - **Key rotation / Kulcsrotáció:** Kulcs vagy kulcsverzió cseréje; itt kampányonkénti HMAC kulcs/key version használatával csökkenti egy kompromittált kulcs hatókörét.
 - **Szavazati tranzakciónapló:** Csak hozzáfűzhető szavazati tároló; UPDATE/DELETE tiltással támogatja a megmásíthatatlanságot.
 - **UNIQUE constraint:** Adatbázis-szintű egyediségi szabály; itt a „egy ötletre egy szavazat” követelmény technológiai garanciája.
