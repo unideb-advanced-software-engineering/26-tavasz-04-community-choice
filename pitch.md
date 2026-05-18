@@ -1,31 +1,51 @@
-Pitch szöveg
+Amikor szoftvert tervezünk, általában a funkciókra fókuszálunk: mit tudjon a rendszer, hogyan nézzen ki. Azonban amikor a Zamunda Digitális Reneszánsz program részeként a Community Choice közösségi javaslattételi és szavazási platformot terveztük, egy ennél sokkal nehezebb kérdéssel találtuk szembe magunkat.
 
-Szoftvertervezés tárgy keretében a Community Choice rendszert terveztük meg. Ez egy közösségi javaslattételi és szavazási platform a Zamunda Digitális Reneszánsz programhoz.
+A kérdés az volt: hogyan építsünk be technológiai szinten egy olyan fogalmat, mint a bizalom?
 
-A rendszer célja egyszerű: a lakosok helyi fejlesztési ötleteket tudjanak beküldeni, majd a saját lakóhelyükhöz tartozó kampányokban hitelesen szavazhassanak.
+[Rövid szünet – kontaktus a hallgatósággal]
 
-A tervezés során négy területet kezeltünk meghatározóként: a szavazási integritást, a jogosultságkezelést, az alacsony sávszélességű működést és a célzott skálázhatóságot. Ezek alapján a rendszer fő kérdése nem az volt, hogy hogyan lehet ötleteket beküldeni és listázni, hanem az, hogy egy közbizalmi környezetben működő döntéstámogató platform milyen garanciákat igényel.
+Egy állami, közbizalmi környezetben működő döntéstámogató platform nem engedhet meg magának kompromisszumokat. Ha a lakosok azt érzik, hogy a szavazatuk elveszhet, manipulálható, vagy hogy a rendszerrel vissza lehet élni, a platform elveszíti a létjogosultságát. Emellett a ZDR program szigorú kereteket is szabott: a rendszernek klímabarátnak, takarékosnak és a gyenge hálózatokon is robusztusnak kell lennie.
 
-Az első ilyen garancia a szavazatok integritása. A dokumentációban abból indultunk ki, hogy a leadott szavazat nem lehet utólag módosítható vagy törölhető, és az egy ötletre vonatkozó ismételt szavazást nem elég alkalmazásszinten tiltani. Ezt architekturális szinten is védeni kell, elsődlegesen erős konzisztenciát adó, tranzakciós adattárolással és adatbázis-szintű egyediségi szabályokkal.
+[Az architekturális alapok – kb. 1.5 perc]
 
-A második fontos döntési pont az adatvédelem és az ellenőrizhetőség egyensúlya volt. A teljes anonimitás nem illeszkedik a duplikált szavazás kizárásához, a nyers személyes azonosító tárolása viszont adatvédelmi szempontból túl erős kitettséget jelentene. Ezért pszeudonimizált szavazói kulcsot javasoltunk: olyan megoldási irányt, amely támogatja az ismételt szavazás kizárását, de nem köti közvetlen személyes azonosítóhoz a szavazati rekordot.
+Ezek a peremfeltételek vezéreltek minket az architekturális stílus kiválasztásakor. A tiszta monolitikus megközelítést elvetettük, mert egy kampányzárás utolsó órájában, amikor a szavazási forgalom ugrásszerűen megnő, a teljes rendszer horizontális skálázása indokolatlanul nagy erőforrás-pazarlással járna. Ugyanakkor a teljes mikroszolgáltatásos architektúrát is elvetettük – a hálózati többlet, az elosztott tranzakciók kezelése és a komplex üzemeltetés szembement volna a takarékossági elvárásokkal.
 
-A harmadik döntési pont a kritikus és nem kritikus folyamatok szétválasztása volt. A szavazat rögzítése szinkron, konzisztens és rövid kritikus útvonalat igényel. Ezzel szemben az audit, az értesítés és a médiafeldolgozás leválasztható háttérfolyamat. Ezért a dokumentációban eseményvezérelt kiegészítést javasoltunk ezekre a területekre. Konkrét technológiaként Kafka-jellegű eseményfolyam-platform szerepelhet, de a döntés lényege nem a termékválasztás, hanem a felelősségek szétválasztása.
+Így jutottunk el a Hibrid Service-Based és Event-Driven (SBA + EDA) architektúrához.
 
-A médiafeltöltésnél ugyanez a gondolkodás jelent meg. A nagy bináris állományok kezelése nem terhelheti a fő backend útvonalakat, és nem akadályozhatja a szavazási vagy pályázatböngészési funkciókat. Ezért objektumtár-alapú, darabolt és folytatható feltöltési irányt javasoltunk, aszinkron médiaoptimalizálással. Ez egyszerre támogatja a robusztusságot, az alacsony sávszélességű használhatóságot és az erőforrás-takarékosságot.
+A koncepciónk lényege az arányosság: a kritikus, erős konzisztenciát igénylő folyamatokat – mint maga a szavazás rögzítése – makroszolgáltatásokba zártuk, közös tranzakciós adatbázissal. A nehézkes, időigényes, de szinkron választ nem igénylő feladatokat – mint a médiafeldolgozás vagy az értesítések küldése – pedig eseményvezérelt háttérfolyamatokra bíztuk.
 
-Az architekturális stílus kiválasztásánál az arányosság volt a fő szempont. A teljes mikroszolgáltatásos megközelítést túlzott üzemeltetési és hálózati komplexitásnak tartottuk az esettanulmányhoz képest. A tiszta monolit egyszerűbb lenne, de a szavazási csúcsterhelés célzott kezelését gyengébben támogatná. A moduláris monolit erős alternatíva, de a futtatási és skálázási határok kevésbé választhatók szét.
+[Szünet, hogy az architektúra koncepciója rögzüljön]
 
-Ezért jutottunk el a hibrid Service-Based Architecture és Event-Driven Architecture kombinációjához. A javasolt irányban a szavazás, a pályázatkezelés és az adminisztratív képességek szolgáltatási határok mentén elkülöníthetők, miközben a rendszer nem válik indokolatlanul sok apró, drágán üzemeltethető mikroszolgáltatásból álló struktúrává. Az eseményvezérelt rész pedig azokat a folyamatokat kezeli, ahol a laza csatolás és az aszinkron feldolgozás valódi előnyt jelent.
+Engedjék meg, hogy bemutassak három olyan kritikus architekturális döntést, ahol a hagyományos megközelítések elbuktak volna, és ahol nekünk kellett új utakat keresni.
 
-A dokumentációban ezt a logikát igyekeztünk végig következetesen felépíteni. Az SRS rögzíti a működési és minőségi követelményeket, az architekturális karakterisztikák kijelölik a fő tervezési prioritásokat, az ASR-ek elkülönítik a valóban architektúrát formáló követelményeket, a stílusválasztás pedig bemutatja az elvetett és elfogadott irányokat.
+[1. Pillér: Az időbeli autorizáció és a Választási Névjegyzék – kb. 1.5 perc]
 
-Az ADR-ekben a fő döntéseket külön is dokumentáltuk: a hibrid architektúrát, a service-based megközelítést, az eseményvezérelt háttérfolyamatokat, az üzenetbroker lehetséges kiválasztását, valamint a szavazatok integritásának és pszeudonimizált tárolásának döntését. A C4 modell ezekhez vizuális szerkezeti nézetet ad, az implementációs javaslatok pedig elkülönítik a lehetséges technológiai irányokat a követelményektől.
+Az első ilyen probléma a lakcím-alapú jogosultság volt. A szabály egyszerű: csak az adott önkormányzat lakója szavazhat. De mi történik akkor, ha egy lakos a 30 napos kampányidőszak közepén átjelentkezik egy másik kerületbe?
 
-Fontosnak tartottuk, hogy a technológiák ne végleges implementációs vállalásként jelenjenek meg. A dokumentációban például PostgreSQL-jellegű tranzakciós adatbázis, Kafka-jellegű eseményfolyam, Redis-jellegű gyorsítótár vagy S3-kompatibilis objektumtár lehetséges opcióként szerepel. Ezek nem önálló célok, hanem a megfogalmazott architekturális problémákra adott indokolt technológiai irányok.
+Ha a rendszert dinamikusan ellenőrzi a lakcímet minden szavazásnál, a lakos mindkét kerületben szavazhatna. A korábbi szavazatait viszont nem törölhetjük, mert az sérti a szavazatok megváltoztathatatlanságának elvét.
 
-Összességében a Community Choice-ra egy olyan architekturális tervet javasoltunk, amely a szavazási integritást erős konzisztenciával védi, a személyesadat-kitettséget pszeudonimizálással csökkenti, a háttérfolyamatokat leválasztja a kritikus útvonalakról, és a skálázást nem általánosan, hanem célzottan kezeli.
+Ezt a feloldhatatlan ellentmondást egy úgynevezett Jogosultsági Pillanatkép (Eligibility Snapshot) bevezetésével kezeltük. Ez gyakorlatilag egy digitális választási névjegyzék. Amikor a felhasználó a kampány során először interakcióba lép a platformmal, a rendszer rögzíti a jogosultságát, figyelembe véve a Zamunda One által biztosított utolsó lakcím-módosítási időbélyeget is. Ezzel architekturális szinten zártuk ki a kampányidőszak alatti, spekulatív átjelentkezésekből fakadó visszaéléseket.
 
-A fő eredményünk tehát nem egy konkrét technológiai stack kijelölése, hanem egy követhető döntési lánc: az esettanulmányból azonosított minőségi elvárásokból vezettük le az architekturális karakterisztikákat, azokból az ASR-eket, majd ezek alapján a stílusválasztást, a C4 modellt és az ADR-eket.
+[2. Pillér: GDPR és a Paranoiás Pszeudonimizáció – kb. 1.5 perc]
 
-Köszönjük a figyelmet, várjuk a kérdéseket.
+A második komoly kihívás az adatvédelem volt. Annak érdekében, hogy a duplikált szavazatokat az adatbázis technológiailag, egy UNIQUE szabállyal is blokkolni tudja, szükségünk volt egy szavazói azonosítóra. A nyers személyes adatokat természetesen nem tárolhatjuk.
+
+De a sima kriptográfiai hash-elés (például SHA-256) önmagában nem elég biztonságos. Ha az adatbázis véletlenül kiszivárog, a hash-ek úgynevezett Rainbow Table-ök segítségével, nyers számítási kapacitással gyorsan visszafejthetők lennének.
+
+[Enyhe hangsúlyváltás, egy picit lassabb tempó]
+
+Ezért a rendszerbe bevezettünk egy dedikált Kulcskezelő Szolgáltatást (KMS). A felhasználói azonosítókat egy úgynevezett Globális Pepperrel titkosítjuk, amely soha, egyetlen pillanatra sem hagyja el a kulcskezelő biztonságos memóriáját, és sosem kerül be az adatbázisba. Így a szavazati adatbázis még a legrosszabb forgatókönyv – egy teljes adatszivárgás – esetén is csak értelmezhetetlen, visszafejthetetlen adatsor marad a támadók számára.
+
+[3. Pillér: Az Audit és a Dual-Write probléma – kb. 1 perc]
+
+A harmadik terület az auditálhatóság kérdése volt. A rendszer minden szavazatról eseményt küld egy tartós, visszajátszható eseményfolyamba (brokerbe). De itt egy klasszikus elosztott rendszerbeli problémával, a Dual-Write anomáliával szembesültünk: mi van, ha a szavazat sikeresen bekerül a fő adatbázisba, de a hálózat abban a pillanatban megszakad, és az audit esemény sosem jut el a brokerbe?
+
+A megoldásunk a Transactional Outbox és a CDC (Change Data Capture) minta alkalmazása volt. A szavazatot és az audit eseményt a szolgáltatásunk egyetlen felbonthatatlan adatbázis-tranzakcióban rögzíti. Ezt a tranzakciós naplót figyeli egy független, háttérben futó CDC komponens, amely garantálja, hogy az esemény – hálózati szakadás esetén akár egy perccel később is, de – biztosan kikerül az audit rendszerbe. Nincs elveszett szavazat, nincs elveszett nyom.
+
+[Összegzés és Zárás – kb. 0.5 perc]
+
+Tisztelt Zsűri!
+
+Amikor a Community Choice dokumentációját összeállítottuk, arra törekedtünk, hogy a végeredmény ne egy felszínes technológiai kívánságlista legyen. Minden architekturális döntésünket (ADR) visszavezettük az esettanulmányból fakadó szignifikáns követelményekre. Legyen szó a szavazási csúcsokat védő adatbázis-particionálásról, adat védelem vagy az eseményvezérelt aszinkron médiafeldolgozásról.
+
+Úgy véljük, hogy a Community Choice nem csupán egy egyetemi vizsgamunka. Ezzel az architekturális alappal és egy kis célzott továbbdolgozással a koncepció akár egy valódi, éles állami környezetben működő projektté is ki tudna alakulni – biztosítva egy transzparens és manipulálhatatlan digitális demokráciát.
