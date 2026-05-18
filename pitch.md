@@ -42,10 +42,6 @@ A harmadik terület az auditálhatóság kérdése volt. A rendszer minden szava
 
 A megoldásunk a Transactional Outbox és a CDC (Change Data Capture) minta alkalmazása volt. A szavazatot és az audit eseményt a szolgáltatásunk egyetlen felbonthatatlan adatbázis-tranzakcióban rögzíti. Ezt a tranzakciós naplót figyeli egy független, háttérben futó CDC komponens, amely garantálja, hogy az esemény – hálózati szakadás esetén akár egy perccel később is, de – biztosan kikerül az audit rendszerbe. Nincs elveszett szavazat, nincs elveszett nyom.
 
-[Összegzés és Zárás – kb. 0.5 perc]
-
-Tisztelt Zsűri!
-
 Amikor a Community Choice dokumentációját összeállítottuk, arra törekedtünk, hogy a végeredmény ne egy felszínes technológiai kívánságlista legyen. Minden architekturális döntésünket (ADR) visszavezettük az esettanulmányból fakadó szignifikáns követelményekre. Legyen szó a szavazási csúcsokat védő adatbázis-particionálásról, adat védelem vagy az eseményvezérelt aszinkron médiafeldolgozásról.
 
 Úgy véljük, hogy a Community Choice nem csupán egy egyetemi vizsgamunka. Ezzel az architekturális alappal és egy kis célzott továbbdolgozással a koncepció akár egy valódi, éles állami környezetben működő projektté is ki tudna alakulni – biztosítva egy transzparens és manipulálhatatlan digitális demokráciát.
