@@ -19,9 +19,18 @@ A konténerszint megmutatja a rendszer futtatható egységeit és adatáramlási
 
 A médiafeltöltési útvonalon a webes kliens nem küld nagy bináris állományt a backend API-n keresztül. A lakossági felület presigned S3-kompatibilis feltöltési URL-t kér, közvetlenül a nyers média bucketbe tölt, majd a backend csak objektumhivatkozást és metaadatot publikál a médiafeldolgozási streambe.
 
-A szavazási út külön kezelendő: a Szavazási szolgáltatás nem publikál közvetlenül brokerbe, hanem a szavazattal egy PostgreSQL tranzakcióban outbox eseményt ír. A Debezium/CDC relé olvassa ezt ki és publikálja a szavazási audit streambe. A KMS/Vault Transit a `voter_key` HMAC műveletet védi, a PgBouncer pedig az adatbázis-kapcsolatok kontrollját biztosítja.
-
 <LikeC4View viewId="containers" />
+
+## Szavazási integritás és audit eseménykibocsátás
+
+Ez a fókusznézet csak a szavazás kritikus integritási láncát mutatja. A Szavazási szolgáltatás nem végez közvetlen broker-publikálást. Egyetlen PostgreSQL tranzakcióban írja:
+
+1. a szavazati rekordot,
+2. az outbox eseményt.
+
+A CDC outbox relé olvassa az outbox változást, majd publikálja a `vote-cast-events` tartós streambe. Így ha a broker vagy a hálózat átmenetileg hibázik, a szavazati commit nem vész el, és az audit esemény később pótolható. A KMS/Vault Transit a `voter_key` HMAC műveletet védi, a PgBouncer pedig az adatbázis-kapcsolatok kontrollját biztosítja.
+
+<LikeC4View viewId="voteIntegrity" />
 
 ## Komponensdiagramok
 

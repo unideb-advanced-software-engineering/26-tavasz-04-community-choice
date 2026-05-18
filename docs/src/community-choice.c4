@@ -42,7 +42,7 @@ specification {
 		}
 	}
 
-	element topic {
+	element stream {
 		style {
 			shape queue
 			color red
@@ -143,7 +143,7 @@ model {
 			style { color indigo; icon tech:nestjs }
 		}
 
-		votingService = service 'Szavazási szolgáltatás' 'Node.js/NestJS alapú, önállóan skálázható szavazási szolgáltatás. Felelős a Zamunda One-ból származó hitelesített lakcímadat alapján végzett szavazási jogosultságellenőrzésért, a KMS/Vault Transit segítségével képzett pszeudonimizált szavazói kulcsért, az egy ötletre egyszeri szavazás kikényszerítéséért, valamint a szavazat PostgreSQL-ben történő, csak hozzáfűzhető tranzakciós rögzítéséért. A szavazat elsődleges igazságforrása a PostgreSQL, nem az event stream. A szolgáltatás nem publikál közvetlenül brokerbe: a szavazati rekorddal egy tranzakcióban outbox eseményt ír, amelyet CDC relé publikál. Nem felelős kampányok létrehozásáért, ötletek moderálásáért, médiafeldolgozásért vagy értesítések kézbesítéséért.' 'Node.js + NestJS' {
+		votingService = service 'Szavazási szolgáltatás' 'Node.js/NestJS alapú, önállóan skálázható szavazási szolgáltatás. Felelős a Zamunda One-ból származó hitelesített lakcímadat alapján végzett szavazási jogosultságellenőrzésért, a KMS/Vault Transit segítségével képzett pszeudonimizált szavazói kulcsért, az egy ötletre egyszeri szavazás kikényszerítéséért, valamint a szavazat PostgreSQL-ben történő, csak hozzáfűzhető tranzakciós rögzítéséért. A szavazat elsődleges igazságforrása a PostgreSQL, nem az event stream. A szolgáltatás nem publikál közvetlenül brokerbe: szavazati rekordot és outbox eseményt ír egy tranzakcióban. Nem felelős kampányok létrehozásáért, ötletek moderálásáért, médiafeldolgozásért vagy értesítések kézbesítéséért.' 'Node.js + NestJS' {
 			style { color green; icon tech:nestjs }
 
 			votingController = component 'Szavazási vezérlő' 'Kezeli a gateway felől érkező szavazási kéréseket' 'NestJS vezérlő'
@@ -177,15 +177,15 @@ model {
 			uploadUrlIssuer -> eventPublisher 'Feltöltés kész esemény előkészítése'
 		}
 
-		mediaProcessingRequests = topic 'media-processing-requests stream' 'Tartós stream médiafeldolgozási kérésekhez. Csak objektumtárbeli hivatkozást, metaadatokat és feldolgozási paramétereket tartalmaz; nagy kép- vagy videófájl nem kerül az üzenetbe. A streamet a Pályázat- és adminisztrációkezelő szolgáltatás publikálja, a Médiafeldolgozó háttérfolyamat fogyasztja.' 'NATS JetStream / Kafka stream' {
+		mediaProcessingRequests = stream 'media-processing-requests stream' 'Tartós stream médiafeldolgozási kérésekhez. Csak objektumtárbeli hivatkozást, metaadatokat és feldolgozási paramétereket tartalmaz; nagy kép- vagy videófájl nem kerül az üzenetbe. A streamet a Pályázat- és adminisztrációkezelő szolgáltatás publikálja, a Médiafeldolgozó háttérfolyamat fogyasztja.' 'NATS JetStream / Kafka stream' {
 			style { color red }
 		}
 
-		voteCastEvents = topic 'vote-cast-events stream' 'Tartós stream szavazatleadási audit és integrációs eseményekhez. A Szavazási szolgáltatás nem publikálja közvetlenül; a PostgreSQL tranzakcióban írt outbox eseményt Debezium vagy kompatibilis CDC relé juttatja ide. Nem a szavazatok elsődleges igazságforrása.' 'NATS JetStream / Kafka stream' {
+		voteCastEvents = stream 'vote-cast-events stream' 'Tartós stream szavazatleadási audit és integrációs eseményekhez. A Szavazási szolgáltatás nem publikálja közvetlenül; a PostgreSQL tranzakcióban írt outbox eseményt Debezium vagy kompatibilis CDC relé juttatja ide. Nem a szavazatok elsődleges igazságforrása.' 'NATS JetStream / Kafka stream' {
 			style { color red }
 		}
 
-		campaignEvents = topic 'campaign-events stream' 'Tartós stream kampány-, ötlet- és adminisztratív domain eseményekhez, például pályázatnyitás, szakaszváltás, ötletbeküldés vagy moderációs döntés. Az Auditnaplózó és az Értesítési szolgáltatás egymástól független fogyasztóként olvassa.' 'NATS JetStream / Kafka stream' {
+		campaignEvents = stream 'campaign-events stream' 'Tartós stream kampány-, ötlet- és adminisztratív domain eseményekhez, például pályázatnyitás, szakaszváltás, ötletbeküldés vagy moderációs döntés. Az Auditnaplózó és az Értesítési szolgáltatás egymástól független fogyasztóként olvassa.' 'NATS JetStream / Kafka stream' {
 			style { color red }
 		}
 
@@ -266,7 +266,7 @@ model {
 		notificationService -> pushApi 'Push értesítés küldése' '' 'Web Push / HTTP API'
 		votingService -> zamundaOne 'Lakcím és jogosultság ellenőrzése' '' 'REST API'
 		votingService -> kms 'HMAC művelet kérése kampánykulccsal' '' 'Vault/KMS API'
-		votingService -> dbPooler 'Szavazatot és outbox eseményt ír/olvas' '' 'PostgreSQL wire protocol'
+		votingService -> dbPooler 'Szavazat + outbox esemény írása egy tranzakcióban' '' 'PostgreSQL wire protocol'
 		campaignAdminService -> dbPooler 'Pályázatokat, ötleteket és admin adatokat ír/olvas' '' 'PostgreSQL wire protocol'
 		auditService -> dbPooler 'Auditnaplót ír' '' 'PostgreSQL wire protocol'
 		dbPooler -> database 'Korlátozott backend kapcsolatok' '' 'PostgreSQL wire protocol'
@@ -290,6 +290,20 @@ views {
 	view containers of cc {
 		title 'Community Choice - konténerdiagram'
 		include *
+	}
+
+	view voteIntegrity {
+		title 'Community Choice - szavazási integritás és audit eseménykibocsátás'
+		include zamundaOne
+		include kms
+		include cc.apiGateway
+		include cc.votingService
+		include cc.dbPooler
+		include cc.database
+		include cc.cdcRelay
+		include cc.voteCastEvents
+		include cc.auditService
+		include cc.notificationService
 	}
 
 	view compVoting of cc.votingService {
