@@ -45,7 +45,9 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 - **Layered / Pipeline / Microkernel / Space-Based:** Mérlegelt, de a projekt céljaival (elaszticitás, integritás, költség) ütköző stílusok a dokumentáció indoklása szerint.
 - **Domain esemény (domain event):** Üzleti jelentésű történés (pl. „szavazat leadva”), amelyet a szolgáltatások publikálnak az aszinkron feldolgozáshoz.
 - **Worker (háttérfolyamat):** Aszinkron feldolgozó komponens (pl. videótömörítés), amely eseményeket fogyaszt és CPU-intenzív munkát végez.
-- **Outbox minta (outbox pattern):** Megközelítés a DB-tranzakció és az eseménypublikálás konzisztens összekötésére (pl. PostgreSQL ↔ Kafka), ha a megbízható eseménykibocsátás kritikus.
+- **Transactional outbox / Outbox minta:** Megközelítés a DB-tranzakció és az eseménypublikálás konzisztens összekötésére; a szavazási auditfolyamban kötelező, mert a szavazati rekord és az outbox esemény egy PostgreSQL tranzakcióban jön létre.
+- **CDC (Change Data Capture):** Adatbázis-változások olvasása a tranzakciós naplóból vagy outbox táblából, hogy az események alkalmazásszintű dual-write nélkül kerüljenek streambe.
+- **Debezium:** CDC eszköz, amely PostgreSQL változásokat olvashat és tartós event streambe publikálhat.
 
 ## Adatkezelés, biztonság, integritás
 
@@ -54,9 +56,13 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 - **Autorizáció:** Jogosultság-ellenőrzés (pl. lakcím alapján szavazhat-e az adott önkormányzatban).
 - **GDPR:** Adatvédelmi megfelelési keret; a dokumentációban személyes adatok minimalizálásával és pszeudonimizálással kapcsolódik.
 - **Pszeudonimizálás:** Személyes azonosítók helyettesítése visszafejtés nélkül nem egyértelmű kulccsal; itt a duplikáció-ellenőrzés mellett védi a szavazók személyazonosságát.
-- **HMAC secret:** Titok, amellyel determinisztikus pszeudonim (`voter_key`) képezhető; üzemeltetésileg kiemelten védendő.
+- **HMAC secret / HMAC kulcs:** Titok, amellyel determinisztikus pszeudonim (`voter_key`) képezhető; a projektben KMS/Vault Transit jellegű szolgáltatásban kezelendő, nem alkalmazáskonfigurációban.
+- **KMS (Key Management Service):** Dedikált kulcskezelő szolgáltatás, amely a kriptográfiai kulcsokat központilag védi és auditálja.
+- **Vault Transit:** HashiCorp Vault secrets engine, amely kriptográfiai műveleteket végezhet anélkül, hogy az alkalmazás kiolvasná a nyers kulcsot.
+- **Key rotation / Kulcsrotáció:** Kulcs vagy kulcsverzió cseréje; itt kampányonkénti HMAC kulcs/key version használatával csökkenti egy kompromittált kulcs hatókörét.
 - **Szavazati tranzakciónapló:** Csak hozzáfűzhető szavazati tároló; UPDATE/DELETE tiltással támogatja a megmásíthatatlanságot.
 - **UNIQUE constraint:** Adatbázis-szintű egyediségi szabály; itt a „egy ötletre egy szavazat” követelmény technológiai garanciája.
+- **Particionálás:** Nagy táblák logikai/fizikai felosztása, például a szavazati tranzakciónapló `campaign_id` szerinti bontása kisebb indexek és kezelhetőbb csúcsidős írások érdekében.
 - **Tranzakció:** Adatbázis-műveletek atomi egysége; a szavazat rögzítése szinkron, tranzakcióban történik.
 - **Eventual consistency:** Aszinkron feldolgozásból adódó késleltetett konzisztencia; pl. auditnaplóba kerülés nem azonnali.
 
@@ -85,15 +91,24 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 - **Redis / Memcached:** Szerveroldali memóriagyorsítótár jelöltek; a dokumentáció publikus, ritkán változó adatok cache-elésére említi.
 - **CDN (Content Delivery Network):** Opcionális multimédia gyorsítóréteg; csökkentheti az origin terhelést és a hálózati költséget, ha a forgalmi adatok indokolják.
 - **Edge caching:** CDN peremcsomópontokon történő cache-elés; alacsony sávszélesség és magas késleltetés mellett hasznos lehet.
-- **Apache Kafka:** Eseményfolyam-platform; itt audit/integrációs célú, tartósan megőrzött domain eseményekkel.
-- **Topic:** Kafka logikai csatorna az események számára (pl. „vote-cast” jellegű események).
-- **Partition:** Kafka topic felosztása párhuzamos feldolgozásra és skálázásra.
+- **Event stream / Tartós stream:** Visszajátszható eseményfolyam audit, értesítés és médiafeldolgozás céljára; technológiai profilja NATS JetStream vagy Kafka lehet.
+- **NATS JetStream:** NATS tartós stream rétege; a projekt induló, takarékos brokerprofiljának jelöltje replay és at-least-once kézbesítés támogatásával.
+- **Apache Kafka:** Eseményfolyam-platform; a projektben országos/nagy audit-replay vagy sok fogyasztós profilnál indokolt broker opció.
+- **Topic / Stream:** Logikai csatorna az események számára (pl. „vote-cast” jellegű események).
+- **Partition:** Kafka topic felosztása párhuzamos feldolgozásra és skálázásra; NATS JetStream profilban más fogalmi és skálázási beállítások érvényesek.
 - **Consumer group:** Fogyasztók csoportja, amely együtt olvas egy topicot úgy, hogy egy partíciót egyszerre csak egy consumer kezeljen.
 - **Offset:** A consumer által olvasott pozíció; visszatekerhető a visszajátszáshoz (audit/újrafeldolgozás).
 - **KRaft:** Kafka beépített konszenzus/metadata rétege (ZooKeeper nélkül); üzemeltetési fogalom az ADR-ben.
 - **RabbitMQ:** Alternatív üzenetközvetítő jelölt; a dokumentáció szerint visszajátszható, tartós eseménytörténethez kevésbé illeszkedik.
 - **Redis Streams:** Alternatív streaming jelölt; könnyűsúlyú, de nagy volumenű tartós eseménytárolásra kevésbé optimális.
-- **pgmq:** PostgreSQL-re épülő üzenetsor; takarékos alternatíva lehet kisebb event volume mellett, de a tranzakciós adatbázis felelősségét növeli.
+- **pgmq:** PostgreSQL-re épülő üzenetsor; takarékos alternatíva lehet kisebb háttérmunkákhoz, de kritikus szavazási auditfolyamnál nem elsődleges, mert a tranzakciós adatbázis terhét növeli.
+- **PgBouncer:** Könnyű PostgreSQL connection pooler; a szolgáltatások és PostgreSQL közötti kapcsolatszám kontrolljára szolgál.
+
+## Keresés és deduplikáció
+
+- **pgvector:** PostgreSQL kiterjesztés vektoros hasonlósági kereséshez; későbbi opció az ötletduplikációk felismerésére.
+- **RAG (Retrieval-Augmented Generation):** Olyan minta, amely meglévő adatok visszakeresésével támogat generatív vagy ajánló funkciót; itt későbbi, lokális embedding alapú ötlet-ajánlásra merül fel.
+- **Embedding:** Szöveg vektoros reprezentációja, amely hasonló jelentésű ötletek kereséséhez használható.
 
 ## Multimédia és formátumok
 

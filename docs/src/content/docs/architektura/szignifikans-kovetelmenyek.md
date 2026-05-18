@@ -27,7 +27,7 @@ A rendszer kép- és videófeltöltési lehetőséget biztosít az ötletekhez (
 **Miért ASR?**
 
 * A rossz zamundai hálózati lefedettség miatt a nagyméretű médiafájlok feltöltése hagyományos módszerekkel megszakadna, ezért az architektúrának robusztus, darabolt és megszakítás esetén folytatható objektumtár-alapú feltöltési mechanizmust kell biztosítania.
-* A szerveroldali videó- és képtömörítés jelentős és hirtelen CPU-terhelést okoz. Ezt az alaprendszertől független, aszinkron háttérfolyamattal és médiafeldolgozási topiccal kell megtervezni, hogy egy tömeges feltöltési hullám ne lassítsa le a teljes webes felületet és a szavazást.
+* A szerveroldali videó- és képtömörítés jelentős és hirtelen CPU-terhelést okoz. Ezt az alaprendszertől független, aszinkron háttérfolyamattal és médiafeldolgozási streammel kell megtervezni, hogy egy tömeges feltöltési hullám ne lassítsa le a teljes webes felületet és a szavazást.
 * Jelentős hatással van a fájltárolási stratégiára és opcionálisan a CDN-re (Content Delivery Network, tartalomelosztó hálózat): a nyers és optimalizált média külön objektumtárban kezelhető, a CDN pedig csak akkor indokolt, ha a forgalmi és költségadatok alapján megtérül.
 
 ### F-SZ-03, F-SZ-04 és F-SZ-05: Egyedi, megváltoztathatatlan és pszeudonimizált szavazatok
@@ -40,6 +40,9 @@ A rendszerben egy felhasználó egy adott ötletre csak egyszer szavazhat (F-SZ-
 * A megváltoztathatatlanság nem csak alkalmazásszintű tiltás: adatbázis-szintű jogosultság- és műveletkorlátozás (append-only tárolás, UPDATE/DELETE tiltás) szükséges.
 * A szavazás titkossága és a duplikációellenőrzés egyszerre csak pszeudonimizált, determinisztikus szavazói kulccsal kezelhető konzisztensen; teljes anonimitás mellett nem lenne megbízható a duplikált szavazatok kizárása.
 * A szavazat elsődleges igazságforrása a PostgreSQL tranzakciós tároló; az audit és értesítés aszinkron eseményfolyamon keresztül történik, hogy ne lassítsa a szavazás szinkron útját.
+* A szavazati rekord és az audit/integrációs esemény kapcsolatát transactional outbox + CDC minta garantálja, nem best-effort alkalmazásszintű publikálás.
+* A HMAC kulcskezelés KMS/Vault Transit jellegű külső szolgáltatásban történik, kampányonkénti kulccsal vagy kulcsverzióval, hogy egy kulcssérülés hatóköre korlátozott legyen.
+* A szavazási hajrában a PostgreSQL írási út védelme PgBouncer poololást és `campaign_id` szerinti szavazati particionálást igényel.
 
 ## Kapcsolódó, de nem önálló ASR
 

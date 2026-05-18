@@ -100,6 +100,9 @@ A fejlesztés során kötelező a klímabarát és sávszélesség-takarékos te
 - A szavazati rekordok nem tartalmazhatnak nyers személyes azonosítót.
 - A leadott szavazat utólagos módosítását és törlését a rendszernek meg kell akadályoznia.
 - A médiatartalmak kezelésénél sávszélesség- és tárhelytakarékos formátumokat kell használni.
+- A szavazati tranzakció és a hozzá tartozó audit/integrációs esemény között nem lehet alkalmazásszintű dual-write rés; a szavazási auditfolyam transactional outbox + CDC mintával készül.
+- A pszeudonimizált szavazói kulcs képzéséhez használt HMAC kulcsot dedikált KMS/Vault Transit jellegű szolgáltatásban kell kezelni.
+- A szavazási csúcsterhelésnél a PostgreSQL írási út connection poolinggal és kampány szerinti particionálással védendő.
 
 ### 2.6. Felhasználói dokumentáció
 
@@ -137,6 +140,7 @@ A pontos protokollokat és adatszerkezeteket a Zamunda One hivatalos technikai s
 - Az API-válaszokat a hálózati forgalom csökkentése érdekében tömöríteni kell.
 - A pályázati értesítések e-mailben és push notification formában is megvalósíthatók.
 - A fotók és videók feltöltését a rendszernek instabil hálózati kapcsolat esetén is hibatűrő módon kell kezelnie.
+- Az aszinkron audit-, értesítési és médiafeldolgozási kommunikáció tartós event streamen keresztül történik; az induló takarékos profil NATS JetStream, országos/nagy replay profil esetén Kafka.
 
 ## 4. Rendszerfunkciók
 
@@ -253,6 +257,7 @@ A szavazás és a jogosultságkezelés a rendszer legfontosabb integritási ter�
 - **F-SZ-03:** A rendszer lehetővé teszi, hogy egy felhasználó egy pályázaton belül korlátlan számú különböző ötletre szavazzon, de egy konkrét ötletre csak egyetlen szavazatot adhat le.
 - **F-SZ-04:** A rendszer megakadályozza a leadott szavazatok utólagos módosítását és törlését, beleértve az adminisztrátori felületről indított műveleteket is.
 - **F-SZ-05:** A rendszer a szavazatokat pszeudonimizált szavazói kulccsal kapcsolja az ötletekhez. A szavazati rekord nem tartalmaz nyers személyes azonosítót, ugyanakkor a pszeudonim kulcs lehetővé teszi az egy ötletre egyszeri szavazás technológiai ellenőrzését.
+- **F-SZ-06:** A rendszer a sikeresen rögzített szavazathoz tartozó audit/integrációs eseményt ugyanabban a PostgreSQL tranzakcióban outbox rekordként is rögzíti; a tartós event streambe kerülést CDC folyamat biztosítja.
 
 ## 5. Egyéb nemfunkcionális követelmények
 
@@ -278,6 +283,7 @@ A rendszer nem vezérel fizikai biztonságkritikus folyamatot, ezért klasszikus
 - A szavazati rekordok nem tartalmaznak nyers személyes azonosítót.
 - A duplikált szavazat kizárásához a rendszer determinisztikus, pszeudonimizált szavazói kulcsot használ.
 - A pszeudonimizáláshoz szükséges titkok csak az erre kijelölt szavazási komponens számára lehetnek hozzáférhetők.
+- A HMAC kulcs nem tárolható `.env` fájlban, alkalmazáskonfigurációban vagy CI/CD változóban; a kulcsműveletet KMS/Vault Transit jellegű szolgáltatás végzi.
 - A személyes adatok kezelésénél az adatminimalizálás és célhoz kötöttség elvét kell követni.
 
 ### 5.4. Szoftverminőségi attribútumok
@@ -285,13 +291,14 @@ A rendszer nem vezérel fizikai biztonságkritikus folyamatot, ezért klasszikus
 - **Elérhetőség:** a publikus böngészésnek és a szavazásnak szavazási időszakban részleges háttérfolyamat-hiba esetén is működőképesnek kell maradnia.
 - **Hatékonyság:** a publikus listanézetek lapozottak, méretkorlátot teljesítenek és csak a szükséges mezőket adják vissza; a médiatartalmak optimalizált formában kerülnek kiszolgálásra.
 - **Integritás:** a leadott szavazatok utólag nem módosíthatók és nem törölhetők; az egy ötletre egyszeri szavazást a rendszer technológiai garanciával védi.
+- **Auditálhatóság:** a szavazati audit esemény nem best-effort mellékhatás, hanem PostgreSQL tranzakcióhoz kötött outbox + CDC folyamat eredménye.
 - **Biztonság:** a szavazáshoz és ötletbeküldéshez Zamunda One alapú hitelesítés és lakcím-alapú jogosultságellenőrzés szükséges.
 - **Robusztusság:** a médiafeltöltés hálózati megszakítás esetén is folytatható; a médiafeldolgozás hibája nem akadályozhatja a szavazást vagy a pályázatok böngészését.
 - **Használhatóság:** a rendszer reszponzív webes felületet és kontextusérzékeny útmutatókat biztosít.
 - **Akadálymentesség:** a publikus és szavazási felületeknek biztosítaniuk kell, hogy Zamunda állampolgárai azonos feltételek mellett férjenek hozzá a fő funkciókhoz, különösen billentyűzettel, képernyőolvasóval és megfelelő kontraszttal.
 - **Bővíthetőség:** az aszinkron eseményfolyamhoz új fogyasztók, például későbbi analitikai komponensek kapcsolhatók a meglévő producerek módosítása nélkül.
 - **Elaszticitás:** szavazási csúcsterhelés esetén a Szavazási szolgáltatás önállóan skálázható.
-- **Skálázhatóság:** a szavazási, médiafeldolgozási és értesítési terhelés külön kezelhető.
+- **Skálázhatóság:** a szavazási, médiafeldolgozási és értesítési terhelés külön kezelhető; a PostgreSQL írási út connection poolinggal és kampány szerinti particionálással védett.
 - **Karbantarthatóság:** a rendszer néhány jól körülhatárolt szolgáltatásra épül, amelyek felelőssége dokumentált.
 
 ### 5.5. Üzleti szabályok

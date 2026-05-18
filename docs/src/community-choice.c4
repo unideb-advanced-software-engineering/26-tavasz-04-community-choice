@@ -46,7 +46,6 @@ specification {
 		style {
 			shape queue
 			color red
-			icon tech:kafka
 		}
 	}
 
@@ -109,6 +108,12 @@ model {
 		}
 	}
 
+	kms = externalSystem 'KMS / Vault Transit' 'Dedikált kulcskezelő szolgáltatás a pszeudonimizált szavazói kulcs HMAC műveleteihez. A Szavazási szolgáltatás nem olvassa ki a nyers HMAC kulcsot, hanem kampányhoz kötött kulcsverzióval aláírási/HMAC műveletet kér. Felelős a kulcshasználat auditálásáért, a hozzáférés kontrolljáért és a kulcsrotáció támogatásáért.' 'HashiCorp Vault Transit vagy kompatibilis KMS' {
+		style {
+			color amber
+		}
+	}
+
 	cc = system 'Community Choice platform' 'Lehetővé teszi a polgárok számára helyi fejlesztési ötletek beküldését és szavazását' {
 		publicPortal = webapp 'Publikus portál' 'React/TypeScript alapú webes kliens az aktív és lezárt pályázatok, valamint ötletek böngészésére és keresésére. Felelős az alacsony sávszélességű listanézetek, részletoldalak, lazy loading és akadálymentes publikus megjelenítés kliensoldali részéért. Nem dönt szavazási jogosultságról, nem rögzít szavazatot és nem dolgoz fel médiafájlokat.' 'React + TypeScript' {
 			style {
@@ -118,7 +123,7 @@ model {
 			}
 		}
 
-		citizenDashboard = webapp 'Lakossági vezérlőpult' 'React/TypeScript alapú privát lakossági felület a bejelentkezett felhasználó saját ötleteihez, szavazási műveleteihez és médiafeltöltési folyamatához. Presigned feltöltési URL-t kér a backendtől, majd a nagyméretű fájlokat közvetlenül az objektumtárba tölti fel. Nem továbbít nagy bináris állományokat a backend API-n keresztül, és nem küld fájlt Kafka topicba.' 'React + TypeScript' {
+		citizenDashboard = webapp 'Lakossági vezérlőpult' 'React/TypeScript alapú privát lakossági felület a bejelentkezett felhasználó saját ötleteihez, szavazási műveleteihez és médiafeltöltési folyamatához. Presigned feltöltési URL-t kér a backendtől, majd a nagyméretű fájlokat közvetlenül az objektumtárba tölti fel. Nem továbbít nagy bináris állományokat a backend API-n keresztül, és nem küld fájlt event streambe.' 'React + TypeScript' {
 			style {
 				color sky
 				icon tech:react
@@ -138,29 +143,31 @@ model {
 			style { color indigo; icon tech:nestjs }
 		}
 
-		votingService = service 'Szavazási szolgáltatás' 'Node.js/NestJS alapú, önállóan skálázható szavazási szolgáltatás. Felelős a Zamunda One-ból származó hitelesített lakcímadat alapján végzett szavazási jogosultságellenőrzésért, a pszeudonimizált szavazói kulcs képzéséért, az egy ötletre egyszeri szavazás kikényszerítéséért, valamint a szavazat PostgreSQL-ben történő, csak hozzáfűzhető tranzakciós rögzítéséért. A szavazat elsődleges igazságforrása a PostgreSQL, nem a Kafka. A szolgáltatás Kafka topicba audit/integrációs eseményt publikál. Nem felelős kampányok létrehozásáért, ötletek moderálásáért, médiafeldolgozásért vagy értesítések kézbesítéséért.' 'Node.js + NestJS' {
+		votingService = service 'Szavazási szolgáltatás' 'Node.js/NestJS alapú, önállóan skálázható szavazási szolgáltatás. Felelős a Zamunda One-ból származó hitelesített lakcímadat alapján végzett szavazási jogosultságellenőrzésért, a KMS/Vault Transit segítségével képzett pszeudonimizált szavazói kulcsért, az egy ötletre egyszeri szavazás kikényszerítéséért, valamint a szavazat PostgreSQL-ben történő, csak hozzáfűzhető tranzakciós rögzítéséért. A szavazat elsődleges igazságforrása a PostgreSQL, nem az event stream. A szolgáltatás nem publikál közvetlenül brokerbe: a szavazati rekorddal egy tranzakcióban outbox eseményt ír, amelyet CDC relé publikál. Nem felelős kampányok létrehozásáért, ötletek moderálásáért, médiafeldolgozásért vagy értesítések kézbesítéséért.' 'Node.js + NestJS' {
 			style { color green; icon tech:nestjs }
 
 			votingController = component 'Szavazási vezérlő' 'Kezeli a gateway felől érkező szavazási kéréseket' 'NestJS vezérlő'
 			votingLogic = component 'Szavazási logika' 'Üzleti logika: egy felhasználó egy ötletre csak egyszer szavazhat' 'NestJS szolgáltatás'
 			voteZamundaClient = component 'Zamunda One kliens' 'Lakcím-ellenőrzés, hogy csak helyi lakos szavazhasson' 'HTTP kliens'
-			voteRepo = component 'Szavazati adattár' 'A csak hozzáfűzhető szavazatok mentése tranzakcionálisan' 'TypeORM'
+			keyClient = component 'KMS kliens' 'Kampányhoz kötött HMAC művelet kérése nyers secret kiolvasása nélkül' 'Vault/KMS kliens'
+			voteRepo = component 'Szavazati és outbox adattár' 'A csak hozzáfűzhető szavazatok és outbox események mentése egy PostgreSQL tranzakcióban' 'TypeORM'
 			rateLimiter = component 'Forgalomkorlátozó' 'Szolgáltatásszintű védelmi limit a gateway-n túli biztonsági rétegként' 'NestJS elfogó'
 
 			votingController -> rateLimiter 'Ellenőrzi a limitet'
 			votingController -> votingLogic 'Szavazat feldolgozása'
 			votingLogic -> voteZamundaClient 'Lakcím és jogosultság ellenőrzése'
-			votingLogic -> voteRepo 'Adatbázisba mentés'
+			votingLogic -> keyClient 'Pszeudonim kulcs kérése'
+			votingLogic -> voteRepo 'Szavazat és outbox mentése'
 		}
 
-		campaignAdminService = service 'Pályázat- és adminisztrációkezelő szolgáltatás' 'Node.js/NestJS alapú kampány-, ötlet- és adminisztrációs szolgáltatás. Felelős az önkormányzati pályázatok létrehozásáért, életciklusának kezeléséért, az ötletbeküldések fogadásáért, adminisztratív moderálásáért, publikálásáért és a publikus listanézetek alacsony adatforgalmú kiszolgálásáért. A médiafeltöltés üzleti oldalán presigned S3-kompatibilis feltöltési URL-t ad, menti a média metaadatait, és feldolgozási kérést publikál topicba. Nem fogad nagy bináris állományokat a saját API-ján keresztül, nem módosíthat leadott szavazatot, és nem végez CPU-igényes videó- vagy képtömörítést a szinkron webes kérés útjában.' 'Node.js + NestJS' {
+		campaignAdminService = service 'Pályázat- és adminisztrációkezelő szolgáltatás' 'Node.js/NestJS alapú kampány-, ötlet- és adminisztrációs szolgáltatás. Felelős az önkormányzati pályázatok létrehozásáért, életciklusának kezeléséért, az ötletbeküldések fogadásáért, adminisztratív moderálásáért, publikálásáért és a publikus listanézetek alacsony adatforgalmú kiszolgálásáért. A médiafeltöltés üzleti oldalán presigned S3-kompatibilis feltöltési URL-t ad, menti a média metaadatait, és feldolgozási kérést publikál tartós streambe. Nem fogad nagy bináris állományokat a saját API-ján keresztül, nem módosíthat leadott szavazatot, és nem végez CPU-igényes videó- vagy képtömörítést a szinkron webes kérés útjában.' 'Node.js + NestJS' {
 			style { color indigo; icon tech:nestjs }
 
 			publicApi = component 'Nyilvános lista API' 'Optimalizált, alacsony sávszélességű lekérdezések' 'NestJS vezérlő'
 			ideaApi = component 'Ötletbeküldő API' 'Ötletek és probléma-megoldás párok beküldése' 'NestJS vezérlő'
 			adminApi = component 'Adminisztrációs API' 'Pályázatok meghirdetése és moderációja' 'NestJS vezérlő'
 			uploadUrlIssuer = component 'Presigned URL kiadó' 'S3-kompatibilis feltöltési URL-ek és objektumkulcsok kiadása' 'MinIO kliens'
-			eventPublisher = component 'Médiaesemény-küldő' 'Feldolgozási és domain események küldése topicokba' 'Kafka kliens'
+			eventPublisher = component 'Médiaesemény-küldő' 'Feldolgozási és domain események küldése tartós streamekbe' 'NATS/Kafka kliens'
 			campaignRepo = component 'Pályázati adattár' 'Adatbázisműveletek' 'TypeORM'
 
 			publicApi -> campaignRepo 'Lekérdezések (paginált JSON)'
@@ -170,22 +177,22 @@ model {
 			uploadUrlIssuer -> eventPublisher 'Feltöltés kész esemény előkészítése'
 		}
 
-		mediaProcessingRequests = topic 'media-processing-requests topic' 'Kafka topic médiafeldolgozási kérésekhez. Csak objektumtárbeli hivatkozást, metaadatokat és feldolgozási paramétereket tartalmaz; nagy kép- vagy videófájl nem kerül az üzenetbe. A topicot a Pályázat- és adminisztrációkezelő szolgáltatás publikálja, a Médiafeldolgozó háttérfolyamat fogyasztja.' 'Apache Kafka topic' {
-			style { color red; icon tech:kafka }
+		mediaProcessingRequests = topic 'media-processing-requests stream' 'Tartós stream médiafeldolgozási kérésekhez. Csak objektumtárbeli hivatkozást, metaadatokat és feldolgozási paramétereket tartalmaz; nagy kép- vagy videófájl nem kerül az üzenetbe. A streamet a Pályázat- és adminisztrációkezelő szolgáltatás publikálja, a Médiafeldolgozó háttérfolyamat fogyasztja.' 'NATS JetStream / Kafka stream' {
+			style { color red }
 		}
 
-		voteCastEvents = topic 'vote-cast-events topic' 'Kafka topic szavazatleadási audit és integrációs eseményekhez. A Szavazási szolgáltatás publikálja a PostgreSQL tranzakció után vagy outbox mintán keresztül. Nem a szavazatok elsődleges igazságforrása.' 'Apache Kafka topic' {
-			style { color red; icon tech:kafka }
+		voteCastEvents = topic 'vote-cast-events stream' 'Tartós stream szavazatleadási audit és integrációs eseményekhez. A Szavazási szolgáltatás nem publikálja közvetlenül; a PostgreSQL tranzakcióban írt outbox eseményt Debezium vagy kompatibilis CDC relé juttatja ide. Nem a szavazatok elsődleges igazságforrása.' 'NATS JetStream / Kafka stream' {
+			style { color red }
 		}
 
-		campaignEvents = topic 'campaign-events topic' 'Kafka topic kampány-, ötlet- és adminisztratív domain eseményekhez, például pályázatnyitás, szakaszváltás, ötletbeküldés vagy moderációs döntés. Az Auditnaplózó és az Értesítési szolgáltatás egymástól független consumer groupként olvassa.' 'Apache Kafka topic' {
-			style { color red; icon tech:kafka }
+		campaignEvents = topic 'campaign-events stream' 'Tartós stream kampány-, ötlet- és adminisztratív domain eseményekhez, például pályázatnyitás, szakaszváltás, ötletbeküldés vagy moderációs döntés. Az Auditnaplózó és az Értesítési szolgáltatás egymástól független fogyasztóként olvassa.' 'NATS JetStream / Kafka stream' {
+			style { color red }
 		}
 
-		mediaWorker = worker 'Médiafeldolgozó háttérfolyamat' 'Aszinkron médiafeldolgozó háttérfolyamat, amely topic esemény alapján az objektumtárból olvassa ki az ötletekhez feltöltött nyers képeket és videókat. Felelős az átméretezésért, tömörítésért, webes formátumokra alakításért, több minőségi változat előállításáért és az optimalizált fájlok objektumtárba írásáért. Nem felelős ötletek üzleti jóváhagyásáért, kampányéletciklusért, szavazási jogosultságért vagy értesítésküldésért.' 'Node.js háttérfolyamat' {
+		mediaWorker = worker 'Médiafeldolgozó háttérfolyamat' 'Aszinkron médiafeldolgozó háttérfolyamat, amely stream esemény alapján az objektumtárból olvassa ki az ötletekhez feltöltött nyers képeket és videókat. Felelős az átméretezésért, tömörítésért, webes formátumokra alakításért, több minőségi változat előállításáért és az optimalizált fájlok objektumtárba írásáért. Nem felelős ötletek üzleti jóváhagyásáért, kampányéletciklusért, szavazási jogosultságért vagy értesítésküldésért.' 'Node.js háttérfolyamat' {
 			style { color amber; icon tech:ffmpeg }
 
-			consumer = component 'Eseményfeldolgozó' 'Médiafeldolgozási kérések fogadása Kafka topicból' 'Kafka kliens'
+			consumer = component 'Eseményfeldolgozó' 'Médiafeldolgozási kérések fogadása tartós streamből' 'NATS/Kafka kliens'
 			rawStorageReader = component 'Nyers média olvasó' 'A feldolgozandó objektumok letöltése a nyers bucketből' 'MinIO kliens'
 			imageProcessor = component 'Képtömörítő' 'Képek átméretezése klímabarát méretre' 'Sharp'
 			videoProcessor = component 'Videótömörítő' 'Videók tömörítése alacsony sávszélességhez' 'FFmpeg'
@@ -198,7 +205,15 @@ model {
 			videoProcessor -> storageUploader 'Kész videó átadása'
 		}
 
-		database = database 'Relációs adatbázis' 'A rendszer elsődleges relációs tranzakciós adattárolója. Felelős a kampányok, ötletek, adminisztratív állapotok és a szavazati tranzakciónapló konzisztens tárolásáért. A szavazatok esetében append-only tárolási modellt, egyediségi constraintet és UPDATE/DELETE tiltást kell biztosítania. A szavazat elsődleges igazságforrása ez az adattár. Nem médiafájl-tároló, nem cache és nem üzenetbróker.' 'PostgreSQL' {
+		dbPooler = service 'Adatbázis connection pooler' 'PgBouncer vagy kompatibilis PostgreSQL connection pooler az alkalmazásszolgáltatások és a PostgreSQL között. Felelős a szolgáltatásonként limitált connection poolokért, hogy a horizontálisan skálázott API példányok ne merítsék ki a PostgreSQL kapcsolatait. Nem üzleti szolgáltatás, nem cache és nem kerülheti meg az adatbázis jogosultsági szabályait.' 'PgBouncer' {
+			style { color blue; icon tech:postgresql }
+		}
+
+		cdcRelay = worker 'CDC outbox relé' 'Debezium vagy kompatibilis Change Data Capture komponens, amely a PostgreSQL WAL/outbox változásait olvassa, és a szavazási audit/integrációs eseményeket at-least-once módon a tartós event streambe publikálja. Felelős a PostgreSQL tranzakció és az eseményfolyam közötti dual-write rés megszüntetéséért. Nem hoz üzleti döntést és nem módosít szavazati rekordot.' 'Debezium CDC' {
+			style { color green }
+		}
+
+		database = database 'Relációs adatbázis' 'A rendszer elsődleges relációs tranzakciós adattárolója. Felelős a kampányok, ötletek, adminisztratív állapotok, outbox események és a szavazati tranzakciónapló konzisztens tárolásáért. A szavazatok esetében append-only tárolási modellt, campaign_id szerinti particionálást, partíciós kulcsot tartalmazó egyediségi constraintet és UPDATE/DELETE tiltást kell biztosítania. A szavazat elsődleges igazságforrása ez az adattár. Nem médiafájl-tároló, nem cache és nem üzenetbróker.' 'PostgreSQL' {
 			style { color blue; icon tech:postgresql }
 		}
 
@@ -206,7 +221,7 @@ model {
 			style { color red; icon tech:redis }
 		}
 
-		rawMediaBucket = storage 'Nyers média bucket' 'S3-kompatibilis objektumtár a felhasználók által közvetlenül feltöltött eredeti képek és videók átmeneti vagy tartós tárolására. Felelős a presigned upload URL-en keresztül érkező nagy állományok fogadásáért úgy, hogy azok ne a backend API-n vagy Kafka üzeneten keresztül utazzanak. Nem szolgál ki publikus optimalizált médiát.' 'MinIO / S3-kompatibilis bucket' {
+		rawMediaBucket = storage 'Nyers média bucket' 'S3-kompatibilis objektumtár a felhasználók által közvetlenül feltöltött eredeti képek és videók átmeneti vagy tartós tárolására. Felelős a presigned upload URL-en keresztül érkező nagy állományok fogadásáért úgy, hogy azok ne a backend API-n vagy event stream üzeneten keresztül utazzanak. Nem szolgál ki publikus optimalizált médiát.' 'MinIO / S3-kompatibilis bucket' {
 			style { color amber }
 		}
 
@@ -214,14 +229,14 @@ model {
 			style { color amber }
 		}
 
-		notificationService = service 'Értesítési szolgáltatás' 'Aszinkron eseményfogyasztó szolgáltatás, amely Kafka topicokból olvasott domain események alapján e-mail és push értesítéseket készít és küld például új pályázat, szakaszváltás, lezárás vagy eredményhirdetés esetén. Hibája vagy lassulása nem akadályozhatja a szavazást, az ötletbeküldést vagy a kampánykezelést. Nem elsődleges adatforrás, nem hoz üzleti döntést, és nem rögzít szavazatot.' 'Node.js + NestJS' {
+		notificationService = service 'Értesítési szolgáltatás' 'Aszinkron eseményfogyasztó szolgáltatás, amely tartós streamekből olvasott domain események alapján e-mail és push értesítéseket készít és küld például új pályázat, szakaszváltás, lezárás vagy eredményhirdetés esetén. Hibája vagy lassulása nem akadályozhatja a szavazást, az ötletbeküldést vagy a kampánykezelést. Nem elsődleges adatforrás, nem hoz üzleti döntést, és nem rögzít szavazatot.' 'Node.js + NestJS' {
 			style {
 				color indigo
 				icon tech:nestjs
 			}
 		}
 
-		auditService = service 'Auditnaplózó szolgáltatás' 'Aszinkron auditnaplózó szolgáltatás, amely Kafka topicokból fogyasztja a jelentős domain eseményeket, például szavazat leadása, ötlet beküldése, kampányállapot-változás vagy adminisztrátori beavatkozás. Felelős az auditcélú, visszakereshető eseménynapló felépítéséért és újrajátszhatóságáért. Nem a szavazatok elsődleges igazságforrása, nem jogosult szavazati rekord módosítására vagy törlésére, és nem lehet a felhasználói kérések szinkron kritikus útjának része.' 'Node.js + NestJS' {
+		auditService = service 'Auditnaplózó szolgáltatás' 'Aszinkron auditnaplózó szolgáltatás, amely tartós streamekből fogyasztja a jelentős domain eseményeket, például szavazat leadása, ötlet beküldése, kampányállapot-változás vagy adminisztrátori beavatkozás. Felelős az auditcélú, visszakereshető eseménynapló felépítéséért és újrajátszhatóságáért. Nem a szavazatok elsődleges igazságforrása, nem jogosult szavazati rekord módosítására vagy törlésére, és nem lehet a felhasználói kérések szinkron kritikus útjának része.' 'Node.js + NestJS' {
 			style {
 				color indigo
 				icon tech:nestjs
@@ -236,23 +251,26 @@ model {
 		apiGateway -> campaignAdminService 'Publikus, lakossági és admin műveletek továbbítása' '' 'HTTPS + REST/JSON'
 		citizenDashboard -> rawMediaBucket 'Nagy médiafájl közvetlen feltöltése presigned URL-lel' '' 'HTTPS + S3 API'
 		campaignAdminService -> rawMediaBucket 'Presigned upload URL és objektumkulcs kiadása' '' 'S3 API'
-		campaignAdminService -> mediaProcessingRequests 'Médiafeldolgozási kérés publikálása' '' 'Apache Kafka'
-		campaignAdminService -> campaignEvents 'Kampány-, ötlet- és admin esemény publikálása' '' 'Apache Kafka'
-		votingService -> voteCastEvents 'Szavazatleadási esemény publikálása' '' 'Apache Kafka'
-		mediaProcessingRequests -> mediaWorker 'Médiafeldolgozási feladat fogyasztása' '' 'Apache Kafka'
-		voteCastEvents -> auditService 'Szavazási audit esemény fogyasztása' '' 'Apache Kafka'
-		voteCastEvents -> notificationService 'Szavazási értesítési esemény fogyasztása' '' 'Apache Kafka'
-		campaignEvents -> auditService 'Kampány- és admin audit esemény fogyasztása' '' 'Apache Kafka'
-		campaignEvents -> notificationService 'Kampányértesítési esemény fogyasztása' '' 'Apache Kafka'
+		campaignAdminService -> mediaProcessingRequests 'Médiafeldolgozási kérés publikálása' '' 'NATS JetStream / Kafka'
+		campaignAdminService -> campaignEvents 'Kampány-, ötlet- és admin esemény publikálása' '' 'NATS JetStream / Kafka'
+		cdcRelay -> voteCastEvents 'Outboxból olvasott szavazatleadási esemény publikálása' '' 'CDC + NATS JetStream / Kafka'
+		mediaProcessingRequests -> mediaWorker 'Médiafeldolgozási feladat fogyasztása' '' 'NATS JetStream / Kafka'
+		voteCastEvents -> auditService 'Szavazási audit esemény fogyasztása' '' 'NATS JetStream / Kafka'
+		voteCastEvents -> notificationService 'Szavazási értesítési esemény fogyasztása' '' 'NATS JetStream / Kafka'
+		campaignEvents -> auditService 'Kampány- és admin audit esemény fogyasztása' '' 'NATS JetStream / Kafka'
+		campaignEvents -> notificationService 'Kampányértesítési esemény fogyasztása' '' 'NATS JetStream / Kafka'
 		mediaWorker -> rawMediaBucket 'Nyers fájl olvasása' '' 'MinIO S3 API'
 		mediaWorker -> optimizedMediaBucket 'Optimalizált fájl tárolása' '' 'MinIO S3 API'
 		optimizedMediaBucket -> cdn 'Opcionális gyorsítótárazott kiszolgálás' '' 'HTTPS'
 		notificationService -> emailApi 'E-mail küldése' '' 'SMTP / HTTP API'
 		notificationService -> pushApi 'Push értesítés küldése' '' 'Web Push / HTTP API'
 		votingService -> zamundaOne 'Lakcím és jogosultság ellenőrzése' '' 'REST API'
-		votingService -> database 'Szavazatokat ír/olvas' '' 'PostgreSQL wire protocol'
-		campaignAdminService -> database 'Pályázatokat, ötleteket és admin adatokat ír/olvas' '' 'PostgreSQL wire protocol'
-		auditService -> database 'Auditnaplót ír' '' 'PostgreSQL wire protocol'
+		votingService -> kms 'HMAC művelet kérése kampánykulccsal' '' 'Vault/KMS API'
+		votingService -> dbPooler 'Szavazatot és outbox eseményt ír/olvas' '' 'PostgreSQL wire protocol'
+		campaignAdminService -> dbPooler 'Pályázatokat, ötleteket és admin adatokat ír/olvas' '' 'PostgreSQL wire protocol'
+		auditService -> dbPooler 'Auditnaplót ír' '' 'PostgreSQL wire protocol'
+		dbPooler -> database 'Korlátozott backend kapcsolatok' '' 'PostgreSQL wire protocol'
+		cdcRelay -> database 'WAL és outbox változások olvasása' '' 'PostgreSQL replication/logical decoding'
 		apiGateway -> cache 'Rate limit és session-adatok' '' 'Redis protocol'
 		votingService -> cache 'Idempotency és szolgáltatásszintű limit kulcsok' '' 'Redis protocol'
 		campaignAdminService -> cache 'Publikus listanézet cache és limit kulcsok' '' 'Redis protocol'

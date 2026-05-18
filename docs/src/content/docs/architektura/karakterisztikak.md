@@ -44,7 +44,16 @@ description: A Community Choice rendszer architekturális karakterisztikáinak l
 - **Környezet:** szavazási csúcsterhelés, párhuzamos kérések, tranzakciós szavazati tárolás.
 - **Válasz:** a rendszer pszeudonimizált szavazói azonosítással és technológiai egyediségi garanciával kizárja a duplikált szavazatot. A leadott szavazatok utólagos módosítása és törlése tiltott.
 - **Válaszmérték:** ugyanarra az ötletre ugyanattól a szavazótól legfeljebb egy érvényes szavazati rekord jön létre; meglévő szavazat utólagos módosítása vagy törlése nem hajtható végre alkalmazásszint megkerülésével sem.
-- **Kapcsolódó döntések:** [ADR-005](../adrs/adr-005/), [Implementációs javaslatok](./implementacios-javaslatok/).
+- **Kapcsolódó döntések:** [ADR-005](../adrs/adr-005/), [ADR-006](../adrs/adr-006/), [ADR-007](../adrs/adr-007/), [ADR-008](../adrs/adr-008/), [Implementációs javaslatok](./implementacios-javaslatok/).
+
+### Forgatókönyv: audit esemény nem veszhet el brokerhiba esetén
+
+- **Forrás:** hitelesített lakos és a szavazási infrastruktúra.
+- **Stimulus:** a lakos szavazata sikeresen commitol PostgreSQL-ben, miközben a tartós event stream átmenetileg nem elérhető.
+- **Környezet:** szavazási csúcsterhelés, broker- vagy hálózati anomália, működő PostgreSQL tranzakciós tároló.
+- **Válasz:** a szavazati rekorddal egy tranzakcióban outbox esemény jön létre; Debezium vagy kompatibilis CDC relé a hiba megszűnése után publikálja az eseményt.
+- **Válaszmérték:** sikeres szavazati commit után a hozzá tartozó outbox rekord nem maradhat tartósan publikálatlan riasztás nélkül; az auditfolyam fogyasztói idempotensen kezelik az esetleges duplikált kézbesítést.
+- **Kapcsolódó döntések:** [ADR-006](../adrs/adr-006/), [ADR-003](../adrs/adr-003/), [ADR-004](../adrs/adr-004/).
 
 ## Robusztusság
 
@@ -84,6 +93,6 @@ description: A Community Choice rendszer architekturális karakterisztikáinak l
 - **Forrás:** nagy létszámú lakosság egy népszerű önkormányzati kampány utolsó órájában.
 - **Stimulus:** a szavazási forgalom rövid idő alatt többszörösére nő.
 - **Környezet:** kampányzárás előtti csúcsterhelés, a publikus böngészés és médiafeltöltés forgalma közben is folytatódik.
-- **Válasz:** az üzemeltetés csak a Szavazási szolgáltatás példányszámát növeli, miközben a Pályázat- és adminisztrációkezelő szolgáltatás, az Értesítési szolgáltatás és a Médiafeldolgozó háttérfolyamat saját terhelésük szerint külön skálázhatók. A szavazási út szinkron része PostgreSQL tranzakcióra támaszkodik, az audit, értesítés és médiafeldolgozás Kafka topicokon keresztül aszinkron történik.
-- **Válaszmérték:** a szavazási kapacitás célzottan növelhető anélkül, hogy a teljes alkalmazást monolitként kellene replikálni; a csúcsidőszak után a Szavazási szolgáltatás visszaskálázható, csökkentve az üresjárati költséget és energiafogyasztást.
-- **Kapcsolódó döntések:** [ADR-001](../adrs/adr-001/), [ADR-002](../adrs/adr-002/), [ADR-003](../adrs/adr-003/), SBA + EDA hibrid architektúra.
+- **Válasz:** az üzemeltetés csak a Szavazási szolgáltatás példányszámát növeli, miközben a Pályázat- és adminisztrációkezelő szolgáltatás, az Értesítési szolgáltatás és a Médiafeldolgozó háttérfolyamat saját terhelésük szerint külön skálázhatók. A szavazási út szinkron része PostgreSQL tranzakcióra támaszkodik, amelyet PgBouncer connection pooling és `campaign_id` szerinti particionálás véd; az audit, értesítés és médiafeldolgozás tartós event streameken keresztül aszinkron történik.
+- **Válaszmérték:** a szavazási kapacitás célzottan növelhető anélkül, hogy a teljes alkalmazást monolitként kellene replikálni; a PostgreSQL kapcsolatszám nem nőhet kontrollálatlanul az alkalmazáspéldányok számával; a csúcsidőszak után a Szavazási szolgáltatás visszaskálázható, csökkentve az üresjárati költséget és energiafogyasztást.
+- **Kapcsolódó döntések:** [ADR-001](../adrs/adr-001/), [ADR-002](../adrs/adr-002/), [ADR-003](../adrs/adr-003/), [ADR-004](../adrs/adr-004/), [ADR-008](../adrs/adr-008/), SBA + EDA hibrid architektúra.
