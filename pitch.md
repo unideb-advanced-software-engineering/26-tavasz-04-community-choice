@@ -1,29 +1,27 @@
-Pitch szöveg 
+Pitch szöveg
 
-Sziasztok, a projektünk a Community Choice, egy Zamunda Digitális Reneszánsz programba illeszkedő közösségi javaslattételi és szavazási platform. 
+Tisztelt Bizottság, a szoftvertervezés tárgy keretében a Community Choice rendszert terveztük meg. Ez egy közösségi javaslattételi és szavazási platform a Zamunda Digitális Reneszánsz programhoz.
 
-A kiinduló probléma az volt, hogy Zamundában szükség van egy hiteles, egységes digitális csatornára, ahol a lakosok helyi fejlesztési ötleteket adhatnak be, majd ezekre lakcím alapján jogosultan szavazhatnak. A valós analógia a közösségi költségvetés: például zöldfelületek, közösségi terek, padok vagy kerékpártárolók kezdeményezése. 
+A rendszer célja, hogy a lakosok helyi fejlesztési ötleteket tudjanak beküldeni, majd a saját lakóhelyükhöz tartozó kampányokban hitelesen szavazhassanak. Ilyen ötlet lehet például egy új zöldfelület, közösségi tér, pad, kerékpártároló vagy bármilyen kisebb helyi fejlesztés.
 
-A platform lényege három lépésben összefoglalható: javasolj, szavazz, megvalósul. A lakos probléma-megoldás formában beküld egy ötletet, a helyi lakosok szavaznak rá, majd a pályázat és az ötlet teljes életciklusa követhető marad. 
+A felhasználói folyamatot három szóban foglaltuk össze: javasolj, szavazz, megvalósul. A lakos azonosítja magát, beküld egy probléma-megoldás alapú ötletet, a helyi közösség szavaz, az önkormányzat pedig végig követhető állapotokon keresztül kezeli a pályázat életciklusát.
 
-A rendszer nagyjából 10 millió zamundai állampolgárral számol, emellett közigazgatási adminisztrátorokkal és technikai super user szerepkörrel. A legfontosabb scope-döntés, hogy a jogosultság lakcímhez kötött: csak az adott önkormányzat lakosai adhatnak be ötletet és szavazhatnak az adott kampányban. 
+A tervezésnél nem technológiából indultunk ki, hanem a rendszer felelősségéből. Ez nem egy egyszerű ötletgyűjtő felület, hanem közbizalmi rendszer. Ezért három alapelvet rögzítettünk: csak jogosult lakos vehessen részt az adott kampányban, egy ötletre egy felhasználó csak egyszer szavazhasson, és a leadott szavazat utólag ne legyen módosítható vagy törölhető.
 
-A legnehezebb követelmények nem a klasszikus CRUD műveletek voltak, hanem az integritás és az üzemeltetési környezet. Egy felhasználó egy ötletre csak egyszer szavazhat, a leadott szavazat nem módosítható és nem törölhető, közben pedig a szavazati rekord nem tartalmazhat nyers személyes azonosítót. Emellett Zamunda egyes régióiban alacsony sávszélességgel és magas késleltetéssel kell számolni, a ZDR program pedig takarékos és klímabarát működést vár el. 
+Ezekből következett az első fontos döntés: a szavazás nem kerülhet laza, később feldolgozott folyamatba. A szavazat leadásakor azonnali, erős konzisztenciára van szükség. Ezért a kritikus szavazási út szinkron, és relációs adatbázis-garanciákra épül. A jogosultságellenőrzés lakcím alapján történik, a szavazat pedig csak hozzáfűzhető tranzakciónaplóba kerül. A duplikált szavazást adatbázis-szintű egyediségi szabály akadályozza meg, a módosítást és törlést pedig szintén adatbázis-szinten tiltjuk.
 
-Ezért az architekturális döntést nem divat alapján hoztuk meg. A fő karakterisztikák az integritás, hatékonyság, robusztusság és elaszticitás voltak. A mikroszolgáltatásokat elvetettük, mert túl nagy üzemeltetési és hálózati overheadet hoznának. A tiszta monolitot sem választottuk, mert szavazási csúcsidőben az egész rendszert kellene skálázni, ami pazarló. 
+Ez a döntés azért fontos, mert a szavazati integritást nem felületi szabályokra bízzuk. Nem az a garancia, hogy az adminisztrációs felületen nincs törlés gomb, hanem az, hogy a rendszer adatmodellje és perzisztencia-rétege sem engedi a szavazat utólagos átírását.
 
-A választott megoldás egy hibrid szolgáltatásalapú architektúra eseményvezérelt kiegészítéssel. Az SBA adja a fő domain szolgáltatásokat, például a szavazási és kampánykezelési szolgáltatást, az EDA pedig az aszinkron részeket: médiafeldolgozás, értesítések és auditnaplózás. 
+A második döntés az volt, hogy nem mindent kell ugyanazon a kritikus úton kezelni. A médiafeltöltés, a videófeldolgozás, az értesítések és az auditnaplózás természetük szerint háttérfolyamatok. Ezeknél nem az a cél, hogy a szavazási kérés részeként azonnal minden megtörténjen, hanem az, hogy megbízhatóan, újrapróbálhatóan és a szavazástól függetlenül fussanak le.
 
-A rendszerben a kritikus szavazási út szinkron. A szavazat elsődleges igazságforrása PostgreSQL. A Szavazási szolgáltatás ellenőrzi a jogosultságot a Zamunda One integráción keresztül, HMAC-alapú pszeudonimizált voter_key-t képez, majd a szavazatot append-only tranzakciónaplóban tárolja. A duplikációt adatbázis-szintű unique constraint védi, az update és delete műveletek pedig adatbázis-szinten tiltottak. 
+Ezért választottunk hibrid szolgáltatásalapú architektúrát eseményvezérelt kiegészítéssel. A szolgáltatásalapú rész jól illik a fő üzleti képességekhez: kampánykezelés, szavazás, adminisztráció, értesítés, audit. Az eseményvezérelt rész pedig azokhoz a folyamatokhoz illik, ahol a leválasztás növeli a robusztusságot. Egy Kafka-szerű üzenetbroker például erős jelölt erre, mert a háttérfeldolgozást leválasztja a felhasználói kérésekről, és kezelhetővé teszi a fogyasztók lassulását vagy újraindítását.
 
-Ez azért fontos, mert a megmásíthatatlanság nem csak alkalmazásszintű szabály. Nem arról van szó, hogy az admin felület nem kínál törlés gombot, hanem arról, hogy a rendszer technológiai szinten sem engedi a szavazat törlését vagy módosítását. 
+A harmadik döntés a skálázásról szólt. Egy teljes mikroszolgáltatásos rendszer ehhez a feladathoz túl sok üzemeltetési és hálózati többletet hozna. Egy tiszta monolit ezzel szemben egyszerű lenne, de szavazási csúcsidőben az egész rendszert kellene skálázni, nem csak azt a részt, amelyik ténylegesen terhelődik. A hibrid szolgáltatásalapú megközelítés köztes, praktikus megoldás: a fontos domain részek külön kezelhetők, de a rendszer nem válik indokolatlanul széttördelté.
 
-Az aszinkron részeket különválasztottuk. A médiafeltöltés, a videótömörítés, az értesítések és az auditnaplózás Kafka-alapú eseményfolyamon keresztül működik. Így egy videófeldolgozási hullám, egy lassú értesítési szolgáltatás vagy egy audit consumer késése nem lassítja a szavazási kéréseket. 
+A technológiákat ezért nem végleges terméklistaként kezeltük, hanem megvalósítási jelöltekként. A dokumentációban szereplő React és TypeScript, Node.js és NestJS, PostgreSQL, Redis, Kafka, MinIO vagy CDN mind olyan opciók, amelyek illeszkednek a megtervezett architektúrához. A lényeg azonban nem önmagában ezek kiválasztása, hanem az, hogy a döntések mögött világos tervezési indok áll: integritás a szavazásnál, leválasztás a háttérfolyamatoknál, és célzott skálázás a terhelési csúcsoknál.
 
-A technológiai stack ehhez React és TypeScript frontendből, NestJS backend szolgáltatásokból, PostgreSQL adatbázisból, Redis cache-ből, Kafka üzenetbrokerből, MinIO/CDN média kiszolgálásból és Zamunda One OAuth2/OIDC integrációból áll. Az ADR-ek dokumentálják, hogy miért ezeket a döntéseket hoztuk meg. 
+A projektmunkában elkészítettük a követelményspecifikációt, az architekturális karakterisztikákat, a C4 modellt és az ADR-eket. Ezek együtt azt mutatják be, hogy a rendszerterv követelményekből épül fel: először meghatároztuk, mi számít lényegesnek, majd ehhez választottunk architekturális stílust, adatkezelési szabályokat és technológiai jelölteket.
 
-Összefoglalva: a Community Choice egy hiteles közösségi döntéstámogató platform, ahol a kritikus szavazási integritást erős, szinkron adatbázis-garanciák védik, míg a lassabb és erőforrás-igényes folyamatok aszinkron háttérfeldolgozásba kerülnek. Így a rendszer egyszerre marad megbízható, skálázható, takarékos és jól dokumentált. 
+Összefoglalva: a Community Choice egy lakcímhez kötött, hiteles közösségi döntéstámogató platform terve. A szavazás integritását erős, szinkron adatréteg védi, a háttérfolyamatok eseményvezérelten leválaszthatók, a rendszer pedig úgy skálázható, hogy közben takarékos és átlátható marad.
 
-Köszönjük a figyelmet, várjuk a kérdéseket. 
-
- 
+Köszönjük a figyelmet, várjuk a kérdéseket.
