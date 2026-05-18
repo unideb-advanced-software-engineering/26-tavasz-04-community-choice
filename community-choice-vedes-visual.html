@@ -1,927 +1,699 @@
 <!DOCTYPE html>
 <html lang="hu">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Community Choice – védés vizuális prezentáció</title>
+  <title>Community Choice – Rendszertervezési Mérföldkő</title>
 
-  <!-- Fonts: a brand styleguide alapján Inter + JetBrains Mono. -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet" />
 
   <style>
-    /* === RESET AND BRAND TOKENS ===
-       A design/brand-styleguide.html színrendszerének és komponenslogikájának prezentációra szabott változata. */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* === RESET ÉS DESIGN TOKENS === */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
-      --cc-green-50: #f0fdf4; --cc-green-100: #dcfce7; --cc-green-200: #bbf7d0; --cc-green-300: #86efac; --cc-green-400: #4ade80; --cc-green-500: #22c55e; --cc-green-600: #16a34a; --cc-green-700: #15803d; --cc-green-800: #166534; --cc-green-900: #14532d; --cc-green-950: #052e16;
-      --cc-blue-50: #eff6ff; --cc-blue-100: #dbeafe; --cc-blue-200: #bfdbfe; --cc-blue-300: #93c5fd; --cc-blue-400: #60a5fa; --cc-blue-500: #3b82f6; --cc-blue-600: #2563eb; --cc-blue-700: #1d4ed8; --cc-blue-800: #1e40af; --cc-blue-900: #1e3a8a;
-      --cc-gold-50: #fefce8; --cc-gold-100: #fef9c3; --cc-gold-200: #fef08a; --cc-gold-300: #fde047; --cc-gold-400: #facc15; --cc-gold-500: #eab308; --cc-gold-600: #ca8a04; --cc-gold-700: #a16207; --cc-gold-800: #854d0e; --cc-gold-900: #713f12;
-      --cc-neutral-0: #ffffff; --cc-neutral-50: #fafaf9; --cc-neutral-100: #f5f5f4; --cc-neutral-200: #e7e5e4; --cc-neutral-300: #d6d3d1; --cc-neutral-400: #a8a29e; --cc-neutral-500: #78716c; --cc-neutral-600: #57534e; --cc-neutral-700: #44403c; --cc-neutral-800: #292524; --cc-neutral-900: #1c1917; --cc-neutral-950: #0c0a09;
-      --cc-earth-50: #fdf8f0; --cc-earth-100: #f5e6d0; --cc-earth-200: #e8d0a8; --cc-earth-300: #d4b078; --cc-earth-400: #c09050; --cc-earth-500: #a87830; --cc-earth-600: #8a6020; --cc-earth-700: #6d4c18; --cc-earth-800: #503810; --cc-earth-900: #3a2808;
-      --cc-red-50: #fef2f2; --cc-red-300: #fca5a5; --cc-red-800: #991b1b;
+      --cc-green-50: #f0fdf4;
+      --cc-green-100: #dcfce7;
+      --cc-green-500: #22c55e;
+      --cc-green-700: #15803d;
+      --cc-green-800: #166534;
+      --cc-blue-100: #dbeafe;
+      --cc-blue-600: #2563eb;
+      --cc-blue-800: #1e40af;
+      --cc-gold-100: #fef9c3;
+      --cc-gold-500: #eab308;
+      --cc-gold-800: #854d0e;
+      --cc-neutral-0: #ffffff;
+      --cc-neutral-50: #fafaf9;
+      --cc-neutral-100: #f5f5f4;
+      --cc-neutral-200: #e7e5e4;
+      --cc-neutral-600: #57534e;
+      --cc-neutral-900: #1c1917;
+      --cc-earth-100: #f5e6d0;
+      --cc-earth-500: #a87830;
 
       --font-display: 'Inter', sans-serif;
       --font-body: 'Inter', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+
       --text-primary: var(--cc-neutral-900);
       --text-secondary: var(--cc-neutral-600);
-      --text-muted: var(--cc-neutral-500);
       --surface-page: var(--cc-neutral-50);
-      --surface-card: rgba(255, 255, 255, 0.88);
-      --surface-card-strong: var(--cc-neutral-0);
-      --border-default: rgba(68, 64, 60, 0.14);
-      --border-strong: rgba(68, 64, 60, 0.24);
-      --accent: var(--cc-green-500);
-      --accent-strong: var(--cc-green-700);
-      --accent-blue: var(--cc-blue-600);
-      --accent-gold: var(--cc-gold-400);
-      --accent-earth: var(--cc-earth-500);
+      --surface-card: #ffffff;
+      --border-default: rgba(68, 64, 60, 0.15);
 
-      --title-size: clamp(2.1rem, 6.4vw, 5.8rem);
-      --h2-size: clamp(1.55rem, 4.2vw, 3.35rem);
-      --h3-size: clamp(1rem, 2.2vw, 1.55rem);
-      --subtitle-size: clamp(0.9rem, 1.8vw, 1.35rem);
-      --body-size: clamp(0.78rem, 1.42vw, 1.05rem);
-      --small-size: clamp(0.64rem, 1vw, 0.82rem);
-      --micro-size: clamp(0.56rem, 0.82vw, 0.72rem);
+      --title-size: clamp(1.8rem, 4vw, 3rem);
+      --h2-size: clamp(1.3rem, 2.8vw, 2.1rem);
+      --h3-size: clamp(1.05rem, 1.8vw, 1.35rem);
+      --body-size: clamp(0.85rem, 1.2vw, 1.05rem);
+      --small-size: clamp(0.75rem, 1vw, 0.88rem);
 
-      --slide-padding: clamp(1rem, 4vw, 4rem);
-      --content-gap: clamp(0.7rem, 2vw, 1.7rem);
-      --element-gap: clamp(0.35rem, 1vw, 0.9rem);
-      --card-padding: clamp(0.65rem, 1.5vw, 1.25rem);
-      --radius-sm: clamp(0.25rem, 0.5vw, 0.38rem);
-      --radius-md: clamp(0.45rem, 0.8vw, 0.75rem);
-      --radius-lg: clamp(0.75rem, 1.2vw, 1rem);
-      --radius-xl: clamp(1rem, 1.8vw, 1.5rem);
-
-      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-      --duration-normal: 0.72s;
+      --slide-padding: clamp(2rem, 5vw, 4.5rem);
+      --content-gap: clamp(1rem, 2.2vw, 2.2rem);
+      --element-gap: clamp(0.5rem, 1.2vw, 1.2rem);
+      --radius-md: 8px;
+      --radius-xl: 16px;
     }
 
+    html,
     body {
+      height: 100%;
+      overflow-x: hidden;
       font-family: var(--font-body);
       color: var(--text-primary);
       background: var(--surface-page);
       -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
     }
 
-    /* ===========================================
-       VIEWPORT FITTING: MANDATORY BASE STYLES
-       Include this ENTIRE file in every presentation.
-       These styles ensure slides fit exactly in the viewport.
-       =========================================== */
-
-    /* 1. Lock html/body to viewport */
-    html, body {
-        height: 100%;
-        overflow-x: hidden;
-    }
-
-    html {
-        scroll-snap-type: y mandatory;
-        scroll-behavior: smooth;
-    }
-
-    /* 2. Each slide = exact viewport height */
+    /* === VILÁGOS, TÁGAS DIÁK === */
     .slide {
-        width: 100vw;
-        height: 100vh;
-        height: 100dvh; /* Dynamic viewport height for mobile browsers */
-        overflow: hidden; /* CRITICAL: Prevent ANY overflow */
-        scroll-snap-align: start;
-        display: flex;
-        flex-direction: column;
-        position: relative;
-    }
-
-    /* 3. Content container with flex for centering */
-    .slide-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        max-height: 100%;
-        overflow: hidden; /* Double-protection against overflow */
-        padding: var(--slide-padding);
-    }
-
-    /* 4. ALL typography uses clamp() for responsive scaling */
-    :root {
-        /* Titles scale from mobile to desktop */
-        --title-size: clamp(1.5rem, 5vw, 4rem);
-        --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
-        --h3-size: clamp(1rem, 2.5vw, 1.75rem);
-
-        /* Body text */
-        --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
-        --small-size: clamp(0.65rem, 1vw, 0.875rem);
-
-        /* Spacing scales with viewport */
-        --slide-padding: clamp(1rem, 4vw, 4rem);
-        --content-gap: clamp(0.5rem, 2vw, 2rem);
-        --element-gap: clamp(0.25rem, 1vw, 1rem);
-    }
-
-    /* 5. Cards/containers use viewport-relative max sizes */
-    .card, .container, .content-box {
-        max-width: min(90vw, 1000px);
-        max-height: min(80vh, 700px);
-    }
-
-    /* 6. Lists auto-scale with viewport */
-    .feature-list, .bullet-list {
-        gap: clamp(0.4rem, 1vh, 1rem);
-    }
-
-    .feature-list li, .bullet-list li {
-        font-size: var(--body-size);
-        line-height: 1.4;
-    }
-
-    /* 7. Grids adapt to available space */
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
-        gap: clamp(0.5rem, 1.5vw, 1rem);
-    }
-
-    /* 8. Images constrained to viewport */
-    img, .image-container {
-        max-width: 100%;
-        max-height: min(50vh, 400px);
-        object-fit: contain;
-    }
-
-    /* ===========================================
-       RESPONSIVE BREAKPOINTS
-       Aggressive scaling for smaller viewports
-       =========================================== */
-
-    /* Short viewports (< 700px height) */
-    @media (max-height: 700px) {
-        :root {
-            --slide-padding: clamp(0.75rem, 3vw, 2rem);
-            --content-gap: clamp(0.4rem, 1.5vw, 1rem);
-            --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
-            --h2-size: clamp(1rem, 3vw, 1.75rem);
-        }
-    }
-
-    /* Very short viewports (< 600px height) */
-    @media (max-height: 600px) {
-        :root {
-            --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
-            --content-gap: clamp(0.3rem, 1vw, 0.75rem);
-            --title-size: clamp(1.1rem, 4vw, 2rem);
-            --body-size: clamp(0.7rem, 1.2vw, 0.95rem);
-        }
-
-        /* Hide non-essential elements */
-        .nav-dots, .keyboard-hint, .decorative {
-            display: none;
-        }
-    }
-
-    /* Extremely short (landscape phones, < 500px height) */
-    @media (max-height: 500px) {
-        :root {
-            --slide-padding: clamp(0.4rem, 2vw, 1rem);
-            --title-size: clamp(1rem, 3.5vw, 1.5rem);
-            --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
-            --body-size: clamp(0.65rem, 1vw, 0.85rem);
-        }
-    }
-
-    /* Narrow viewports (< 600px width) */
-    @media (max-width: 600px) {
-        :root {
-            --title-size: clamp(1.25rem, 7vw, 2.5rem);
-        }
-
-        /* Stack grids vertically */
-        .grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    /* ===========================================
-       REDUCED MOTION
-       Respect user preferences
-       =========================================== */
-    @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after {
-            animation-duration: 0.01ms !important;
-            transition-duration: 0.2s !important;
-        }
-
-        html {
-            scroll-behavior: auto;
-        }
-    }
-
-    /* === GLOBAL SLIDE SURFACES ===
-       Savanna + River + Sun hangulat, visszafogott állami / közbizalmi karakterrel. */
-    .slide {
-      isolation: isolate;
-      background:
-        radial-gradient(circle at 12% 10%, rgba(34, 197, 94, 0.055), transparent 30%),
-        radial-gradient(circle at 92% 16%, rgba(37, 99, 235, 0.045), transparent 28%),
-        linear-gradient(135deg, var(--cc-neutral-50) 0%, #fffdf8 58%, var(--cc-green-50) 100%);
-    }
-
-    .slide::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: -2;
-      opacity: 0.22;
-      background-image:
-        linear-gradient(rgba(20, 83, 45, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(20, 83, 45, 0.035) 1px, transparent 1px);
-      background-size: clamp(1.8rem, 5vw, 4rem) clamp(1.8rem, 5vw, 4rem);
-      mask-image: linear-gradient(120deg, transparent, black 14%, black 86%, transparent);
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: linear-gradient(135deg, var(--cc-neutral-50) 0%, #ffffff 65%, var(--cc-green-50) 100%);
     }
 
     .slide::after {
       content: "";
       position: absolute;
-      inset: auto 0 0 0;
-      height: clamp(0.16rem, 0.35vh, 0.28rem);
-      z-index: -1;
-      background: linear-gradient(90deg, var(--cc-green-700), var(--cc-green-500), var(--cc-gold-400), var(--cc-blue-600));
-      opacity: 0.72;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--cc-green-700), var(--cc-green-500), var(--cc-blue-600));
     }
 
-    .dark-slide {
-      color: var(--cc-neutral-0);
-      background:
-        radial-gradient(circle at 84% 16%, rgba(34, 197, 94, 0.09), transparent 34%),
-        linear-gradient(135deg, var(--cc-green-950), var(--cc-neutral-950) 62%, #111827);
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: var(--slide-padding);
+      max-width: 1150px;
+      width: 100%;
+      margin: 0 auto;
     }
 
-    .dark-slide::before { opacity: 0.18; background-image: linear-gradient(rgba(255,255,255,0.11) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.11) 1px, transparent 1px); }
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-display);
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    h1 {
+      font-size: var(--title-size);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: var(--element-gap);
+    }
+
+    h2 {
+      font-size: var(--h2-size);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: var(--element-gap);
+    }
+
+    h3 {
+      font-size: var(--h3-size);
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 0.4rem;
+    }
+
+    p {
+      font-size: var(--body-size);
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
 
     .slide-kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: clamp(0.35rem, 0.8vw, 0.7rem);
-      width: fit-content;
-      color: var(--accent-strong);
+      display: inline-block;
+      color: var(--cc-green-700);
       font-size: var(--small-size);
-      font-weight: 800;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: clamp(0.04em, 0.4vw, 0.12em);
-      padding: clamp(0.28rem, 0.75vw, 0.5rem) clamp(0.55rem, 1vw, 0.9rem);
-      border-radius: 9999px;
-      background: rgba(220, 252, 231, 0.86);
-      border: 1px solid rgba(22, 163, 74, 0.22);
-      box-shadow: none;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.4rem;
     }
-
-    .dark-slide .slide-kicker { color: var(--cc-green-200); background: rgba(22, 101, 52, 0.58); border-color: rgba(134, 239, 172, 0.34); }
-
-    h1, h2, h3 { font-family: var(--font-display); line-height: 0.96; letter-spacing: -0.055em; }
-    h1 { font-size: var(--title-size); font-weight: 900; max-width: 13ch; }
-    h2 { font-size: var(--h2-size); font-weight: 900; max-width: 15ch; }
-    h3 { font-size: var(--h3-size); font-weight: 800; letter-spacing: -0.025em; line-height: 1.1; }
-    p { font-size: var(--body-size); line-height: 1.48; color: var(--text-secondary); max-width: 58ch; }
-    .dark-slide p { color: rgba(255,255,255,0.78); }
 
     .deck-label {
       position: absolute;
-      top: clamp(0.6rem, 1.3vw, 1.1rem);
-      left: clamp(0.8rem, 2vw, 1.5rem);
-      z-index: 20;
+      top: 1.5rem;
+      left: 2rem;
       font-family: var(--font-mono);
-      font-size: var(--micro-size);
-      color: var(--text-muted);
-      background: rgba(255,255,255,0.72);
-      border: 1px solid var(--border-default);
-      border-radius: 9999px;
-      padding: clamp(0.22rem, 0.55vw, 0.38rem) clamp(0.45rem, 0.9vw, 0.7rem);
-      backdrop-filter: blur(clamp(0.3rem, 0.8vw, 0.65rem));
-    }
-    .dark-slide .deck-label { color: rgba(255,255,255,0.72); background: rgba(12,10,9,0.42); border-color: rgba(255,255,255,0.14); }
-
-    /* === REVEAL ANIMATIONS === */
-    .reveal, .reveal-left, .reveal-scale {
-      opacity: 0;
-      transform: translateY(clamp(1rem, 3vw, 2rem));
-      transition: opacity var(--duration-normal) var(--ease-out-expo), transform var(--duration-normal) var(--ease-out-expo), filter var(--duration-normal) var(--ease-out-expo);
-      filter: none;
-    }
-    .reveal-left { transform: translateX(calc(-1 * clamp(1rem, 4vw, 3rem))); }
-    .reveal-scale { transform: scale(0.92); }
-    .slide.visible .reveal, .slide.visible .reveal-left, .slide.visible .reveal-scale { opacity: 1; transform: translate(0,0) scale(1); filter: blur(0); }
-    .d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; } .d3 { transition-delay: 0.24s; } .d4 { transition-delay: 0.32s; } .d5 { transition-delay: 0.40s; }
-
-    /* === NAVIGATION UI === */
-    .progress-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: clamp(0.18rem, 0.45vh, 0.35rem);
-      width: 0%;
-      z-index: 9999;
-      background: linear-gradient(90deg, var(--cc-green-700), var(--cc-green-500), var(--cc-gold-400));
-      box-shadow: 0 0 clamp(0.7rem, 1.5vw, 1.2rem) rgba(34,197,94,0.35);
-      transition: width 0.22s linear;
-    }
-    .nav-dots {
-      position: fixed;
-      right: clamp(0.5rem, 1.3vw, 1rem);
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 9000;
-      display: flex;
-      flex-direction: column;
-      gap: clamp(0.28rem, 0.7vh, 0.52rem);
-    }
-    .nav-dot {
-      width: clamp(0.45rem, 0.8vw, 0.68rem);
-      height: clamp(0.45rem, 0.8vw, 0.68rem);
-      border-radius: 9999px;
-      border: 1px solid rgba(20,83,45,0.25);
-      background: rgba(255,255,255,0.65);
-      cursor: pointer;
-      transition: transform 0.2s ease, background 0.2s ease;
-    }
-    .nav-dot.active { transform: scale(1.35); background: var(--cc-green-600); }
-    .keyboard-hint {
-      position: fixed;
-      right: clamp(0.6rem, 1.4vw, 1rem);
-      bottom: clamp(0.7rem, 1.6vw, 1.2rem);
-      z-index: 9000;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-      font-size: var(--micro-size);
-      opacity: 0.7;
+      font-size: var(--small-size);
+      color: var(--text-secondary);
+      opacity: 0.5;
     }
 
-    /* === LAYOUT PRIMITIVES === */
+    /* === TÉRKIHASZNÁLÁS ÉS RÁCSOK === */
     .split {
       display: grid;
-      grid-template-columns: 1.02fr 0.98fr;
+      grid-template-columns: 1fr 1fr;
       gap: var(--content-gap);
       align-items: center;
-      width: min(100%, 1180px);
-      max-height: min(84vh, 760px);
-      margin: 0 auto;
     }
-    .stack { display: flex; flex-direction: column; gap: var(--content-gap); min-height: 0; }
-    .tight-stack { display: flex; flex-direction: column; gap: var(--element-gap); min-height: 0; }
-    .center { text-align: center; align-items: center; }
-    .wide { width: min(100%, 1180px); margin: 0 auto; max-height: min(84vh, 760px); }
-    .panel, .card {
+
+    .split-30-70 {
+      display: grid;
+      grid-template-columns: 0.7fr 1.3fr;
+      gap: var(--content-gap);
+      align-items: center;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--element-gap);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--element-gap);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--element-gap);
+    }
+
+    .panel,
+    .card {
       background: var(--surface-card);
       border: 1px solid var(--border-default);
       border-radius: var(--radius-xl);
-      box-shadow: 0 clamp(0.35rem, 0.9vw, 0.8rem) clamp(0.9rem, 2vw, 1.6rem) rgba(28,25,23,0.055);
-      backdrop-filter: blur(clamp(0.35rem, 0.9vw, 0.7rem));
+      padding: var(--content-gap);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
     }
-    .panel { padding: var(--card-padding); }
-    .card { padding: var(--card-padding); }
-    .dark-slide .panel, .dark-slide .card { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.16); box-shadow: 0 clamp(0.35rem, 0.9vw, 0.8rem) clamp(1rem, 2.4vw, 1.8rem) rgba(0,0,0,0.18); }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: fit-content;
-      border-radius: 9999px;
-      padding: clamp(0.22rem, 0.5vw, 0.36rem) clamp(0.45rem, 0.9vw, 0.72rem);
-      font-size: var(--micro-size);
-      font-weight: 800;
-      font-family: var(--font-mono);
-      letter-spacing: 0.02em;
-      color: var(--cc-green-800);
-      background: var(--cc-green-100);
-      border: 1px solid rgba(21,128,61,0.18);
-      white-space: nowrap;
-    }
-    .badge.blue { color: var(--cc-blue-800); background: var(--cc-blue-100); border-color: rgba(29,78,216,0.18); }
-    .badge.gold { color: var(--cc-gold-800); background: var(--cc-gold-100); border-color: rgba(202,138,4,0.22); }
-    .badge.earth { color: var(--cc-earth-800); background: var(--cc-earth-100); border-color: rgba(138,96,32,0.2); }
-    .mono { font-family: var(--font-mono); }
-    .accent { color: var(--accent-strong); }
-    .dark-slide .accent { color: var(--cc-green-300); }
 
-    /* === TITLE AND ARCHITECTURE DIAGRAM UTILITIES === */
-    .title-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--content-gap);
-      align-items: center;
-      width: min(100%, 1080px);
-      margin: 0 auto;
-      max-height: min(86vh, 780px);
-    }
-    .hero-minimal {
-      max-width: 980px;
-      display: flex;
-      flex-direction: column;
-      gap: clamp(1rem, 2.4vw, 2rem);
-      padding-left: clamp(0.8rem, 1.6vw, 1.4rem);
-      border-left: clamp(0.18rem, 0.45vw, 0.32rem) solid var(--cc-green-500);
-    }
-    .hero-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: clamp(0.5rem, 1vw, 0.85rem);
-      color: rgba(255,255,255,0.68);
-      font-family: var(--font-mono);
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
       font-size: var(--small-size);
+      font-weight: 700;
+      background: var(--cc-green-100);
+      color: var(--cc-green-800);
+      margin-bottom: 0.5rem;
     }
-    .evidence-line {
-      border-left: clamp(0.14rem, 0.32vw, 0.24rem) solid var(--cc-blue-500);
-      padding-left: clamp(0.7rem, 1.3vw, 1rem);
+
+    .badge.blue {
+      background: var(--cc-blue-100);
+      color: var(--cc-blue-800);
     }
-    .lucide-icon {
-      width: clamp(1.5rem, 3.2vw, 2.35rem);
-      height: clamp(1.5rem, 3.2vw, 2.35rem);
-      color: var(--cc-green-700);
-      stroke: currentColor;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
+
+    .badge.gold {
+      background: var(--cc-gold-100);
+      color: var(--cc-gold-800);
     }
-    .dark-slide .lucide-icon { color: var(--cc-green-300); }
-    .data-flow, .outbox-visual {
+
+    .badge.earth {
+      background: var(--cc-earth-100);
+      color: var(--cc-earth-500);
+    }
+
+    /* === DIAGRAMOK === */
+    .flow-container {
       display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: var(--element-gap);
-      align-items: stretch;
+      margin-top: 0.5rem;
     }
-    .data-flow { grid-template-columns: repeat(4, 1fr); }
-    .vertical-flow { grid-template-columns: 1fr; }
-    .flow-cell {
+
+    .flow-step {
+      background: #ffffff;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: var(--element-gap);
       position: relative;
-      min-height: clamp(5.4rem, 16vh, 9rem);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: clamp(0.3rem,0.7vw,0.55rem);
+      text-align: center;
     }
-    .flow-cell::after {
-      content: "→";
+
+    .flow-step:not(:last-child)::after {
+      content: "➔";
       position: absolute;
-      right: calc(-1 * clamp(0.75rem, 1.4vw, 1.1rem));
+      right: calc(-1 * var(--element-gap) / 1.6);
       top: 50%;
       transform: translateY(-50%);
-      color: var(--cc-earth-500);
-      font-size: var(--h3-size);
-      font-weight: 900;
+      color: var(--cc-green-500);
+      font-size: 1.2rem;
     }
-    .flow-cell:last-child::after { display: none; }
-    .vertical-flow .flow-cell::after, .vertical-flow .pipe-step::after {
-      content: "↓";
-      left: 50%;
-      right: auto;
-      top: auto;
-      bottom: calc(-1 * clamp(0.75rem, 1.4vw, 1.1rem));
-      transform: translateX(-50%);
+
+    .box-boundary {
+      border: 2px solid var(--cc-gold-500);
+      background: rgba(254, 249, 195, 0.3);
+      border-radius: var(--radius-md);
+      padding: var(--element-gap);
     }
-    .outbox-visual { grid-template-columns: 1fr 1.15fr 0.95fr 0.95fr; }
-    .transaction-boundary {
-      border: clamp(0.12rem, 0.25vw, 0.18rem) solid var(--cc-gold-500);
-      background: rgba(254, 249, 195, 0.46);
-      border-radius: var(--radius-xl);
-      padding: var(--card-padding);
+
+    /* === CSAPAT === */
+    .team-container {
+      display: flex;
+      gap: 1rem;
+      margin-top: var(--element-gap);
+    }
+
+    .team-card {
+      background: #ffffff;
+      border: 1px solid var(--border-default);
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      color: var(--cc-neutral-900);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.01);
+    }
+
+    /* === REVEAL ANIMÁCIÓ === */
+    .reveal {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    }
+
+    .slide.visible .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .d1 {
+      transition-delay: 0.1s;
+    }
+
+    .d2 {
+      transition-delay: 0.2s;
+    }
+
+    .d3 {
+      transition-delay: 0.3s;
+    }
+
+    /* === NAVIGÁCIÓ === */
+    .nav-dots {
+      position: fixed;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
       display: flex;
       flex-direction: column;
-      gap: var(--element-gap);
-      min-height: clamp(10rem, 30vh, 16rem);
+      gap: 0.5rem;
     }
-    .db-table {
-      border: 1px solid rgba(202,138,4,0.28);
-      border-radius: var(--radius-md);
-      background: rgba(255,255,255,0.74);
-      padding: clamp(0.45rem, 1vw, 0.75rem);
-      font-size: var(--small-size);
-      line-height: 1.24;
+
+    .nav-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--cc-green-700);
+      background: #fff;
+      cursor: pointer;
     }
-    .db-table strong { display: block; font-size: var(--body-size); color: var(--cc-neutral-900); }
-    .diagram-note { font-family: var(--font-mono); font-size: var(--micro-size); color: var(--text-muted); }
-    .dark-slide .diagram-note { color: rgba(255,255,255,0.58); }
 
-    /* === DECISION AND ARCHITECTURE DIAGRAMS === */
-    .constraint-ring { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--element-gap); }
-    .constraint-card { min-height: clamp(6.2rem, 18vh, 10rem); display: flex; flex-direction: column; justify-content: space-between; border-top: clamp(0.22rem, 0.5vw, 0.36rem) solid var(--cc-green-500); }
-    .constraint-card .icon { font-size: clamp(1.6rem, 4vw, 3rem); }
-    .decision-funnel { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: var(--element-gap); align-items: stretch; }
-    .choice-card { display: flex; flex-direction: column; justify-content: center; gap: var(--element-gap); min-height: clamp(8rem, 28vh, 16rem); text-align: center; }
-    .choice-card.rejected { opacity: 0.78; filter: grayscale(0.18); }
-    .choice-card.selected { border-color: rgba(22,163,74,0.44); box-shadow: 0 0 0 clamp(0.08rem, 0.18vw, 0.14rem) rgba(22,163,74,0.12); }
-    .arrow { display: grid; place-items: center; color: var(--cc-earth-500); font-size: clamp(1.3rem, 3vw, 2.2rem); font-weight: 900; }
-
-    .architecture-map {
-      display: grid;
-      grid-template-columns: 0.9fr 1.05fr 1.05fr 0.9fr;
-      grid-template-rows: auto auto auto;
-      gap: var(--element-gap);
-      align-items: stretch;
+    .nav-dot.active {
+      background: var(--cc-green-700);
+      transform: scale(1.2);
     }
-    .node { position: relative; display: flex; flex-direction: column; gap: clamp(0.2rem,0.5vw,0.4rem); justify-content: center; min-height: clamp(4.2rem, 12vh, 7rem); padding: var(--card-padding); border-radius: var(--radius-lg); border: 1px solid var(--border-default); background: rgba(255,255,255,0.88); }
-    .node strong { font-size: var(--body-size); }
-    .node span { color: var(--text-muted); font-size: var(--small-size); line-height: 1.25; }
-    .node.green { border-top: clamp(0.18rem,0.42vw,0.32rem) solid var(--cc-green-500); }
-    .node.blue { border-top: clamp(0.18rem,0.42vw,0.32rem) solid var(--cc-blue-500); }
-    .node.gold { border-top: clamp(0.18rem,0.42vw,0.32rem) solid var(--cc-gold-400); }
-    .node.earth { border-top: clamp(0.18rem,0.42vw,0.32rem) solid var(--cc-earth-500); }
-    .flow-line { grid-column: 1 / -1; height: clamp(0.25rem, 0.8vh, 0.45rem); border-radius: 9999px; background: linear-gradient(90deg, var(--cc-green-600), var(--cc-blue-500), var(--cc-gold-400)); opacity: 0.68; }
 
-    .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--element-gap); align-items: center; }
-    .pipe-step { min-height: clamp(5.2rem, 15vh, 8.4rem); display: flex; flex-direction: column; justify-content: center; gap: clamp(0.25rem,0.6vw,0.5rem); text-align: center; }
-    .pipe-step strong { font-size: var(--body-size); }
-    .pipe-step span { font-size: var(--small-size); color: var(--text-secondary); }
-    .pipe-step::after { content: "→"; position: absolute; right: calc(-1 * clamp(0.75rem, 1.4vw, 1.1rem)); top: 50%; transform: translateY(-50%); color: var(--cc-earth-500); font-size: var(--h3-size); font-weight: 900; }
-    .pipe-step { position: relative; }
-    .pipe-step:last-child::after { display: none; }
-    .pipeline.vertical-flow { grid-template-columns: 1fr; }
-    .pipeline.vertical-flow .pipe-step::after {
-      content: "↓";
-      left: 50%;
-      right: auto;
-      top: auto;
-      bottom: calc(-1 * clamp(0.75rem, 1.4vw, 1.1rem));
-      transform: translateX(-50%);
-    }
-    .pipeline.vertical-flow .pipe-step:last-child::after { display: none; }
+    @media (max-width: 768px) {
 
-    .timeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--element-gap); align-items: stretch; }
-    .time-card { position: relative; min-height: clamp(6rem, 18vh, 10rem); display: flex; flex-direction: column; justify-content: space-between; }
-    .time-card::after { content: ""; position: absolute; top: 50%; right: calc(-1 * var(--element-gap)); width: var(--element-gap); height: clamp(0.12rem,0.35vh,0.22rem); background: var(--cc-green-400); }
-    .time-card:last-child::after { display: none; }
-    .time-card .day { font-family: var(--font-mono); font-size: var(--small-size); color: var(--cc-earth-700); font-weight: 700; }
-    .time-card .state { font-size: var(--body-size); font-weight: 800; }
-    .time-card .note { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.28; }
-    .warning-x { color: var(--cc-red-800); font-weight: 900; }
+      .split,
+      .split-30-70,
+      .grid,
+      .grid-2,
+      .flow-container {
+        grid-template-columns: 1fr;
+      }
 
-    .shield-diagram { display: grid; grid-template-columns: 1fr 0.18fr 1fr 0.18fr 1fr; gap: var(--element-gap); align-items: center; }
-    .vault { border-color: rgba(29,78,216,0.28); background: linear-gradient(135deg, rgba(219,234,254,0.95), rgba(255,255,255,0.82)); }
-    .leak { border-color: rgba(153,27,27,0.28); background: linear-gradient(135deg, rgba(254,242,242,0.96), rgba(255,255,255,0.84)); }
-    .safe { border-color: rgba(22,101,52,0.28); background: linear-gradient(135deg, rgba(220,252,231,0.96), rgba(255,255,255,0.84)); }
-
-    .matrix { display: grid; grid-template-columns: 0.74fr 1.26fr; gap: clamp(0.28rem,0.8vw,0.55rem); }
-    .matrix > div { padding: clamp(0.4rem, 0.95vw, 0.72rem); border-radius: var(--radius-md); border: 1px solid var(--border-default); background: rgba(255,255,255,0.82); font-size: var(--small-size); line-height: 1.25; }
-    .matrix .head { font-weight: 900; color: var(--cc-green-800); background: rgba(220,252,231,0.85); }
-
-    .mermaid-chip { display: inline-flex; align-items: center; gap: clamp(0.25rem,0.5vw,0.42rem); font-size: var(--micro-size); font-family: var(--font-mono); color: var(--cc-blue-800); background: var(--cc-blue-50); border: 1px solid var(--cc-blue-200); border-radius: 9999px; padding: clamp(0.2rem,0.45vw,0.32rem) clamp(0.38rem,0.8vw,0.6rem); }
-
-    /* === FOOTNOTE AND SOURCE BADGES === */
-    .source-note {
-      position: absolute;
-      left: var(--slide-padding);
-      bottom: clamp(0.9rem, 2.1vh, 1.5rem);
-      font-size: var(--micro-size);
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-      max-width: 74ch;
-    }
-    .dark-slide .source-note { color: rgba(255,255,255,0.55); }
-
-    /* === RESPONSIVE CUSTOM LAYOUTS === */
-    @media (max-width: 840px) {
-      .split, .title-grid { grid-template-columns: 1fr; }
-      .decision-funnel, .shield-diagram, .data-flow, .outbox-visual { grid-template-columns: 1fr; }
-      .arrow { transform: rotate(90deg); }
-      .constraint-ring { grid-template-columns: 1fr; }
-      .architecture-map, .pipeline, .timeline { grid-template-columns: 1fr; }
-      .pipe-step::after, .time-card::after, .flow-cell::after { display: none; }
-      .source-note { display: none; }
+      .flow-step:not(:last-child)::after {
+        content: "➔";
+        transform: rotate(90deg);
+        bottom: -10px;
+        top: auto;
+        left: 50%;
+      }
     }
   </style>
 </head>
 
 <body>
-  <!-- === FIXED PRESENTATION UI === -->
-  <div class="progress-bar" aria-hidden="true"></div>
-  <nav class="nav-dots" aria-label="Dia navigáció"></nav>
-  <div class="keyboard-hint">↑ ↓ / Space</div>
+  <nav class="nav-dots" aria-hidden="true"></nav>
 
   <main>
-    <!-- SLIDE 1: Opening — the project as trust architecture -->
-    <section class="slide title-slide dark-slide" data-title="Nyitás">
-      <div class="deck-label">Community Choice · védés</div>
+    <section class="slide" data-title="Nyitás">
+      <div class="deck-label">Rendszertervezési projektvédés</div>
       <div class="slide-content">
-        <div class="title-grid">
-          <div class="hero-minimal">
-            <span class="slide-kicker reveal-left">Zamunda Digitális Reneszánsz</span>
-            <h1 class="reveal-left d1">Community Choice</h1>
-            <p class="reveal-left d2">Bizalom mint architekturális követelmény egy közösségi javaslattételi és szavazási platformban.</p>
-            <div class="hero-meta reveal-left d3"><span>Szoftvertervezési projektvédés</span><span>·</span><span>Hibrid SBA + EDA</span></div>
+        <span class="slide-kicker reveal">Zamunda Digitális Reneszánsz program</span>
+        <h1 class="reveal d1">Community Choice</h1>
+        <p class="reveal d2">Közösségi javaslattételi és szavazási platform szoftverarchitektúra terve.</p>
+
+        <div class="stack reveal d3">
+          <div class="team-container">
+            <div class="team-card">Fekete Adrián</div>
+            <div class="team-card">Nagy Mónika</div>
+            <div class="team-card">Svec Antal</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SLIDE 2: Core problem — trust failure modes -->
-    <section class="slide" data-title="Bizalmi peremfeltétel">
-      <div class="deck-label">01 · probléma</div>
+    <section class="slide" data-title="A bizalom kérdése">
+      <div class="deck-label">01 · Bevezetés</div>
       <div class="slide-content">
-        <div class="split">
-          <div class="stack">
-            <span class="slide-kicker reveal-left">Közbizalmi környezet</span>
-            <h2 class="reveal-left d1">A bizalom mint architekturális peremfeltétel.</h2>
-            <p class="reveal-left d2 evidence-line">A funkcionális követelményeken túli integritási kritériumok: megmásíthatatlanság, pszeudonimizáció és egyediség technológiai garanciái.</p>
-          </div>
-          <div class="panel reveal-scale d3">
-            <div class="constraint-ring">
-              <div class="card constraint-card"><svg class="lucide-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><h3>Megmásíthatatlanság</h3><p>Append-only napló és adatbázis-szintű integritási korlátok.</p></div>
-              <div class="card constraint-card"><svg class="lucide-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg><h3>Pszeudonimizáció</h3><p>Nyers személyes azonosító nem kerül a szavazati tárolóba.</p></div>
-              <div class="card constraint-card"><svg class="lucide-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="M3 17h7"/><path d="M7 14v7"/></svg><h3>Egyediség</h3><p>Kampányhoz kötött jogosultsági snapshot és UNIQUE constraint.</p></div>
+        <div class="stack">
+          <span class="slide-kicker reveal">Túl a funkciókon</span>
+          <h2 class="reveal d1">Hogyan építsük be technológiai szinten a bizalmat?</h2>
+          <p class="reveal d2">Egy állami, közbizalmi környezetben működő döntéstámogató platform nem engedhet meg
+            magának kompromisszumokat. Ha a lakosok azt érzik, a rendszer manipulálható, a platform elveszíti a
+            létjogosultságát. A szoftver felépítésének kell bizonyítania a tisztaságot.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="ZDR követelmények">
+      <div class="deck-label">02 · Peremfeltételek</div>
+      <div class="slide-content">
+        <div class="stack">
+          <span class="slide-kicker reveal">Állami keretrendszer</span>
+          <h2 class="reveal d1">A ZDR program szigorú elvárásai.</h2>
+          <div class="grid reveal d2" style="margin-top: 0.5rem;">
+            <div class="card">
+              <h3>Klímabarát működés</h3>
+              <p>Törekedni kell az erőforrások takarékos használatára.</p>
+            </div>
+            <div class="card">
+              <h3>Hálózati robusztusság</h3>
+              <p>A szoftvernek gyenge vagy hiányos internetlefedettség mellett is stabilnak kell maradnia.</p>
+            </div>
+            <div class="card">
+              <h3>Dokumentáltság</h3>
+              <p>Minden komoly tervezési döntést vissza kell vezetni a valós követelményekre.</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SLIDE 3: Architectural drivers -->
-    <section class="slide" data-title="Peremfeltételek">
-      <div class="deck-label">02 · ASR-ek</div>
+    <section class="slide" data-title="Mérlegelés">
+      <div class="deck-label">03 · Tervezési dilemmák</div>
       <div class="slide-content">
-        <div class="wide stack">
-          <div class="tight-stack center">
-            <span class="slide-kicker reveal">Architekturális hajtóerők</span>
-            <h2 class="reveal d1">Három követelmény, amelyek tervezési döntéssé váltak.</h2>
-          </div>
-          <div class="grid reveal d2">
-            <div class="card constraint-card"><span class="badge">Integritás</span><h3>Megváltoztathatatlan szavazatok</h3><p>PostgreSQL mint tranzakciós igazságforrás, UNIQUE constraint, append-only napló.</p></div>
-            <div class="card constraint-card"><span class="badge blue">Robusztusság</span><h3>Gyenge hálózat, csúcsterhelés</h3><p>A szavazási út rövid és szinkron; média, audit és értesítés nem blokkolja.</p></div>
-            <div class="card constraint-card"><span class="badge gold">Takarékosság</span><h3>Klímabarát működés</h3><p>Elasztikus skálázás csak a terhelt konténerekre és háttérfogyasztókra.</p></div>
+        <div class="stack">
+          <span class="slide-kicker reveal">Architekturális mérlegelés</span>
+          <h2>Miért bukott el a két véglet?</h2>
+          <div class="grid-2 reveal d1" style="margin-top: 0.5rem;">
+            <div class="card" style="border-top: 4px solid var(--cc-neutral-600);">
+              <h3>Miért nem tiszta monolit?</h3>
+              <p>Egy kampányzárás utolsó órájában, amikor a szavazási forgalom hirtelen megugrik, a teljes rendszer
+                másolása és skálázása indokolatlan erőforrás-pazarlással járna.</p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--cc-neutral-600);">
+              <h3>Miért nem teljes mikroszerviz?</h3>
+              <p>A hálózati többletterhelés, a bonyolult elosztott tranzakciók kezelése és a komplex üzemeltetés
+                teljesen szembement volna a takarékossági elvárásokkal.</p>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SLIDE 4: Style decision funnel -->
-    <section class="slide" data-title="Stílusválasztás">
-      <div class="deck-label">03 · architekturális stílus</div>
+    <section class="slide" data-title="Hibrid alapok">
+      <div class="deck-label">04 · Stílusválasztás</div>
       <div class="slide-content">
-        <div class="wide stack">
-          <div class="tight-stack center">
-            <span class="slide-kicker reveal">ADR-001 / ADR-003</span>
-            <h2 class="reveal d1">Hibrid SBA + EDA architektúra.</h2>
-            <p class="reveal d2">Takarékos elaszticitás szinkron tranzakciós maggal és aszinkron háttérfolyamatokkal.</p>
-          </div>
-          <div class="decision-funnel reveal d3">
-            <div class="card choice-card rejected"><span class="badge earth">Elvetve</span><h3>Tiszta monolit</h3><p>Kampányzáráskor a teljes rendszer skálázása pazarló.</p></div>
-            <div class="arrow">→</div>
-            <div class="card choice-card selected"><span class="badge">Döntés</span><h3>Hibrid SBA + EDA</h3><p>Erős konzisztencia ott, ahol szükséges; eseményvezérlés ott, ahol leválasztható.</p></div>
-            <div class="arrow">←</div>
-            <div class="card choice-card rejected"><span class="badge earth">Elvetve</span><h3>Teljes mikroservice</h3><p>Elosztott tranzakció, hálózati többlet és indokolatlan üzemeltetési komplexitás.</p></div>
+        <div class="stack">
+          <span class="slide-kicker reveal">Az arányosság elve</span>
+          <h2 class="reveal d1">Hibrid Service-Based és Event-Driven architektúra.</h2>
+          <p class="reveal d2">A kritikus, szigorú és azonnali választ igénylő folyamatokat jól körülhatárolt
+            szolgáltatásokba (makroszolgáltatások) zártuk. A nehézkes, időigényes, de azonnali választ nem igénylő
+            feladatokat pedig eseményvezérelt háttérfolyamatokra bíztuk.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Rendszerfelépítés">
+      <div class="deck-label">05 · Logikai modell</div>
+      <div class="slide-content">
+        <div class="stack">
+          <span class="slide-kicker reveal">A felépítés áttekintése</span>
+          <h2>A szétválasztott felelősségi körök.</h2>
+          <div class="grid reveal d1" style="margin-top: 0.5rem;">
+            <div class="panel" style="border-top: 4px solid var(--cc-green-700);">
+              <h3>Szavazási zóna</h3>
+              <p><strong>Szinkron és szigorú</strong></p>
+              <p style="margin-top: 0.5rem;">Jogosultság-ellenőrzés, névtelenítés, szavazatok azonnali, fix rögzítése a
+                központi adatbázisban.</p>
+            </div>
+            <div class="panel" style="border-top: 4px solid var(--cc-blue-600);">
+              <h3>Központi csatorna</h3>
+              <p><strong>Eseményvezérelt üzenetsor</strong></p>
+              <p style="margin-top: 0.5rem;">Tartós, visszajátszható adatfolyam (NATS / Kafka), amely továbbítja a
+                sikeres események híreit.</p>
+            </div>
+            <div class="panel" style="border-top: 4px solid var(--cc-gold-500);">
+              <h3>Háttér folyamatok</h3>
+              <p><strong>Aszinkron feldolgozás</strong></p>
+              <p style="margin-top: 0.5rem;">E-mailes értesítések kiküldése és a beküldött nagyméretű képek/videók
+                háttérben futó tömörítése.</p>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SLIDE 5: Architecture overview diagram -->
-    <section class="slide" data-title="SBA + EDA térkép">
-      <div class="deck-label">04 · C4 konténernézet</div>
+    <section class="slide" data-title="Költözési probléma">
+      <div class="deck-label">06 · 1. Pillér</div>
       <div class="slide-content">
-        <div class="wide stack">
-          <div class="tight-stack">
-            <span class="slide-kicker reveal-left">C4 konténerdiagram · dokumentált struktúra</span>
-            <h2 class="reveal-left d1">Szinkron tranzakciós mag, aszinkron kimeneti folyamatok.</h2>
+        <div class="split-30-70">
+          <div class="stack">
+            <span class="slide-kicker reveal">Kihívás</span>
+            <h2 class="reveal d1">A mozgó szavazó esete.</h2>
+            <p class="reveal d2">A szabály egyszerű: csak az adott önkormányzat lakója szavazhat. De mi történik, ha egy
+              lakos a 30 napos kampány közepén átjelentkezik egy másik kerületbe?</p>
+          </div>
+          <div class="card reveal d3">
+            <h3>A dinamikus ellenőrzés buktatója:</h3>
+            <p style="margin-top: 0.5rem; margin-bottom: 0.5rem;">Ha a rendszer minden gombnyomásnál újra lekérné az
+              aktuális lakcímet, az illető a költözés miatt mindkét kerületben leadhatna szavazatokat.</p>
+            <p>A korábbi szavazatait viszont nem törölhetjük ki utólag, mert az sértené a szavazatok
+              megváltoztathatatlanságát.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Snapshot megoldás">
+      <div class="deck-label">07 · Digitális névjegyzék</div>
+      <div class="slide-content">
+        <div class="stack">
+          <span class="slide-kicker reveal">1. Megoldás</span>
+          <h2>A Jogosultsági Pillanatkép (Eligibility Snapshot).</h2>
+          <p class="reveal d1">Ezt a feloldhatatlan ellentmondást egy digitális választási névjegyzékkel kezeltük.
+            Amikor a felhasználó a kampány során először lép interakcióba a platformmal, rögzítjük a kerületi
+            jogosultságát.</p>
+
+          <div class="flow-container reveal d2">
+            <div class="flow-step"><span class="badge">1. Belépés</span>
+              <h3>Interakció</h3>
+              <p>Felhasználó szavazni vagy beküldeni szeretne.</p>
+            </div>
+            <div class="flow-step"><span class="badge blue">2. Ellenőrzés</span>
+              <h3>Állami lekérés</h3>
+              <p>Lakcím és utolsó módosítási időbélyeg ellenőrzése.</p>
+            </div>
+            <div class="flow-step"><span class="badge gold">3. Befagyasztás</span>
+              <h3>Snapshot rögzítés</h3>
+              <p>A rendszer elmenti az akkori kerületet a kampány végéig.</p>
+            </div>
+            <div class="flow-step"><span class="badge earth">4. Védelem</span>
+              <h3>Kizárás</h3>
+              <p>A kampány során a költözés már nem nyit új szavazási kört.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Adatvédelmi dilemma">
+      <div class="deck-label">08 · 2. Pillér</div>
+      <div class="slide-content">
+        <div class="split-30-70">
+          <div class="stack">
+            <span class="slide-kicker reveal">Kihívás</span>
+            <h2 class="reveal d1">Névtelenség vs. Egyediség.</h2>
+            <p class="reveal d2">Ahhoz, hogy az adatbázis technológiailag, egy egyediségi szabállyal meg tudja
+              akadályozni a duplázást, szükség van egy szavazói azonosítóra. A nyers személyes adatokat viszont a
+              titkosság miatt nem tárolhatjuk.</p>
+          </div>
+          <div class="card reveal d3">
+            <h3>Miért nem elég a sima kódolás (pl. SHA-256)?</h3>
+            <p style="margin-top: 0.5rem;">Ha az adatbázis véletlenül kiszivárogna, a sima kódolt azonosítók külső, nagy
+              számítási kapacitással (Rainbow Table módszerrel) viszonylag gyorsan visszafejthetők és visszakapcsolhatók
+              lennének a valós személyekhez.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="KMS és Titkosítás">
+      <div class="deck-label">09 · Biztonsági kapu</div>
+      <div class="slide-content">
+        <div class="stack">
+          <span class="slide-kicker reveal">2. Megoldás</span>
+          <h2>Védett Kulcskezelés és elszigetelt azonosítók.</h2>
+          <p class="reveal d1">A rendszert kiegészítettük egy dedikált Kulcskezelő Szolgáltatással (KMS). A felhasználói
+            azonosítókból egy külső, védett kulccsal (Global Pepper) képezünk egyedi kódot.</p>
+
+          <div class="grid reveal d2" style="margin-top: 0.5rem;">
+            <div class="card">
+              <h3>Elszigetelt titok</h3>
+              <p>A kódoláshoz használt mesterkulcs soha, egyetlen pillanatra sem hagyja el a kulcskezelő biztonságos
+                memóriáját, nem kerül be a fájlokba.</p>
+            </div>
+            <div class="card">
+              <h3>Nyers adatok kizárása</h3>
+              <p>A szavazati adatbázis, a logfájlok és a háttérben futó üzenetek kizárólag a generált,
+                visszafejthetetlen álneveket látják.</p>
+            </div>
+            <div class="card" style="background: var(--cc-green-100);">
+              <h3>Mérföldkő szivárgás esetén</h3>
+              <p>Ha az adatbázis teljesen kiszivárogna, a támadók akkor sem tudnák visszafejteni az azonosítókat a
+                védett kulcs nélkül. Az adatok biztonságban maradnak.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Mentési anomália">
+      <div class="deck-label">10 · 3. Pillér</div>
+      <div class="slide-content">
+        <div class="split-30-70">
+          <div class="stack">
+            <span class="slide-kicker reveal">Kihívás</span>
+            <h2 class="reveal d1">A széteső mentések kockázata.</h2>
+            <p class="reveal d2">A rendszernek minden szavazatról értesítést kell küldenie a háttérben futó ellenőrző
+              naplóba. De mi van akkor, ha a szavazat sikeresen bekerül a fő adatbázisba, de a hálózat abban a
+              pillanatban megszakad, és az értesítés elvész?</p>
+          </div>
+          <div class="card reveal d3" style="border-left: 4px solid var(--cc-red-800); background: var(--cc-red-50);">
+            <h3>A Dual-Write hiba:</h3>
+            <p style="margin-top: 0.5rem;">Ha az alkalmazásból két külön lépésben küldjük el az adatot az adatbázisnak
+              és a háttérsornak, hálózati anomália esetén a két rendszer állapota eltérhet egymástól. Ez egy közbizalmi
+              rendszernél megengedhetetlen.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Outbox megoldás">
+      <div class="deck-label">11 · Tranzakciós biztonság</div>
+      <div class="slide-content">
+        <div class="stack">
+          <span class="slide-kicker reveal">3. Megoldás</span>
+          <h2>A Transactional Outbox minta alkalmazása.</h2>
+          <p class="reveal d1">A szavazat leadását és a háttérbe szánt ellenőrző naplóbejegyzést a szoftverünk egyetlen,
+            szétválaszthatatlan csomagként (adatbázis-tranzakció) kezeli.</p>
+
+          <div class="grid-2 reveal d2" style="margin-top: 0.5rem;">
+            <div class="box-boundary">
+              <h3 style="color: var(--cc-gold-800);">Atomi adatbázis lépés</h3>
+              <p style="margin-top: 0.5rem;">· <strong>Szavazati rekord</strong> elmentése</p>
+              <p>· <strong>Outbox (Kimenő) rekord</strong> elmentése</p>
+              <p style="margin-top: 0.5rem; font-size: var(--small-size); color: var(--text-secondary);">A kettő
+                egyszerre vagy sehogy sem teljesül.</p>
+            </div>
+            <div class="card">
+              <h3>Hibatűrő háttérküldés</h3>
+              <p>Ezt a belső kimenő táblát figyeli egy független háttérprogram. Ha a külső üzenetsor szakad meg, a
+                szavazat biztonságban van, a háttérbejegyzést pedig a hiba elhárulása után automatikusan pótolja a
+                rendszer.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Csúcsforgalom">
+      <div class="deck-label">12 · Terhelésvédelem</div>
+      <div class="slide-content">
+        <div class="split">
+          <div class="stack">
+            <span class="slide-kicker reveal">Erőforrás-optimalizálás</span>
+            <h2>Felkészülés az utolsó órás rohamra.</h2>
+            <p class="reveal d1">A szavazási kampányok utolsó óráiban ugrásszerű terhelés várható. A rendszert úgy
+              készítettük fel erre, hogy közben hűek maradtunk a takarékossági alapelvekhez.</p>
           </div>
           <div class="panel reveal d2">
-            <div class="architecture-map">
-              <div class="node green"><strong>Publikus portál / Dashboard / Admin</strong><span>React + TypeScript webfelületek</span></div>
-              <div class="node earth"><strong>Ingress / API Gateway</strong><span>TLS, routing, rate limit, JWT elővalidálás</span></div>
-              <div class="node blue"><strong>Backend API / BFF</strong><span>API-összeállítás, domain routing</span></div>
-              <div class="node gold"><strong>Zamunda One + KMS</strong><span>OIDC, lakcímadat, Vault Transit</span></div>
-              <div class="flow-line"></div>
-              <div class="node green"><strong>Szavazási szolgáltatás</strong><span>Eligibility Snapshot, voter_key, append-only vote</span></div>
-              <div class="node blue"><strong>Pályázat- és admin szolgáltatás</strong><span>Ötletek, kampányok, presigned URL</span></div>
-              <div class="node earth"><strong>PgBouncer</strong><span>Kontrollált PostgreSQL kapcsolatpool</span></div>
-              <div class="node green"><strong>PostgreSQL</strong><span>Igazságforrás, partíciók, outbox</span></div>
-              <div class="node gold"><strong>Outbox relay</strong><span>SELECT ... FOR UPDATE SKIP LOCKED / CDC</span></div>
-              <div class="node blue"><strong>NATS JetStream / Kafka</strong><span>vote-cast, campaign, media streams</span></div>
-              <div class="node earth"><strong>Redis + MinIO / CDN</strong><span>Cache, idempotency, nyers és optimalizált média</span></div>
-              <div class="node blue"><strong>Audit / Notification / Media worker</strong><span>Független, replayelhető fogyasztók</span></div>
-            </div>
-          </div>
-          <span class="mermaid-chip reveal d3">Forrásstruktúra: docs/src/community-choice.c4 · view containers</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 6: Critical voting path -->
-    <section class="slide" data-title="Szavazási integritási lánc">
-      <div class="deck-label">05 · kritikus út</div>
-      <div class="slide-content">
-        <div class="wide stack">
-          <div class="tight-stack center">
-            <span class="slide-kicker reveal">Szinkron út · erős konzisztencia</span>
-            <h2 class="reveal d1">Szavazási integritási lánc.</h2>
-            <p class="reveal d2">A szavazatrögzítés nem háttéresemény: a jogosultság, az egyediség és az outbox rekord egy tranzakciós út része.</p>
-          </div>
-          <div class="pipeline reveal d3">
-            <div class="card pipe-step"><span class="badge blue">1</span><strong>Zamunda One</strong><span>Lakcím + módosítási időbélyeg</span></div>
-            <div class="card pipe-step"><span class="badge blue">2</span><strong>Eligibility Snapshot</strong><span>Kampányhoz rögzített jogosultság</span></div>
-            <div class="card pipe-step"><span class="badge gold">3</span><strong>KMS / HMAC</strong><span>Pszeudonim voter_key</span></div>
-            <div class="card pipe-step"><span class="badge">4</span><strong>PostgreSQL</strong><span>UNIQUE + append-only vote_log</span></div>
-            <div class="card pipe-step"><span class="badge earth">5</span><strong>Outbox</strong><span>Audit esemény ugyanabban a commitban</span></div>
-          </div>
-          <span class="diagram-note reveal d4">C4 fókusznézet: voteIntegrity · a visszajelzés iránya szándékosan nincs túldiagramozva.</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 7: Pillar 1 — eligibility paradox -->
-    <section class="slide" data-title="Jogosultsági pillanatkép">
-      <div class="deck-label">06 · 1. pillér</div>
-      <div class="slide-content">
-        <div class="wide stack">
-          <div class="tight-stack">
-            <span class="slide-kicker reveal-left">Időbeli autorizáció</span>
-            <h2 class="reveal-left d1">Időbeli autorizáció: Jogosultsági Pillanatkép.</h2>
-            <p class="reveal-left d2">A kampányidőszak alatti spekulatív migráció kizárása determinisztikus snapshot rögzítéssel.</p>
-          </div>
-          <div class="timeline reveal d3">
-            <div class="card time-card"><div class="day">D0</div><div class="state">Kampány indul</div><div class="note">A jogosultsági kör értelmezhető állapota.</div></div>
-            <div class="card time-card"><div class="day">D7</div><div class="state">Első interakció</div><div class="note">campaign_eligibility sor létrejön.</div></div>
-            <div class="card time-card"><div class="day">D14</div><div class="state">Lakcímváltozás</div><div class="note">Zamunda One metaadat jelzi az új állapotot.</div></div>
-            <div class="card time-card"><div class="day">D20</div><div class="state warning-x">Új részvétel blokkolva</div><div class="note">A snapshot nem írható át visszamenőleg.</div></div>
-            <div class="card time-card"><div class="day">D30</div><div class="state accent">Auditálható lezárás</div><div class="note">Nincs visszamenőleges törlés, nincs dupla részvétel.</div></div>
+            <h3>Beépített védelmi mechanizmusok:</h3>
+            <p style="margin-top: 0.5rem; margin-bottom: 0.4rem;">· <strong>Kapcsolatkezelő kapu (PgBouncer):</strong>
+              Nem engedi, hogy a hirtelen jövő kérések túlterheljék a központi adatbázist.</p>
+            <p style="margin-bottom: 0.4rem;">· <strong>Adatbázis particionálás:</strong> A szavazatokat kampányok
+              szerint külön logikai táblákra bontottuk, így az indexek kicsik és gyorsak maradnak.</p>
+            <p>· <strong>Háttérmunkák korlátozása:</strong> A CPU-igényes feladatok (pl. videók tömörítése) a csúcsidő
+              alatt automatikusan háttérbe szorulnak, elsőbbséget adva a szavazatoknak.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SLIDE 8: Pillar 1 — sequence diagram visual -->
-    <section class="slide" data-title="Snapshot folyamat">
-      <div class="deck-label">07 · snapshot</div>
+    <section class="slide" data-title="Összegzés">
+      <div class="deck-label">13 · Következtetés</div>
       <div class="slide-content">
-        <div class="split">
-          <div class="stack">
-            <span class="slide-kicker reveal-left">Voting Service komponensek</span>
-            <h2 class="reveal-left d1">Snapshot létrehozás és újrafelhasználás.</h2>
-            <p class="reveal-left d2">A Jogosultságkezelő a Zamunda One kliensen és a Kulcskezelési kliensen keresztül hoz létre kampányhoz kötött, pszeudonim jogosultsági rekordot.</p>
-            <span class="mermaid-chip reveal-left d3">Mermaid forrás: eligibility-snapshot-sequence.mmd</span>
+        <div class="stack">
+          <span class="slide-kicker reveal">Eredmények és jövőkép</span>
+          <h2>Több, mint egy egyetemi vizsgamunka.</h2>
+          <p class="reveal d1">Amikor a Community Choice dokumentációját összeállítottuk, arra törekedtünk, hogy a
+            végeredmény ne egy felszínes technológiai kívánságlista legyen. Minden architekturális döntésünket (ADR)
+            visszavezettük az esettanulmányból fakadó szignifikáns követelményekre.</p>
+    
+          <div class="card reveal d2" style="margin-top: 0.5rem; border-left: 4px solid var(--cc-green-700);">
+            <h3>Valós problémákra adott célzott válaszok:</h3>
+            <p style="margin-top: 0.5rem;">· <strong>Megalapozott tervezés:</strong> Legyen szó a szavazási csúcsokat védő
+              adatbázis-particionálásról, adatvédelemről vagy az eseményvezérelt aszinkron médiafeldolgozásról.</p>
+            <p>· <strong>Éles potenciál:</strong> Ezzel az architekturális alappal és egy kis célzott továbbdolgozással a
+              koncepció akár egy valódi, éles állami környezetben működő projektté is ki tudna alakulni.</p>
+            <p>· <strong>Közbizalom:</strong> Biztosítva egy maximálisan transzparens és manipulálhatatlan digitális
+              demokráciát.</p>
           </div>
-          <div class="panel reveal-scale d2">
-            <div class="pipeline vertical-flow">
-              <div class="card pipe-step"><span class="badge blue">Lakos</span><strong>Első kampány-interakció</strong><span>szavazás / ötlet / bejelentkezett művelet</span></div>
-              <div class="card pipe-step"><span class="badge earth">Zamunda One kliens</span><strong>Lakcím + módosítás ideje</strong><span>külső identitás- és lakcímforrás</span></div>
-              <div class="card pipe-step"><span class="badge gold">Kulcskezelési kliens</span><strong>HMAC(user_id)</strong><span>nyers azonosító izoláció</span></div>
-              <div class="card pipe-step"><span class="badge">campaign_eligibility</span><strong>UNIQUE(campaign_id, user_hash)</strong><span>determinált részvételi keret</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 9: Pillar 2 — pseudonymization threat model -->
-    <section class="slide dark-slide" data-title="Adatvédelem">
-      <div class="deck-label">08 · 2. pillér</div>
-      <div class="slide-content">
-        <div class="split">
-          <div class="stack">
-            <span class="slide-kicker reveal-left">ADR-007</span>
-            <h2 class="reveal-left d1">Személyesadat-kitettség minimalizálása.</h2>
-            <p class="reveal-left d2">Determinisztikus HMAC kulcsképzés dedikált KMS tranzit réteggel, rainbow table támadások és adatbázis-szivárgás hatásának csökkentésére.</p>
-          </div>
-          <div class="panel reveal-scale d3">
-            <div class="data-flow vertical-flow">
-              <div class="card flow-cell"><span class="badge earth">Nem tároljuk</span><h3>Zamunda One raw ID</h3><p>A nyers személyes azonosító csak izolált feldolgozási ponton jelenhet meg.</p></div>
-              <div class="card flow-cell"><span class="badge blue">Tranzit réteg</span><h3>KMS / Vault HMAC</h3><p>A pepper és a master key nem kerül DB-be, logba vagy alkalmazáskonfigurációba.</p></div>
-              <div class="card flow-cell"><span class="badge">Tárolható</span><h3>user_hash / voter_key</h3><p>A szavazási DB-ben csak kampányhoz kötött, pszeudonim kulcs marad.</p></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 10: Pillar 2 — key-management compromise -->
-    <section class="slide" data-title="KMS stratégia">
-      <div class="deck-label">09 · kulcskezelés</div>
-      <div class="slide-content">
-        <div class="wide stack">
-          <div class="tight-stack center">
-            <span class="slide-kicker reveal">Kulcskezelési útvonal</span>
-            <h2 class="reveal d1">HMAC útvonal explicit titokhatárokkal.</h2>
-          </div>
-          <div class="data-flow reveal d2">
-            <div class="card flow-cell"><span class="badge earth">Raw input</span><h3>Zamunda One ID</h3><p>Rövid életű feldolgozási adat; perzisztens tárolóba nem kerül.</p></div>
-            <div class="card flow-cell"><span class="badge blue">Vault Transit</span><h3>HMAC / HKDF</h3><p>Védett master secret, auditált hozzáférés, rotációs kontroll.</p></div>
-            <div class="card flow-cell"><span class="badge gold">Pod memória</span><h3>Rövid élettartamú kampánykulcs</h3><p>Csúcsterheléskor lokális HMAC; nem per-request KMS hálózat.</p></div>
-            <div class="card flow-cell"><span class="badge">PostgreSQL</span><h3>campaign_eligibility + vote_log</h3><p>Csak pszeudonim kulcsok és auditálható szavazati tények.</p></div>
-          </div>
-          <div class="tight-stack reveal d3"><span class="diagram-note">Kulcsszavak a védéshez: nyers adat izoláció · rövid élettartamú kampánykulcs · pod memória · rotáció · audit.</span><span class="mermaid-chip">Mermaid forrás: kms-hmac-flow.mmd</span></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 11: Pillar 3 — outbox / CDC -->
-    <section class="slide" data-title="Dual-write megoldás">
-      <div class="deck-label">10 · 3. pillér</div>
-      <div class="slide-content">
-        <div class="wide stack">
-          <div class="tight-stack">
-            <span class="slide-kicker reveal-left">ADR-006</span>
-            <h2 class="reveal-left d1">Dual-write prevenció: Transactional Outbox.</h2>
-            <p class="reveal-left d2">Atomi szavazatrögzítés és audit eseménykibocsátás PostgreSQL CDC/Relay alapon.</p>
-          </div>
-          <div class="outbox-visual reveal d3">
-            <div class="card flow-cell"><span class="badge blue">HTTP</span><h3>Szavazatleadás</h3><p>BFF → Voting Service, validált kampány- és jogosultsági kontextus.</p></div>
-            <div class="transaction-boundary">
-              <span class="badge gold">Egy PostgreSQL tranzakció</span>
-              <div class="db-table"><strong>vote_log</strong>append-only szavazati rekord · campaign_id · idea_id · voter_key</div>
-              <div class="db-table"><strong>outbox_event</strong>vote-cast-event payload · státusz · retry metaadat</div>
-            </div>
-            <div class="card flow-cell"><span class="badge earth">Relay / CDC</span><h3>SKIP LOCKED / WAL</h3><p>Hibatűrő háttérpublikálás, ismételhető feldolgozással.</p></div>
-            <div class="card flow-cell"><span class="badge blue">NATS / Kafka</span><h3>vote-cast-events</h3><p>Audit és értesítés saját tempóban, replayelhető eseményfolyamból.</p></div>
-          </div>
-          <span class="mermaid-chip reveal d4">Mermaid forrás: outbox-audit-sequence.mmd</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 12: Scaling and resource efficiency -->
-    <section class="slide" data-title="Skálázás">
-      <div class="deck-label">11 · csúcsterhelés</div>
-      <div class="slide-content">
-        <div class="split">
-          <div class="stack">
-            <span class="slide-kicker reveal-left">Takarékos elaszticitás</span>
-            <h2 class="reveal-left d1">Elaszticitási stratégia.</h2>
-            <p class="reveal-left d2">Kampányzáráskor a szavazási út skálázódik; médiafeldolgozás, audit és értesítés tartós streamen keresztül, független fogyasztói tempóban halad.</p>
-          </div>
-          <div class="panel reveal-scale d3">
-            <div class="matrix">
-              <div class="head">Terhelési pont</div><div class="head">Architekturális kontroll</div>
-              <div>HTTP kéréscsúcs</div><div>Ingress rate limit + BFF cache</div>
-              <div>PostgreSQL kapcsolat</div><div>PgBouncer, szolgáltatásonként limitált pool</div>
-              <div>Szavazati írások</div><div><code>campaign_id</code> szerinti partíciók</div>
-              <div>Média CPU</div><div>MinIO + aszinkron worker streamből</div>
-              <div>Értesítés / audit</div><div>Tartós stream, független fogyasztók</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 13: Traceability from requirements to ADRs -->
-    <section class="slide" data-title="ADR traceability">
-      <div class="deck-label">12 · dokumentációs minőség</div>
-      <div class="slide-content">
-        <div class="wide stack">
-          <div class="tight-stack center">
-            <span class="slide-kicker reveal">Követhetőség</span>
-            <h2 class="reveal d1">Követelmény → döntés → mechanizmus.</h2>
-          </div>
-          <div class="panel reveal d2">
-            <div class="matrix">
-              <div class="head">Követelmény / kockázat</div><div class="head">Döntési lánc</div>
-              <div>Megmásíthatatlan szavazat</div><div>ADR-005 append-only vote log + UNIQUE constraint</div>
-              <div>Elveszett auditnyom kizárása</div><div>ADR-006 Transactional Outbox + relay / CDC</div>
-              <div>Adatvédelmi kitettség</div><div>ADR-007 KMS / Vault HMAC, rövid kampánykulcs</div>
-              <div>Csúcsterhelés</div><div>ADR-008 PgBouncer + kampány-particionálás</div>
-              <div>Takarékos aszinkron működés</div><div>ADR-003/004 EDA + NATS JetStream / Kafka profil</div>
-            </div>
-          </div>
-          <p class="reveal d3">A védés állítása: az architektúra nem technológiai márkalista, hanem követelményvezérelt kompromisszumrendszer.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- SLIDE 14: Closing vision -->
-    <section class="slide dark-slide" data-title="Zárás">
-      <div class="deck-label">13 · zárógondolat</div>
-      <div class="slide-content">
-        <div class="title-grid">
-          <div class="hero-minimal">
-            <span class="slide-kicker reveal-left">Zárás</span>
-            <h1 class="reveal-left d1">Bizalom: nem ígéret, hanem architektúra.</h1>
-            <p class="reveal-left d2">A Community Choice szakmai értéke abban áll, hogy a közbizalmi kockázatokat konkrét architekturális mechanizmusokra fordítja le.</p>
-            <div class="hero-meta reveal-left d3"><span>Eligibility Snapshot</span><span>·</span><span>KMS / HMAC</span><span>·</span><span>Transactional Outbox</span></div>
-          </div>
+    
+          <p class="reveal d3"
+            style="font-size: var(--small-size); font-weight: 600; color: var(--cc-green-700); margin-top: 0.5rem;">
+            Köszönjük a figyelmet!</p>
         </div>
       </div>
     </section>
   </main>
 
   <script>
-    /* === SLIDE PRESENTATION CONTROLLER ===
-       Billentyűzet, touch, egérkerék, progress bar, navigációs pontok és reveal animációk. */
-    class SlidePresentation {
+    class SimplePresentation {
       constructor() {
         this.slides = Array.from(document.querySelectorAll('.slide'));
         this.currentSlide = 0;
         this.isAnimating = false;
         this.navDotsContainer = document.querySelector('.nav-dots');
-        this.progressBar = document.querySelector('.progress-bar');
-        this.touchStartY = 0;
         this.setupNavDots();
-        this.setupIntersectionObserver();
-        this.setupKeyboardNav();
-        this.setupTouchNav();
-        this.setupWheelNav();
-        this.updateProgress();
+        this.setupObserver();
+        this.setupKeyboard();
+        this.setupWheel();
       }
 
       goToSlide(index) {
@@ -929,81 +701,61 @@
         if (next === this.currentSlide && this.slides[next].classList.contains('visible')) return;
         this.currentSlide = next;
         this.slides[next].scrollIntoView({ behavior: 'smooth', block: 'start' });
-        this.updateProgress();
+        this.updateUi();
       }
 
-      setupIntersectionObserver() {
+      setupObserver() {
         const observer = new IntersectionObserver((entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               entry.target.classList.add('visible');
               this.currentSlide = this.slides.indexOf(entry.target);
-              this.updateProgress();
+              this.updateUi();
             }
           });
-        }, { threshold: 0.58 });
+        }, { threshold: 0.45 });
         this.slides.forEach((slide) => observer.observe(slide));
-        this.slides[0]?.classList.add('visible');
       }
 
-      setupKeyboardNav() {
-        document.addEventListener('keydown', (event) => {
-          const key = event.key;
-          if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(key)) {
-            event.preventDefault();
-            this.goToSlide(this.currentSlide + 1);
-          }
-          if (['ArrowUp', 'PageUp'].includes(key)) {
-            event.preventDefault();
-            this.goToSlide(this.currentSlide - 1);
-          }
-          if (key === 'Home') { event.preventDefault(); this.goToSlide(0); }
-          if (key === 'End') { event.preventDefault(); this.goToSlide(this.slides.length - 1); }
+      setupKeyboard() {
+        document.addEventListener('keydown', (e) => {
+          if (['ArrowDown', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); this.goToSlide(this.currentSlide + 1); }
+          if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); this.goToSlide(this.currentSlide - 1); }
         });
       }
 
-      setupTouchNav() {
-        document.addEventListener('touchstart', (event) => {
-          this.touchStartY = event.changedTouches[0].screenY;
-        }, { passive: true });
-        document.addEventListener('touchend', (event) => {
-          const delta = this.touchStartY - event.changedTouches[0].screenY;
-          if (Math.abs(delta) > 40) this.goToSlide(this.currentSlide + (delta > 0 ? 1 : -1));
-        }, { passive: true });
-      }
-
-      setupWheelNav() {
-        document.addEventListener('wheel', (event) => {
-          if (this.isAnimating || Math.abs(event.deltaY) < 28) return;
+      setupWheel() {
+        document.addEventListener('wheel', (e) => {
+          if (this.isAnimating || Math.abs(e.deltaY) < 35) return;
           this.isAnimating = true;
-          this.goToSlide(this.currentSlide + (event.deltaY > 0 ? 1 : -1));
-          window.setTimeout(() => { this.isAnimating = false; }, 520);
+          this.goToSlide(this.currentSlide + (e.deltaY > 0 ? 1 : -1));
+          setTimeout(() => { this.isAnimating = false; }, 500);
         }, { passive: true });
       }
 
       setupNavDots() {
         if (!this.navDotsContainer) return;
-        this.navDotsContainer.innerHTML = '';
         this.slides.forEach((slide, index) => {
-          const button = document.createElement('button');
-          button.className = 'nav-dot';
-          button.type = 'button';
-          button.setAttribute('aria-label', `${index + 1}. dia: ${slide.dataset.title || ''}`);
-          button.addEventListener('click', () => this.goToSlide(index));
-          this.navDotsContainer.appendChild(button);
+          const dot = document.createElement('button');
+          dot.className = 'nav-dot';
+          dot.type = 'button';
+          dot.setAttribute('aria-label', `${index + 1}. dia`);
+          dot.addEventListener('click', () => this.goToSlide(index));
+          this.navDotsContainer.appendChild(dot);
         });
       }
 
-      updateProgress() {
-        const progress = ((this.currentSlide + 1) / this.slides.length) * 100;
-        if (this.progressBar) this.progressBar.style.width = `${progress}%`;
-        document.querySelectorAll('.nav-dot').forEach((dot, index) => {
-          dot.classList.toggle('active', index === this.currentSlide);
+      updateUi() {
+        document.querySelectorAll('.nav-dot').forEach((dot, idx) => {
+          dot.classList.toggle('active', idx === this.currentSlide);
         });
       }
     }
 
-    new SlidePresentation();
+    window.addEventListener('DOMContentLoaded', () => {
+      new SimplePresentation();
+    });
   </script>
 </body>
+
 </html>
