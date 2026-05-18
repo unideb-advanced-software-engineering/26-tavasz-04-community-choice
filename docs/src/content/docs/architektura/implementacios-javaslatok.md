@@ -22,7 +22,7 @@ Ez az oldal azokat a technológiai részleteket gyűjti, amelyek hasznos tervez�
 
 ## Médiafeltöltés és médiakiszolgálás
 
-- Instabil hálózati kapcsolat esetén a fotók és videók feltöltése darabolt, megszakítás után folytatható S3-kompatibilis multipart upload mechanizmussal kezelhető.
+- Instabil hálózati kapcsolat esetén a lakossági ötletmédia és az adminisztrátori pályázati média feltöltése darabolt, megszakítás után folytatható S3-kompatibilis multipart upload mechanizmussal kezelhető.
 - A backend csak presigned upload URL-t és objektumkulcsot adjon ki; a kliens a nagy bináris állományt közvetlenül az objektumtárba töltse fel.
 - Az event stream üzenetek csak objektumtárbeli hivatkozást, metaadatot és feldolgozási paramétereket tartalmazzanak, ne magát a médiafájlt.
 - A feltöltött képek WebP, a videók WebM változatra alakíthatók, ha a minőség és böngészőtámogatás alapján ez indokolt.

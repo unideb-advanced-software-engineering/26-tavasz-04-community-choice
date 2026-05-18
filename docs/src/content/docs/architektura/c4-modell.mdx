@@ -5,7 +5,7 @@ description: A Community Choice rendszer C4 rendszerkörnyezeti, konténer- és 
 
 import LikeC4View from '../../../components/LikeC4View.astro';
 
-A Community Choice platform architektúráját a [C4 modell](https://c4model.com/) három szintjén mutatjuk be: a rendszerkörnyezeti, a konténer- és a komponensnézetben.
+A Community Choice platform architektúráját a [C4 modell](https://c4model.com/) szintjein és fókusznézetein keresztül mutatjuk be. A fő nézetek áttekintők; a szavazási integritás és a médiafeldolgozás külön diagramon látható, hogy a konténerdiagram ne zsúfolódjon túl.
 
 ## Rendszerkörnyezeti diagram
 
@@ -13,11 +13,13 @@ A legfelső szint megmutatja, kik használják a rendszert és milyen külső re
 
 <LikeC4View viewId="context" />
 
-## Konténerdiagram
+## Konténerdiagram Áttekintő
 
-A konténerszint megmutatja a rendszer futtatható egységeit és adatáramlási határait: a három React/TypeScript webes felületet, az egységes API Gateway / BFF belépési pontot, az SBA-stílus szerinti backend szolgáltatásokat, valamint az aszinkron feldolgozást segítő tartós event streameket. A diagram a C4 ajánlás szerint nem magát az üzenetbrókert, hanem a logikai streameket jeleníti meg, mert ezek mutatják meg pontosan a producer és consumer oldali csatolást. A technológiai profil az [ADR-004](../adrs/adr-004/) szerint NATS JetStream vagy Kafka lehet.
+A konténerdiagram áttekintő nézet: a webes felületeket, az API Gatewayt, a két fő domain szolgáltatást, az adattárolókat, a tartós event streameket és a háttérfogyasztókat mutatja. A részletes infrastruktúra-elemek, például PgBouncer, KMS és CDC relé, külön fókusznézetben szerepelnek.
 
-A médiafeltöltési útvonalon a webes kliens nem küld nagy bináris állományt a backend API-n keresztül. A lakossági felület presigned S3-kompatibilis feltöltési URL-t kér, közvetlenül a nyers média bucketbe tölt, majd a backend csak objektumhivatkozást és metaadatot publikál a médiafeldolgozási streambe.
+A diagram a C4 ajánlás szerint nem magát az üzenetbrókert, hanem a logikai streameket jeleníti meg, mert ezek mutatják meg pontosan a producer és consumer oldali csatolást. A technológiai profil az [ADR-004](../adrs/adr-004/) szerint NATS JetStream vagy Kafka lehet.
+
+A nyilak az elsődleges kérés-, adat- vagy eseményáramlást mutatják. Szinkron API-hívásoknál a válasz iránya nincs külön berajzolva; aszinkron folyamatoknál a nyíl az esemény tényleges útját követi, például `PostgreSQL -> CDC outbox relé -> vote-cast-events stream`.
 
 <LikeC4View viewId="containers" />
 
@@ -31,6 +33,12 @@ Ez a fókusznézet csak a szavazás kritikus integritási láncát mutatja. A Sz
 A CDC outbox relé olvassa az outbox változást, majd publikálja a `vote-cast-events` tartós streambe. Így ha a broker vagy a hálózat átmenetileg hibázik, a szavazati commit nem vész el, és az audit esemény később pótolható. A KMS/Vault Transit a `voter_key` HMAC műveletet védi, a PgBouncer pedig az adatbázis-kapcsolatok kontrollját biztosítja.
 
 <LikeC4View viewId="voteIntegrity" />
+
+## Médiafeltöltés és Feldolgozás
+
+Ez a fókusznézet azt mutatja, hogyan kerülnek a nagy médiafájlok a backend API megkerülésével objektumtárba. A lakosok ötletekhez, az adminisztrátorok pedig pályázati kiírásokhoz tölthetnek fel képet vagy videót. A megfelelő webes felület presigned S3-kompatibilis feltöltési URL-t kér, közvetlenül a nyers média bucketbe tölt, majd a backend csak objektumhivatkozást és metaadatot publikál a médiafeldolgozási streambe.
+
+<LikeC4View viewId="mediaFlow" />
 
 ## Komponensdiagramok
 

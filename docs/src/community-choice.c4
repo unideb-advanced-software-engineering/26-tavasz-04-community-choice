@@ -84,38 +84,38 @@ model {
 	allampol = actor 'Zamundai állampolgár' 'Ötleteket javasol és szavaz a helyi pályázatokon' 'Reszponzív böngésző'
 	admin = actor 'Közigazgatási adminisztrátor' 'Pályázatokat hirdet és moderál' 'Hivatali böngésző'
 
-	zamundaOne = externalSystem 'Zamunda One' 'Külső állami azonosítási és autorizációs szolgáltatás, amely megbízható bejelentkezési információt és hiteles lakcímadatot biztosít a Community Choice számára. Felelős a felhasználó személyazonosságának és bejelentett lakóhelyének igazolásáért. Nem tárol Community Choice szavazatokat, nem dönt kampányéletciklusról, és nem helyettesíti a szavazási szolgáltatás üzleti jogosultságellenőrzését.' 'OAuth2 / OpenID Connect + REST API' {
+	zamundaOne = externalSystem 'Zamunda One' 'Külső állami azonosítás és lakcímadat-szolgáltatás.' 'OAuth2 / OpenID Connect + REST API' {
 		style {
 			color amber
 		}
 	}
 
-	cdn = externalSystem 'CDN / edge cache' 'Opcionális, deployment-szinten cserélhető tartalomgyorsító réteg az optimalizált képek és videók kiszolgálására. Felelős lehet az origin objektumtár terhelésének és a felhasználói letöltési késleltetésnek a csökkentéséért, ha a forgalmi és költségadatok ezt indokolják. Nem kötelező országos terítésű infrastruktúra, nem tárol üzleti tranzakciókat, szavazatokat vagy személyes azonosításra alkalmas szavazói adatokat.' 'Cloudflare CDN vagy kompatibilis edge cache' {
+	cdn = externalSystem 'CDN / edge cache' 'Opcionális gyorsítóréteg optimalizált médiatartalmakhoz.' 'Cloudflare CDN vagy kompatibilis edge cache' {
 		style {
 			color amber
 		}
 	}
 
-	emailApi = externalSystem 'E-mail kézbesítő API' 'Külső kézbesítési szolgáltatás tranzakciós e-mailekhez, például pályázatindítási, szakaszváltási vagy eredményhirdetési értesítésekhez. Nem hoz üzleti döntést és nem tárol szavazatot.' 'SMTP / HTTP API' {
+	emailApi = externalSystem 'E-mail kézbesítő API' 'Külső tranzakciós e-mail kézbesítés.' 'SMTP / HTTP API' {
 		style {
 			color amber
 		}
 	}
 
-	pushApi = externalSystem 'Push értesítési API' 'Külső mobil vagy böngészős push kézbesítési szolgáltatás rövid kampány- és státuszértesítésekhez. Nem hoz üzleti döntést és nem tárol szavazatot.' 'Web Push / HTTP API' {
+	pushApi = externalSystem 'Push értesítési API' 'Külső böngészős vagy mobil push kézbesítés.' 'Web Push / HTTP API' {
 		style {
 			color amber
 		}
 	}
 
-	kms = externalSystem 'KMS / Vault Transit' 'Dedikált kulcskezelő szolgáltatás a pszeudonimizált szavazói kulcs HMAC műveleteihez. A Szavazási szolgáltatás nem olvassa ki a nyers HMAC kulcsot, hanem kampányhoz kötött kulcsverzióval aláírási/HMAC műveletet kér. Felelős a kulcshasználat auditálásáért, a hozzáférés kontrolljáért és a kulcsrotáció támogatásáért.' 'HashiCorp Vault Transit vagy kompatibilis KMS' {
+	kms = externalSystem 'KMS / Vault Transit' 'HMAC műveletek és kampánykulcsok védett kezelése.' 'HashiCorp Vault Transit vagy kompatibilis KMS' {
 		style {
 			color amber
 		}
 	}
 
 	cc = system 'Community Choice platform' 'Lehetővé teszi a polgárok számára helyi fejlesztési ötletek beküldését és szavazását' {
-		publicPortal = webapp 'Publikus portál' 'React/TypeScript alapú webes kliens az aktív és lezárt pályázatok, valamint ötletek böngészésére és keresésére. Felelős az alacsony sávszélességű listanézetek, részletoldalak, lazy loading és akadálymentes publikus megjelenítés kliensoldali részéért. Nem dönt szavazási jogosultságról, nem rögzít szavazatot és nem dolgoz fel médiafájlokat.' 'React + TypeScript' {
+		publicPortal = webapp 'Publikus portál' 'Pályázatok és ötletek böngészése alacsony adatforgalommal.' 'React + TypeScript' {
 			style {
 				color sky
 				icon tech:react
@@ -123,7 +123,7 @@ model {
 			}
 		}
 
-		citizenDashboard = webapp 'Lakossági vezérlőpult' 'React/TypeScript alapú privát lakossági felület a bejelentkezett felhasználó saját ötleteihez, szavazási műveleteihez és médiafeltöltési folyamatához. Presigned feltöltési URL-t kér a backendtől, majd a nagyméretű fájlokat közvetlenül az objektumtárba tölti fel. Nem továbbít nagy bináris állományokat a backend API-n keresztül, és nem küld fájlt event streambe.' 'React + TypeScript' {
+		citizenDashboard = webapp 'Lakossági vezérlőpult' 'Bejelentkezett lakos ötletei, szavazása és ötlethez tartozó médiafeltöltése.' 'React + TypeScript' {
 			style {
 				color sky
 				icon tech:react
@@ -131,7 +131,7 @@ model {
 			}
 		}
 
-		adminPanel = webapp 'Közigazgatási panel' 'React/TypeScript alapú adminisztrációs felület pályázatok kiírására, életciklus-kezelésre, moderációra és adminisztratív műveletekre. Nem módosíthat és nem törölhet leadott szavazatot; a szavazati integritást backend és adatbázis-szintű garanciák védik.' 'React + TypeScript' {
+		adminPanel = webapp 'Közigazgatási panel' 'Pályázatok, kiíráshoz tartozó média, moderáció és adminisztratív folyamatok kezelése.' 'React + TypeScript' {
 			style {
 				color sky
 				icon tech:react
@@ -139,11 +139,11 @@ model {
 			}
 		}
 
-		apiGateway = service 'API Gateway / BFF' 'Egységes backend belépési pont a webes kliensek számára. Felelős a HTTPS végpontok publikálásáért, request routingért, tokenellenőrzésért, alapvető rate limitingért, kliensre szabott válaszformálásért és a Zamunda One bejelentkezési folyamat technikai integrációjáért. Nem tartalmaz kampány-, szavazási vagy médiafeldolgozási üzleti logikát, és nem kerülheti meg a szolgáltatások saját jogosultságellenőrzését.' 'Node.js + NestJS BFF' {
+		apiGateway = service 'API Gateway / BFF' 'Webes belépési pont, routing, tokenellenőrzés és rate limit.' 'Node.js + NestJS BFF' {
 			style { color indigo; icon tech:nestjs }
 		}
 
-		votingService = service 'Szavazási szolgáltatás' 'Node.js/NestJS alapú, önállóan skálázható szavazási szolgáltatás. Felelős a Zamunda One-ból származó hitelesített lakcímadat alapján végzett szavazási jogosultságellenőrzésért, a KMS/Vault Transit segítségével képzett pszeudonimizált szavazói kulcsért, az egy ötletre egyszeri szavazás kikényszerítéséért, valamint a szavazat PostgreSQL-ben történő, csak hozzáfűzhető tranzakciós rögzítéséért. A szavazat elsődleges igazságforrása a PostgreSQL, nem az event stream. A szolgáltatás nem publikál közvetlenül brokerbe: szavazati rekordot és outbox eseményt ír egy tranzakcióban. Nem felelős kampányok létrehozásáért, ötletek moderálásáért, médiafeldolgozásért vagy értesítések kézbesítéséért.' 'Node.js + NestJS' {
+		votingService = service 'Szavazási szolgáltatás' 'Jogosultságellenőrzés, voter_key képzés, append-only szavazat + outbox írás.' 'Node.js + NestJS' {
 			style { color green; icon tech:nestjs }
 
 			votingController = component 'Szavazási vezérlő' 'Kezeli a gateway felől érkező szavazási kéréseket' 'NestJS vezérlő'
@@ -160,7 +160,7 @@ model {
 			votingLogic -> voteRepo 'Szavazat és outbox mentése'
 		}
 
-		campaignAdminService = service 'Pályázat- és adminisztrációkezelő szolgáltatás' 'Node.js/NestJS alapú kampány-, ötlet- és adminisztrációs szolgáltatás. Felelős az önkormányzati pályázatok létrehozásáért, életciklusának kezeléséért, az ötletbeküldések fogadásáért, adminisztratív moderálásáért, publikálásáért és a publikus listanézetek alacsony adatforgalmú kiszolgálásáért. A médiafeltöltés üzleti oldalán presigned S3-kompatibilis feltöltési URL-t ad, menti a média metaadatait, és feldolgozási kérést publikál tartós streambe. Nem fogad nagy bináris állományokat a saját API-ján keresztül, nem módosíthat leadott szavazatot, és nem végez CPU-igényes videó- vagy képtömörítést a szinkron webes kérés útjában.' 'Node.js + NestJS' {
+		campaignAdminService = service 'Pályázat- és adminisztrációkezelő szolgáltatás' 'Kampányok, ötletek, moderáció, pályázati és ötletmédia metaadatainak kezelése.' 'Node.js + NestJS' {
 			style { color indigo; icon tech:nestjs }
 
 			publicApi = component 'Nyilvános lista API' 'Optimalizált, alacsony sávszélességű lekérdezések' 'NestJS vezérlő'
@@ -177,19 +177,19 @@ model {
 			uploadUrlIssuer -> eventPublisher 'Feltöltés kész esemény előkészítése'
 		}
 
-		mediaProcessingRequests = stream 'media-processing-requests stream' 'Tartós stream médiafeldolgozási kérésekhez. Csak objektumtárbeli hivatkozást, metaadatokat és feldolgozási paramétereket tartalmaz; nagy kép- vagy videófájl nem kerül az üzenetbe. A streamet a Pályázat- és adminisztrációkezelő szolgáltatás publikálja, a Médiafeldolgozó háttérfolyamat fogyasztja.' 'NATS JetStream / Kafka stream' {
+		mediaProcessingRequests = stream 'media-processing-requests stream' 'Objektumhivatkozást tartalmazó médiafeldolgozási kérések.' 'NATS JetStream / Kafka stream' {
 			style { color red }
 		}
 
-		voteCastEvents = stream 'vote-cast-events stream' 'Tartós stream szavazatleadási audit és integrációs eseményekhez. A Szavazási szolgáltatás nem publikálja közvetlenül; a PostgreSQL tranzakcióban írt outbox eseményt Debezium vagy kompatibilis CDC relé juttatja ide. Nem a szavazatok elsődleges igazságforrása.' 'NATS JetStream / Kafka stream' {
+		voteCastEvents = stream 'vote-cast-events stream' 'CDC outbox relén keresztül érkező szavazási audit események.' 'NATS JetStream / Kafka stream' {
 			style { color red }
 		}
 
-		campaignEvents = stream 'campaign-events stream' 'Tartós stream kampány-, ötlet- és adminisztratív domain eseményekhez, például pályázatnyitás, szakaszváltás, ötletbeküldés vagy moderációs döntés. Az Auditnaplózó és az Értesítési szolgáltatás egymástól független fogyasztóként olvassa.' 'NATS JetStream / Kafka stream' {
+		campaignEvents = stream 'campaign-events stream' 'Kampány-, ötlet- és adminisztratív domain események.' 'NATS JetStream / Kafka stream' {
 			style { color red }
 		}
 
-		mediaWorker = worker 'Médiafeldolgozó háttérfolyamat' 'Aszinkron médiafeldolgozó háttérfolyamat, amely stream esemény alapján az objektumtárból olvassa ki az ötletekhez feltöltött nyers képeket és videókat. Felelős az átméretezésért, tömörítésért, webes formátumokra alakításért, több minőségi változat előállításáért és az optimalizált fájlok objektumtárba írásáért. Nem felelős ötletek üzleti jóváhagyásáért, kampányéletciklusért, szavazási jogosultságért vagy értesítésküldésért.' 'Node.js háttérfolyamat' {
+		mediaWorker = worker 'Médiafeldolgozó háttérfolyamat' 'Képek és videók aszinkron átméretezése, tömörítése és feltöltése.' 'Node.js háttérfolyamat' {
 			style { color amber; icon tech:ffmpeg }
 
 			consumer = component 'Eseményfeldolgozó' 'Médiafeldolgozási kérések fogadása tartós streamből' 'NATS/Kafka kliens'
@@ -205,38 +205,38 @@ model {
 			videoProcessor -> storageUploader 'Kész videó átadása'
 		}
 
-		dbPooler = service 'Adatbázis connection pooler' 'PgBouncer vagy kompatibilis PostgreSQL connection pooler az alkalmazásszolgáltatások és a PostgreSQL között. Felelős a szolgáltatásonként limitált connection poolokért, hogy a horizontálisan skálázott API példányok ne merítsék ki a PostgreSQL kapcsolatait. Nem üzleti szolgáltatás, nem cache és nem kerülheti meg az adatbázis jogosultsági szabályait.' 'PgBouncer' {
+		dbPooler = service 'Adatbázis connection pooler' 'Limitált PostgreSQL kapcsolatpool az alkalmazásszolgáltatások előtt.' 'PgBouncer' {
 			style { color blue; icon tech:postgresql }
 		}
 
-		cdcRelay = worker 'CDC outbox relé' 'Debezium vagy kompatibilis Change Data Capture komponens, amely a PostgreSQL WAL/outbox változásait olvassa, és a szavazási audit/integrációs eseményeket at-least-once módon a tartós event streambe publikálja. Felelős a PostgreSQL tranzakció és az eseményfolyam közötti dual-write rés megszüntetéséért. Nem hoz üzleti döntést és nem módosít szavazati rekordot.' 'Debezium CDC' {
+		cdcRelay = worker 'CDC outbox relé' 'PostgreSQL outbox változások publikálása a szavazási streambe.' 'Debezium CDC' {
 			style { color green }
 		}
 
-		database = database 'Relációs adatbázis' 'A rendszer elsődleges relációs tranzakciós adattárolója. Felelős a kampányok, ötletek, adminisztratív állapotok, outbox események és a szavazati tranzakciónapló konzisztens tárolásáért. A szavazatok esetében append-only tárolási modellt, campaign_id szerinti particionálást, partíciós kulcsot tartalmazó egyediségi constraintet és UPDATE/DELETE tiltást kell biztosítania. A szavazat elsődleges igazságforrása ez az adattár. Nem médiafájl-tároló, nem cache és nem üzenetbróker.' 'PostgreSQL' {
+		database = database 'Relációs adatbázis' 'Kampányok, ötletek, szavazati napló és outbox elsődleges tárolója.' 'PostgreSQL' {
 			style { color blue; icon tech:postgresql }
 		}
 
-		cache = cache 'Gyorsítótár' 'Szerveroldali memóriagyorsítótár gyakran olvasott, ritkán változó publikus adatokhoz, például nyitott pályázatok listájához, településlistákhoz, optimalizált listanézeti adatokhoz és forgalomkorlátozási kulcsokhoz. Felelős az adatbázis-terhelés és válaszidő csökkentéséért. Nem lehet a szavazatok elsődleges tárolója, nem használható megváltoztathatatlan auditnaplóként, és nem helyettesíti a PostgreSQL tranzakciós garanciáit.' 'Redis' {
+		cache = cache 'Gyorsítótár' 'Publikus listák, session/rate limit és idempotency kulcsok cache-elése.' 'Redis' {
 			style { color red; icon tech:redis }
 		}
 
-		rawMediaBucket = storage 'Nyers média bucket' 'S3-kompatibilis objektumtár a felhasználók által közvetlenül feltöltött eredeti képek és videók átmeneti vagy tartós tárolására. Felelős a presigned upload URL-en keresztül érkező nagy állományok fogadásáért úgy, hogy azok ne a backend API-n vagy event stream üzeneten keresztül utazzanak. Nem szolgál ki publikus optimalizált médiát.' 'MinIO / S3-kompatibilis bucket' {
+		rawMediaBucket = storage 'Nyers média bucket' 'Felhasználók által közvetlenül feltöltött eredeti média.' 'MinIO / S3-kompatibilis bucket' {
 			style { color amber }
 		}
 
-		optimizedMediaBucket = storage 'Optimalizált média bucket' 'S3-kompatibilis objektumtár a médiafeldolgozó által előállított WebP/WebM vagy más webes megjelenítésre optimalizált változatokhoz. Felelős a publikus kiszolgálás origin rétegéért, amely elé szükség esetén CDN vagy edge cache tehető. Nem tárol üzleti tranzakciókat vagy szavazatokat.' 'MinIO / S3-kompatibilis bucket' {
+		optimizedMediaBucket = storage 'Optimalizált média bucket' 'Webre optimalizált képek és videók origin tárolója.' 'MinIO / S3-kompatibilis bucket' {
 			style { color amber }
 		}
 
-		notificationService = service 'Értesítési szolgáltatás' 'Aszinkron eseményfogyasztó szolgáltatás, amely tartós streamekből olvasott domain események alapján e-mail és push értesítéseket készít és küld például új pályázat, szakaszváltás, lezárás vagy eredményhirdetés esetén. Hibája vagy lassulása nem akadályozhatja a szavazást, az ötletbeküldést vagy a kampánykezelést. Nem elsődleges adatforrás, nem hoz üzleti döntést, és nem rögzít szavazatot.' 'Node.js + NestJS' {
+		notificationService = service 'Értesítési szolgáltatás' 'Domain eseményekből e-mail és push értesítések készítése.' 'Node.js + NestJS' {
 			style {
 				color indigo
 				icon tech:nestjs
 			}
 		}
 
-		auditService = service 'Auditnaplózó szolgáltatás' 'Aszinkron auditnaplózó szolgáltatás, amely tartós streamekből fogyasztja a jelentős domain eseményeket, például szavazat leadása, ötlet beküldése, kampányállapot-változás vagy adminisztrátori beavatkozás. Felelős az auditcélú, visszakereshető eseménynapló felépítéséért és újrajátszhatóságáért. Nem a szavazatok elsődleges igazságforrása, nem jogosult szavazati rekord módosítására vagy törlésére, és nem lehet a felhasználói kérések szinkron kritikus útjának része.' 'Node.js + NestJS' {
+		auditService = service 'Auditnaplózó szolgáltatás' 'Jelentős domain események visszakereshető auditnaplózása.' 'Node.js + NestJS' {
 			style {
 				color indigo
 				icon tech:nestjs
@@ -249,7 +249,8 @@ model {
 		apiGateway -> zamundaOne 'Bejelentkezés és tokenellenőrzés' '' 'OAuth2 / OpenID Connect'
 		apiGateway -> votingService 'Szavazási műveletek továbbítása' '' 'HTTPS + REST/JSON'
 		apiGateway -> campaignAdminService 'Publikus, lakossági és admin műveletek továbbítása' '' 'HTTPS + REST/JSON'
-		citizenDashboard -> rawMediaBucket 'Nagy médiafájl közvetlen feltöltése presigned URL-lel' '' 'HTTPS + S3 API'
+		citizenDashboard -> rawMediaBucket 'Ötletmédia közvetlen feltöltése presigned URL-lel' '' 'HTTPS + S3 API'
+		adminPanel -> rawMediaBucket 'Pályázati média közvetlen feltöltése presigned URL-lel' '' 'HTTPS + S3 API'
 		campaignAdminService -> rawMediaBucket 'Presigned upload URL és objektumkulcs kiadása' '' 'S3 API'
 		campaignAdminService -> mediaProcessingRequests 'Médiafeldolgozási kérés publikálása' '' 'NATS JetStream / Kafka'
 		campaignAdminService -> campaignEvents 'Kampány-, ötlet- és admin esemény publikálása' '' 'NATS JetStream / Kafka'
@@ -270,7 +271,7 @@ model {
 		campaignAdminService -> dbPooler 'Pályázatokat, ötleteket és admin adatokat ír/olvas' '' 'PostgreSQL wire protocol'
 		auditService -> dbPooler 'Auditnaplót ír' '' 'PostgreSQL wire protocol'
 		dbPooler -> database 'Korlátozott backend kapcsolatok' '' 'PostgreSQL wire protocol'
-		cdcRelay -> database 'WAL és outbox változások olvasása' '' 'PostgreSQL replication/logical decoding'
+		database -> cdcRelay 'WAL/outbox változások átadása' '' 'PostgreSQL logical decoding'
 		apiGateway -> cache 'Rate limit és session-adatok' '' 'Redis protocol'
 		votingService -> cache 'Idempotency és szolgáltatásszintű limit kulcsok' '' 'Redis protocol'
 		campaignAdminService -> cache 'Publikus listanézet cache és limit kulcsok' '' 'Redis protocol'
@@ -279,17 +280,50 @@ model {
 	allampol -> cc.publicPortal 'Böngész és ötleteket néz meg' '' 'HTTPS'
 	allampol -> cc.citizenDashboard 'Bejelentkezik, ötletet javasol, szavaz, médiát tölt fel' '' 'HTTPS'
 	admin -> cc.adminPanel 'Pályázatot hirdet, ötleteket moderál' '' 'HTTPS'
+	allampol -> cc 'Ötletet javasol és szavaz' '' 'HTTPS'
+	admin -> cc 'Pályázatot és moderációt kezel' '' 'HTTPS'
+	cc -> zamundaOne 'Azonosítás és lakcímadat ellenőrzése' '' 'OIDC / REST'
+	cc -> kms 'HMAC kulcsműveletek' '' 'Vault/KMS API'
+	cc -> emailApi 'Tranzakciós e-mail kézbesítés' '' 'SMTP / HTTP API'
+	cc -> pushApi 'Push értesítés kézbesítés' '' 'Web Push / HTTP API'
+	cc -> cdn 'Optimalizált médiatartalom kiszolgálása' '' 'HTTPS'
 }
 
 views {
 	view context {
 		title 'Community Choice - rendszerkörnyezeti diagram'
-		include *
+		include allampol
+		include admin
+		include cc
+		include zamundaOne
+		include kms
+		include emailApi
+		include pushApi
+		include cdn
 	}
 
 	view containers of cc {
-		title 'Community Choice - konténerdiagram'
-		include *
+		title 'Community Choice - konténerdiagram áttekintő'
+		include allampol
+		include admin
+		include cc.publicPortal
+		include cc.citizenDashboard
+		include cc.adminPanel
+		include cc.apiGateway
+		include cc.votingService
+		include cc.campaignAdminService
+		include cc.dbPooler
+		include cc.database
+		include cc.cdcRelay
+		include cc.cache
+		include cc.mediaProcessingRequests
+		include cc.campaignEvents
+		include cc.voteCastEvents
+		include cc.mediaWorker
+		include cc.auditService
+		include cc.notificationService
+		include cc.rawMediaBucket
+		include cc.optimizedMediaBucket
 	}
 
 	view voteIntegrity {
@@ -304,6 +338,21 @@ views {
 		include cc.voteCastEvents
 		include cc.auditService
 		include cc.notificationService
+	}
+
+	view mediaFlow {
+		title 'Community Choice - médiafeltöltés és feldolgozás'
+		include allampol
+		include admin
+		include cc.citizenDashboard
+		include cc.adminPanel
+		include cc.apiGateway
+		include cc.campaignAdminService
+		include cc.rawMediaBucket
+		include cc.mediaProcessingRequests
+		include cc.mediaWorker
+		include cc.optimizedMediaBucket
+		include cdn
 	}
 
 	view compVoting of cc.votingService {
