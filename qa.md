@@ -1,9 +1,3 @@
-Ahhoz, hogy a védeni tudjátok a projektet, nemcsak a saját döntéseiteket kell kívülről fújni, hanem azt is, hogy *mit miért vetettetek el*. Egy tapasztalt zsűri vagy oktató nem a funkciókat fogja támadni, hanem a kompromisszumokat (trade-offs), a biztonsági réseket és a skálázhatósági szűk keresztmetszeteket.
-
-Íme a "golyóálló" FAQ (Gyakran Ismételt Kérdések), amely három blokkra oszlik: Architektúra, Biztonság/Integritás, és a tipikus "Kötözködő" Zsűri Kérdések.
-
----
-
 ### I. Architekturális Alapok és Kompromisszumok
 
 **1. Miért nem tiszta Mikroszolgáltatásos (Microservices) architektúrát terveztetek?**
@@ -46,12 +40,54 @@ Ahhoz, hogy a védeni tudjátok a projektet, nemcsak a saját döntéseiteket ke
 
 * **A válasz:** Két dolog. Egyrészt egy Connection Pooler (PgBouncer) védi az adatbázist attól, hogy a több ezer hirtelen beérkező API kérés kimerítse a TCP kapcsolatokat. Másrészt natív adatbázis-particionálást alkalmazunk a szavazati táblán kampányok alapján. Így a csúcsidőszakban a szavazatok egy kisebb, szeparált indexszel rendelkező táblába íródnak, ami minimalizálja a "lock contention" (holtverseny) problémáját a lemezen.
 
-**9. Zsűri kérdése: "Említették az API Gateway-t és a hálózati támadások elleni Rate Limiting-et. Hogyan fogják kezelni azt a problémát, hogy mobilhálózatok esetén (CGNAT miatt) több száz felhasználónak ugyanaz a publikus IP-címe?"**
-
-* **A válasz:** Tisztában vagyunk a Carrier-Grade NAT problémájával. Éppen ezért a Rate Limitinget nem tisztán IP-alapon végezzük az autentikált folyamatoknál. A publikus böngészést védheti IP-limit, de a szavazási és ötletbeküldési végpontokon a sebességkorlátozást a Zamunda One által kiadott JWT tokenek `Subject` (User ID) claimje alapján hajtja végre az API Gateway. Ezzel megelőzzük, hogy egy egész kollégiumot tévedésből kizárjunk a szavazásból.
-
 ---
 
 Ezzel a tudásanyaggal minden komolyabb architekturális és tervezési rohamot vissza tudtok verni a védés során.
 
 Melyik kérdéskör (adatbázis-particionálás, CDC/Outbox, vagy az időbeli jogosultság) megválaszolását és mélyebb logikáját érzed jelenleg a leggyengébb pontnak a csapaton belül, amire érdemes lenne még fókuszálni a prezentáció előtt?
+
+
+Az ADR-007 dokumentum alapján a rendszer két teljesen eltérő megközelítést alkalmaz a HMAC képzésére (attól függően, hogy a jogosultsági ellenőrzésről vagy magáról a szavazásról van szó), ami meghatározza a kulcslekérés módját. A kulcsrotáció esetén pedig a rendszer a kulcsverziók (key versions) átfedő kezelésével és visszamenőleges ellenőrzésével kerüli el a duplikált szavazatokat.
+
+Íme a két kérdésedre a részletes, architekturális válasz.
+
+### 1. Hogyan működik a secret lekérés?
+
+A dokumentum alapján a rendszer minimalizálja a titkos kulcsok utaztatását, és két külön utat határoz meg:
+
+**A jogosultsági pillanatképnél (Eligibility Snapshot): Nincs secret lekérés**
+
+* Itt a rendszer a **Vault Transit** engine-t használja. A titkos kulcs (pepper) soha, semmilyen formában nem hagyja el a Vault memóriáját.
+* Amikor a BFF (Backend for Frontend) vagy a domain szolgáltatás megkapja a Zamunda One ID-t, a hálózaton keresztül elküldi ezt a nyers azonosítót a Vaultnak.
+* A Vault lokálisan, a saját memóriájában elvégzi a HMAC számítást, majd csak a kész hash eredményt küldi vissza az alkalmazásnak. A NestJS alkalmazás sosem ismeri meg magát a kulcsot.
+
+**A szavazói kulcsnál (Voter Key): Rövid élettartamú kulcs lekérése és származtatása**
+
+* Mivel szavazási csúcsidőben minden egyes szavazatnál Vault hívást indítani túl lassú lenne, a *Szavazási szolgáltatás (Voting Service)* podjai a saját illékony memóriájukban végzik a HMAC számítást.
+* A pod az indulásakor (vagy kampányváltáskor) a saját szolgáltatásidentitásával (pl. Kubernetes Service Account / Vault AppRole) hitelesíti magát a KMS-nél (Key Management Service).
+* Lekér egy **rövid élettartamú, operatív HMAC kulcsot** (vagy egy mesterkulcsból HKDF eljárással származtat egyet).
+* Ezt a kulcsot szigorúan csak a RAM-ban tartja (nem kerül logba, lemezre, swapbe). Amikor a kulcs élettartama (TTL, pl. 1 óra) lejár, a pod újraadja a hitelesítését és lekéri a frissített vagy következő verziójú kulcsot.
+
+---
+
+### 2. Ha rotáció van, honnét tudjuk, hogy egy felhasználó már szavazott-e?
+
+Ez a pszeudonimizált, HMAC-alapú rendszerek legkritikusabb pontja. Ha megváltozik a titkos kulcs, ugyanabból a Zamunda One ID-ból egy teljesen új `voter_key` (hash) fog keletkezni. Ha a rendszer csak az új hasht vizsgálná, a felhasználó újra tudna szavazni, ami sérti az alapkövetelményeket.
+
+A megoldás az ADR-007 alapján a következő lépésekből áll:
+
+**Kampányonkénti izoláció és tervezett rotáció**
+
+* Az alapelv az, hogy **aktív kampány közben nincs rotáció**, csak új kampány indításakor. Mivel minden kampánynak saját kulcsa van, a rotáció nem okoz ütközést, hiszen egy adott kampányon belül végig ugyanaz a kulcs él.
+
+**Incidens miatti rotáció aktív kampány közben (Átfedő kulcskezelés)**
+
+* Ha egy kulcs kiszivárog, és aktív kampány közben kell azonnali (incidens) rotációt végrehajtani, a *Szavazási szolgáltatásnak* **átfedő kulcskezelést (overlapping key versions)** kell alkalmaznia.
+* A szavazati adatbázisban minden leadott szavazat mellett szerepel a felhasznált kulcs verziója (pl. `key_version: v1`).
+* Amikor a felhasználó megpróbál szavazni az incidens (és a `v2`-es kulcs bevezetése) után, a Szavazási szolgáltatás a memóriájában lévő korábbi (`v1`) és az új (`v2`) kulccsal is kiszámolja a HMAC értéket.
+* A szolgáltatás lekérdezi a PostgreSQL-ből, hogy létezik-e szavazat az adott ötletre a `voter_key_v1` VAGY a `voter_key_v2` azonosítóval.
+* Ha bármelyik hash találatot ad, a rendszer tudja, hogy a felhasználó már szavazott, és elutasítja a kérést. Ha nem szavazott még, a rendszer az új, biztonságos (`v2`) kulccsal menti el a szavazatát.
+
+**Régi kulcsok kivezetése**
+
+* A kampány lezárulta után a régi, kompromittálódott kulcsok végleg törölhetők a memóriából. A szavazati rekordok integritása megmarad (hiszen append-only táblában vannak, és a szavazat ténye a `key_version` és a `voter_key` alapján auditálható marad anélkül, hogy a nyers azonosítóra vissza lehetne fejteni).
