@@ -34,6 +34,13 @@ specification {
 		}
 	}
 
+	element gateway {
+		style {
+			shape component
+			color amber
+		}
+	}
+
 	element worker {
 		style {
 			shape component
@@ -84,7 +91,7 @@ model {
 	allampol = actor 'Zamundai állampolgár' 'Ötleteket javasol és szavaz a helyi pályázatokon' 'Reszponzív böngésző'
 	admin = actor 'Közigazgatási adminisztrátor' 'Pályázatokat hirdet és moderál' 'Hivatali böngésző'
 
-	zamundaOne = externalSystem 'Zamunda One' 'Külső állami azonosítás és lakcímadat-szolgáltatás.' 'OAuth2 / OpenID Connect + REST API' {
+	zamundaOne = externalSystem 'Zamunda One' 'Külső állami azonosítás és lakcímadat-szolgáltatás; feltételezett lakcím-módosítási metaadattal.' 'OAuth2 / OpenID Connect + REST API' {
 		style {
 			color amber
 		}
@@ -108,7 +115,7 @@ model {
 		}
 	}
 
-	kms = externalSystem 'KMS / Vault Transit' 'HMAC műveletek és kampánykulcsok védett kezelése.' 'HashiCorp Vault Transit vagy kompatibilis KMS' {
+	kms = externalSystem 'KMS / Vault Transit' 'Kampány-mesterkulcsok és rövid élettartamú kulcsok származtatásának védett kezelése.' 'HashiCorp Vault Transit vagy kompatibilis KMS' {
 		style {
 			color amber
 		}
@@ -139,25 +146,33 @@ model {
 			}
 		}
 
-		apiGateway = service 'API Gateway / BFF' 'Webes belépési pont, routing, tokenellenőrzés és rate limit.' 'Node.js + NestJS BFF' {
+		edgeGateway = gateway 'Ingress / API Gateway' 'Publikus peremréteg: TLS termináció, routing, request limit, durva rate limit és JWT elővalidálás.' 'Traefik / Nginx / Kong / cloud gateway' {
+			style { color amber }
+		}
+
+		apiBff = service 'Backend API / BFF' 'Alkalmazási belépési pont: API-összeállítás, üzleti jogosultság és domain routing.' 'Node.js + NestJS BFF' {
 			style { color indigo; icon tech:nestjs }
 		}
 
-		votingService = service 'Szavazási szolgáltatás' 'Jogosultságellenőrzés, voter_key képzés, append-only szavazat + outbox írás.' 'Node.js + NestJS' {
+		votingService = service 'Szavazási szolgáltatás' 'Jogosultsági pillanatkép, voter_key képzés, append-only szavazat + outbox írás.' 'Node.js + NestJS' {
 			style { color green; icon tech:nestjs }
 
-			votingController = component 'Szavazási vezérlő' 'Kezeli a gateway felől érkező szavazási kéréseket' 'NestJS vezérlő'
+			votingController = component 'Szavazási vezérlő' 'Kezeli a BFF felől érkező szavazási kéréseket' 'NestJS vezérlő'
 			votingLogic = component 'Szavazási logika' 'Üzleti logika: egy felhasználó egy ötletre csak egyszer szavazhat' 'NestJS szolgáltatás'
-			voteZamundaClient = component 'Zamunda One kliens' 'Lakcím-ellenőrzés, hogy csak helyi lakos szavazhasson' 'HTTP kliens'
-			keyClient = component 'KMS kliens' 'Kampányhoz kötött HMAC művelet kérése nyers secret kiolvasása nélkül' 'Vault/KMS kliens'
-			voteRepo = component 'Szavazati és outbox adattár' 'A csak hozzáfűzhető szavazatok és outbox események mentése egy PostgreSQL tranzakcióban' 'TypeORM'
+			eligibilityManager = component 'Jogosultságkezelő' 'Kampányhoz kötött jogosultsági pillanatkép ellenőrzése és létrehozása' 'NestJS szolgáltatás'
+			voteZamundaClient = component 'Zamunda One kliens' 'Lakcím és opcionális lakcím-módosítási metaadat lekérése' 'HTTP kliens'
+			keyClient = component 'Kulcsszármaztatási kliens' 'Rövid élettartamú kampánykulcs frissítése KMS/Vault által védett mesterkulcsból' 'Vault/KMS kliens + HKDF'
+			voteRepo = component 'Szavazati, jogosultsági és outbox adattár' 'A campaign_eligibility snapshot, a csak hozzáfűzhető szavazatok és outbox események mentése' 'TypeORM'
 			rateLimiter = component 'Forgalomkorlátozó' 'Szolgáltatásszintű védelmi limit a gateway-n túli biztonsági rétegként' 'NestJS elfogó'
 
 			votingController -> rateLimiter 'Ellenőrzi a limitet'
 			votingController -> votingLogic 'Szavazat feldolgozása'
-			votingLogic -> voteZamundaClient 'Lakcím és jogosultság ellenőrzése'
-			votingLogic -> keyClient 'Pszeudonim kulcs kérése'
-			votingLogic -> voteRepo 'Szavazat és outbox mentése'
+			votingLogic -> voteZamundaClient 'Lakcím és módosítási metaadat lekérése'
+			votingLogic -> eligibilityManager 'Jogosultsági pillanatkép kérése'
+			eligibilityManager -> voteRepo 'campaign_eligibility olvasása vagy létrehozása'
+			eligibilityManager -> votingLogic 'Snapshot adatok visszaadása'
+			votingLogic -> keyClient 'Snapshot-alapú voter_key képzése'
+			votingLogic -> voteRepo 'Szavazat és outbox mentése snapshot alapján'
 		}
 
 		campaignAdminService = service 'Pályázat- és adminisztrációkezelő szolgáltatás' 'Kampányok, ötletek, moderáció, pályázati és ötletmédia metaadatainak kezelése.' 'Node.js + NestJS' {
@@ -181,7 +196,7 @@ model {
 			style { color red }
 		}
 
-		voteCastEvents = stream 'vote-cast-events stream' 'CDC outbox relén keresztül érkező szavazási audit események.' 'NATS JetStream / Kafka stream' {
+		voteCastEvents = stream 'vote-cast-events stream' 'Outbox relay workeren keresztül érkező szavazási audit események.' 'NATS JetStream / Kafka stream' {
 			style { color red }
 		}
 
@@ -209,11 +224,11 @@ model {
 			style { color blue; icon tech:postgresql }
 		}
 
-		cdcRelay = worker 'CDC outbox relé' 'PostgreSQL outbox változások publikálása a szavazási streambe.' 'Debezium CDC' {
+		outboxRelay = worker 'Outbox relay worker' 'PostgreSQL outbox rekordok publikálása a szavazási streambe SKIP LOCKED feldolgozással.' 'Go / Rust / NestJS worker + NATS JetStream' {
 			style { color green }
 		}
 
-		database = database 'Relációs adatbázis' 'Kampányok, ötletek, szavazati napló és outbox elsődleges tárolója.' 'PostgreSQL' {
+		database = database 'Relációs adatbázis' 'Kampányok, ötletek, jogosultsági pillanatképek, szavazati napló és outbox elsődleges tárolója.' 'PostgreSQL' {
 			style { color blue; icon tech:postgresql }
 		}
 
@@ -243,18 +258,20 @@ model {
 			}
 		}
 
-		publicPortal -> apiGateway 'Pályázatok és ötletek böngészése' '' 'HTTPS + REST/JSON'
-		citizenDashboard -> apiGateway 'Bejelentkezés, ötletbeküldés, szavazás, feltöltési URL kérése' '' 'HTTPS + REST/JSON'
-		adminPanel -> apiGateway 'Pályázatok és moderáció kezelése' '' 'HTTPS + REST/JSON'
-		apiGateway -> zamundaOne 'Bejelentkezés és tokenellenőrzés' '' 'OAuth2 / OpenID Connect'
-		apiGateway -> votingService 'Szavazási műveletek továbbítása' '' 'HTTPS + REST/JSON'
-		apiGateway -> campaignAdminService 'Publikus, lakossági és admin műveletek továbbítása' '' 'HTTPS + REST/JSON'
+		publicPortal -> edgeGateway 'Pályázatok és ötletek böngészése' '' 'HTTPS + REST/JSON'
+		citizenDashboard -> edgeGateway 'Bejelentkezés, ötletbeküldés, szavazás, feltöltési URL kérése' '' 'HTTPS + REST/JSON'
+		adminPanel -> edgeGateway 'Pályázatok és moderáció kezelése' '' 'HTTPS + REST/JSON'
+		edgeGateway -> zamundaOne 'JWT kulcskészlet és token formai elővalidálása' '' 'OIDC / JWKS'
+		edgeGateway -> apiBff 'Előszűrt API kérések továbbítása' '' 'HTTPS + REST/JSON'
+		apiBff -> zamundaOne 'Bejelentkezési és profil integráció koordinálása' '' 'OAuth2 / OpenID Connect'
+		apiBff -> votingService 'Szavazási műveletek továbbítása' '' 'HTTPS + REST/JSON'
+		apiBff -> campaignAdminService 'Publikus, lakossági és admin műveletek továbbítása' '' 'HTTPS + REST/JSON'
 		citizenDashboard -> rawMediaBucket 'Ötletmédia közvetlen feltöltése presigned URL-lel' '' 'HTTPS + S3 API'
 		adminPanel -> rawMediaBucket 'Pályázati média közvetlen feltöltése presigned URL-lel' '' 'HTTPS + S3 API'
 		campaignAdminService -> rawMediaBucket 'Presigned upload URL és objektumkulcs kiadása' '' 'S3 API'
 		campaignAdminService -> mediaProcessingRequests 'Médiafeldolgozási kérés publikálása' '' 'NATS JetStream / Kafka'
 		campaignAdminService -> campaignEvents 'Kampány-, ötlet- és admin esemény publikálása' '' 'NATS JetStream / Kafka'
-		cdcRelay -> voteCastEvents 'Outboxból olvasott szavazatleadási esemény publikálása' '' 'CDC + NATS JetStream / Kafka'
+		outboxRelay -> voteCastEvents 'Outboxból olvasott szavazatleadási esemény publikálása' '' 'PostgreSQL SKIP LOCKED + NATS JetStream'
 		mediaProcessingRequests -> mediaWorker 'Médiafeldolgozási feladat fogyasztása' '' 'NATS JetStream / Kafka'
 		voteCastEvents -> auditService 'Szavazási audit esemény fogyasztása' '' 'NATS JetStream / Kafka'
 		voteCastEvents -> notificationService 'Szavazási értesítési esemény fogyasztása' '' 'NATS JetStream / Kafka'
@@ -265,14 +282,15 @@ model {
 		optimizedMediaBucket -> cdn 'Opcionális gyorsítótárazott kiszolgálás' '' 'HTTPS'
 		notificationService -> emailApi 'E-mail küldése' '' 'SMTP / HTTP API'
 		notificationService -> pushApi 'Push értesítés küldése' '' 'Web Push / HTTP API'
-		votingService -> zamundaOne 'Lakcím és jogosultság ellenőrzése' '' 'REST API'
-		votingService -> kms 'HMAC művelet kérése kampánykulccsal' '' 'Vault/KMS API'
-		votingService -> dbPooler 'Szavazat + outbox esemény írása egy tranzakcióban' '' 'PostgreSQL wire protocol'
+		votingService -> zamundaOne 'Lakcím és opcionális módosítási metaadat lekérése' '' 'REST API'
+		votingService -> kms 'Rövid élettartamú kampánykulcs frissítése' '' 'Vault/KMS API + HKDF'
+		votingService -> dbPooler 'Jogosultsági snapshot, szavazat és outbox írása' '' 'PostgreSQL wire protocol'
 		campaignAdminService -> dbPooler 'Pályázatokat, ötleteket és admin adatokat ír/olvas' '' 'PostgreSQL wire protocol'
 		auditService -> dbPooler 'Auditnaplót ír' '' 'PostgreSQL wire protocol'
 		dbPooler -> database 'Korlátozott backend kapcsolatok' '' 'PostgreSQL wire protocol'
-		database -> cdcRelay 'WAL/outbox változások átadása' '' 'PostgreSQL logical decoding'
-		apiGateway -> cache 'Rate limit és session-adatok' '' 'Redis protocol'
+		database -> outboxRelay 'Outbox rekordok zárolt olvasása' '' 'PostgreSQL SELECT FOR UPDATE SKIP LOCKED'
+		edgeGateway -> cache 'Elosztott rate limit állapot' '' 'Redis protocol'
+		apiBff -> cache 'Session-adatok és BFF cache' '' 'Redis protocol'
 		votingService -> cache 'Idempotency és szolgáltatásszintű limit kulcsok' '' 'Redis protocol'
 		campaignAdminService -> cache 'Publikus listanézet cache és limit kulcsok' '' 'Redis protocol'
 	}
@@ -282,8 +300,8 @@ model {
 	admin -> cc.adminPanel 'Pályázatot hirdet, ötleteket moderál' '' 'HTTPS'
 	allampol -> cc 'Ötletet javasol és szavaz' '' 'HTTPS'
 	admin -> cc 'Pályázatot és moderációt kezel' '' 'HTTPS'
-	cc -> zamundaOne 'Azonosítás és lakcímadat ellenőrzése' '' 'OIDC / REST'
-	cc -> kms 'HMAC kulcsműveletek' '' 'Vault/KMS API'
+	cc -> zamundaOne 'Azonosítás, lakcím és opcionális módosítási metaadat ellenőrzése' '' 'OIDC / REST'
+	cc -> kms 'Kampánykulcsok és rövid élettartamú kulcsok származtatása' '' 'Vault/KMS API'
 	cc -> emailApi 'Tranzakciós e-mail kézbesítés' '' 'SMTP / HTTP API'
 	cc -> pushApi 'Push értesítés kézbesítés' '' 'Web Push / HTTP API'
 	cc -> cdn 'Optimalizált médiatartalom kiszolgálása' '' 'HTTPS'
@@ -309,12 +327,13 @@ views {
 		include cc.publicPortal
 		include cc.citizenDashboard
 		include cc.adminPanel
-		include cc.apiGateway
+		include cc.edgeGateway
+		include cc.apiBff
 		include cc.votingService
 		include cc.campaignAdminService
 		include cc.dbPooler
 		include cc.database
-		include cc.cdcRelay
+		include cc.outboxRelay
 		include cc.cache
 		include cc.mediaProcessingRequests
 		include cc.campaignEvents
@@ -330,11 +349,12 @@ views {
 		title 'Community Choice - szavazási integritás és audit eseménykibocsátás'
 		include zamundaOne
 		include kms
-		include cc.apiGateway
+		include cc.edgeGateway
+		include cc.apiBff
 		include cc.votingService
 		include cc.dbPooler
 		include cc.database
-		include cc.cdcRelay
+		include cc.outboxRelay
 		include cc.voteCastEvents
 		include cc.auditService
 		include cc.notificationService
@@ -346,7 +366,8 @@ views {
 		include admin
 		include cc.citizenDashboard
 		include cc.adminPanel
-		include cc.apiGateway
+		include cc.edgeGateway
+		include cc.apiBff
 		include cc.campaignAdminService
 		include cc.rawMediaBucket
 		include cc.mediaProcessingRequests

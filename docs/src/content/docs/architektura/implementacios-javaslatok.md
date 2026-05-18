@@ -13,6 +13,13 @@ Ez az oldal azokat a technológiai részleteket gyűjti, amelyek hasznos tervez�
 - Ha a Zamunda One támogatja, érdemes OAuth 2.0 / OpenID Connect jellegű folyamatot használni.
 - A kliens és backend közötti adatcsere RESTful API-kon és JSON üzenetformátumon alapulhat, amennyiben ez illeszkedik a végleges API-szerződéshez.
 
+## Peremvédelem és API belépési pont
+
+- A publikus webes forgalom dedikált Ingress/API Gateway rétegen keresztül érkezzen, ne közvetlenül a NestJS BFF vagy domain szolgáltatások felé.
+- A gateway felelőssége a TLS termináció, routing, request size limitek, durva rate limiting, alapvető DDoS/abuse szűrés, biztonsági fejlécek és JWT formai/JWKS-alapú elővalidálás.
+- A gateway implementációfüggetlen döntés: önmenedzselt környezetben Traefik vagy Nginx javasolt, plugin-orientált gateway igénynél Kong, felhőben natív API gateway/load balancer is megfelelő lehet.
+- A NestJS BFF maradjon alkalmazási belépési pont az üzleti jogosultság, lakcím-alapú ellenőrzés, API-összeállítás és domain-specifikus hibakezelés számára.
+
 ## Hálózati hatékonyság
 
 - Magas késleltetésű és alacsony sávszélességű régiókban HTTP/2 vagy HTTP/3 használata csökkentheti a kapcsolatkezelési és multiplexálási költségeket.
@@ -38,9 +45,11 @@ Ez az oldal azokat a technológiai részleteket gyűjti, amelyek hasznos tervez�
 
 - A szavazatok elsődleges igazságforrása PostgreSQL tranzakciós tároló.
 - A leadott szavazatok módosításának és törlésének tiltása csak hozzáfűzhető szavazati tranzakciónaplóval, adatbázis-szintű jogosultságokkal és `UPDATE` / `DELETE` tiltással valósul meg.
+- A kampányhoz kötött lakcímjogosultságot `campaign_eligibility` pillanatkép táblában kell rögzíteni felhasználóazonosító hash, kampányazonosító, önkormányzati azonosító, jogosultsági döntés, snapshot időpont és - ha a Zamunda One API-ból lekérhető - lakcím-módosítási dátum/időbélyeg mezőkkel; nyers lakcímet vagy nyers személyes azonosítót ez a tábla sem tárolhat.
 - Az „egy felhasználó egy ötletre egyszer” szabályt adatbázis-szintű egyediségi szabály védi; particionált szavazati táblánál például `UNIQUE(campaign_id, idea_id, voter_key)`.
 - A nyers személyes azonosító helyett determinisztikus, pszeudonimizált szavazói kulcs használatos.
-- A pszeudonimizált kulcs HMAC-alapú képzése KMS/Vault Transit jellegű kulcskezelésre támaszkodik; a nyers HMAC secret nem kerülhet `.env` fájlba vagy CI/CD változóba.
+- A kampány-mesterkulcs KMS/Vault Transit jellegű kulcskezelésben él; a szavazási kritikus útban a pod illékony memóriában tartott rövid élettartamú kampánykulcsból számolja a HMAC-et.
+- A nyers kampány-mesterkulcs nem kerülhet `.env` fájlba, CI/CD változóba, alkalmazáslogba vagy lemezre; a rövid élettartamú kulcs TTL-je és rotációja üzemeltetési szabály.
 - A szavazati tranzakciónaplót `campaign_id` szerint particionálni kell, hogy a kampányzárási írási terhelés kisebb indexeken fusson.
 - Az alkalmazásszolgáltatások és a PostgreSQL között PgBouncer vagy kompatibilis connection pooler szükséges, szolgáltatásonként korlátozott poolokkal.
 
@@ -49,7 +58,7 @@ Ez az oldal azokat a technológiai részleteket gyűjti, amelyek hasznos tervez�
 - Az audit és integrációs eseményfolyam tartós event streamként működik; induló profilban NATS JetStream, országos/nagy replay profilban Kafka alkalmazható.
 - A szavazat leadása, ötlet beküldése és adminisztrátori beavatkozás domain eseményként külön streamekbe kerül.
 - Az audit, értesítés és médiafeldolgozás egymástól független fogyasztóként működhet, hogy ezek lassulása ne akadályozza a szavazási vagy pályázatkezelési kéréseket.
-- A szavazási auditfolyamnál a megbízható eseménypublikálás kötelező transactional outbox + CDC mintával történik: a Szavazási szolgáltatás PostgreSQL tranzakcióban ír, Debezium vagy kompatibilis CDC relé publikál a streambe.
+- A szavazási auditfolyamnál a megbízható eseménypublikálás kötelező transactional outbox mintával történik: a Szavazási szolgáltatás PostgreSQL tranzakcióban ír, valamint saját outbox relay worker publikál NATS JetStreambe.
 
 ## Későbbi opció: ötlet-deduplikáció RAG/pgvector alapon
 

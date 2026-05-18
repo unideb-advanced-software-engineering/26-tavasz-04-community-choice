@@ -45,7 +45,7 @@ Budapest és a kerületek közösségi költségvetése:
 - Az egyes pályázatokon minden lakos annyi ötletre szavazhat, amennyire csak szeretne.
 - Szigorúan kontrollálni kell a szavazatokhoz való hozzáférést; szavazat adminisztrátori törlése és módosítása pedig egyáltalán nem lehet megoldható.
 - A pályázatok és ötletek teljes életciklusa jelenjen meg a platformban.
-- Az autentikációhoz és autorizációhoz a Zamunda One nevű API-t kell integrálni, mely megbízható adatokat biztosít a bejelentkezett felhasználó bejelentett lakóhelyéről.
+- Az autentikációhoz és autorizációhoz a Zamunda One nevű API-t kell integrálni, mely megbízható adatokat biztosít a bejelentkezett felhasználó bejelentett lakóhelyéről. A kampány közbeni lakcímváltozások kezeléséhez feltétel, hogy a Zamunda One-ból lekérhető legyen a lakcím utolsó módosítási dátuma/időbélyege vagy egy ekvivalens lakcím-érvényességi metaadat.
   - Valós kapcsolódás: [SZEUSZ KAÜ](https://szeusz.gov.hu/szeusz/kau)  
 
 ## Kiegészítések

@@ -51,7 +51,7 @@ description: A Community Choice rendszer architekturális karakterisztikáinak l
 - **Forrás:** hitelesített lakos és a szavazási infrastruktúra.
 - **Stimulus:** a lakos szavazata sikeresen commitol PostgreSQL-ben, miközben a tartós event stream átmenetileg nem elérhető.
 - **Környezet:** szavazási csúcsterhelés, broker- vagy hálózati anomália, működő PostgreSQL tranzakciós tároló.
-- **Válasz:** a szavazati rekorddal egy tranzakcióban outbox esemény jön létre; Debezium vagy kompatibilis CDC relé a hiba megszűnése után publikálja az eseményt.
+- **Válasz:** a szavazati rekorddal egy tranzakcióban outbox esemény jön létre; az outbox relay worker a hiba megszűnése után publikálja az eseményt.
 - **Válaszmérték:** sikeres szavazati commit után a hozzá tartozó outbox rekord nem maradhat tartósan publikálatlan riasztás nélkül; az auditfolyam fogyasztói idempotensen kezelik az esetleges duplikált kézbesítést.
 - **Kapcsolódó döntések:** [ADR-006](../adrs/adr-006/), [ADR-003](../adrs/adr-003/), [ADR-004](../adrs/adr-004/).
 

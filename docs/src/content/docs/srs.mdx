@@ -17,6 +17,8 @@ import Mermaid from '../../components/Mermaid.astro';
 | --- | --- | --- |
 | 1.0 | 2026-05-05 | Első beadandó-kompatibilis SRS-verzió |
 | 1.1 | 2026-05-16 | Követelmények pontosítása, mérhetőbb nemfunkcionális követelmények és implementációs részletek különválasztása |
+| 1.2 | 2026-05-18 | Perem gateway, rövid élettartamú kampánykulcs és takarékos outbox relay döntések átvezetése |
+| 1.3 | 2026-05-18 | Jogosultsági pillanatkép bevezetése a kampány közbeni lakcímváltozások kezelésére |
 
 ## 1. Bevezetés
 
@@ -98,10 +100,12 @@ A fejlesztés során kötelező a klímabarát és sávszélesség-takarékos te
 - A felhasználók autentikációjához és lakcím-alapú autorizációjához a Zamunda One szolgáltatást kell használni.
 - A személyes adatok kezelésénél a GDPR-hoz hasonló alapelveket lehet alapul venni.
 - A szavazati rekordok nem tartalmazhatnak nyers személyes azonosítót.
+- A lakcímváltozások kezelésére a rendszer jogosultsági pillanatképet alkalmaz. A jogosultság ellenőrzése a kampány kezdési időpontja és a Zamunda One-ból lekérhető lakcím-módosítási dátum/időbélyeg, például `address_updated_at`, összevetésével történik. Ha ilyen mező nem érhető el, a Zamunda One integrációnak ekvivalens hivatalos lakcím-érvényességi dátumot kell biztosítania.
 - A leadott szavazat utólagos módosítását és törlését a rendszernek meg kell akadályoznia.
 - A médiatartalmak kezelésénél sávszélesség- és tárhelytakarékos formátumokat kell használni.
-- A szavazati tranzakció és a hozzá tartozó audit/integrációs esemény között nem lehet alkalmazásszintű dual-write rés; a szavazási auditfolyam transactional outbox + CDC mintával készül.
-- A pszeudonimizált szavazói kulcs képzéséhez használt HMAC kulcsot dedikált KMS/Vault Transit jellegű szolgáltatásban kell kezelni.
+- A publikus backend elérés dedikált, implementációfüggetlen Ingress/API Gateway rétegen keresztül történik; Traefik vagy Nginx javasolt önmenedzselt megoldás, de nem kötelező termékválasztás.
+- A szavazati tranzakció és a hozzá tartozó audit/integrációs esemény között nem lehet alkalmazásszintű dual-write rés; a szavazási auditfolyam transactional outbox + outbox relay mintával készül.
+- A pszeudonimizált szavazói kulcs képzéséhez használt kampány-mesterkulcsot dedikált KMS/Vault Transit jellegű szolgáltatásban kell kezelni; a szavazási kritikus útban pod memóriában tartott rövid élettartamú kampánykulcs használható.
 - A szavazási csúcsterhelésnél a PostgreSQL írási út connection poolinggal és kampány szerinti particionálással védendő.
 
 ### 2.6. Felhasználói dokumentáció
@@ -111,6 +115,7 @@ A rendszer beépített online súgót és rövid, kontextusérzékeny útmutató
 ### 2.7. Feltételezések és függőségek
 
 - A Zamunda One megbízhatóan biztosítja a bejelentkezett felhasználó hitelesített profilját és bejelentett lakóhelyét.
+- A jogosultsági pillanatkép időbeli védelme feltételezi, hogy a Zamunda One API-ból lekérhető a lakcím utolsó hivatalos módosítási dátuma/időbélyege, vagy egy ezzel ekvivalens lakcím-érvényességi metaadat.
 - A Zamunda One pontos technikai API-szerződése implementációs fázisban pontosítandó, de a rendszer biztonságos, titkosított integrációval számol.
 - A pályázati költségvetési keretek kezelése és a keretek kimerülésének nyomon követése nem része az első verzió hatókörének.
 
@@ -130,13 +135,14 @@ A rendszer nem igényel közvetlen, speciális hardverinterfészt. A felhasznál
 
 ### 3.3. Szoftverinterfészek
 
-A rendszer a felhasználók autentikációjához és autorizációjához a Zamunda One API-t használja. Bejelentkezéskor a rendszer ezen az interfészen keresztül kapja meg a felhasználó hitelesített profiladatait, különösen a bejelentett állandó lakóhelyet. Ez az adatcsere képezi annak alapját, hogy kizárólag a helyi lakosok szavazhassanak vagy küldhessenek be ötletet az adott önkormányzat pályázatához.
+A rendszer a felhasználók autentikációjához és autorizációjához a Zamunda One API-t használja. Bejelentkezéskor a rendszer ezen az interfészen keresztül kapja meg a felhasználó hitelesített profiladatait, különösen a bejelentett állandó lakóhelyet. A jogosultsági pillanatképhez a rendszernek szüksége van a lakcím utolsó hivatalos módosítási dátumára/időbélyegére is, amennyiben ez a Zamunda One API-ból lekérhető, vagy egy ekvivalens lakcím-érvényességi metaadatra. Ez az adatcsere képezi annak alapját, hogy kizárólag a kampány kezdetéhez képest jogosult helyi lakosok szavazhassanak vagy küldhessenek be ötletet az adott önkormányzat pályázatához.
 
 A pontos protokollokat és adatszerkezeteket a Zamunda One hivatalos technikai specifikációjának ismeretében kell véglegesíteni. A tervezett integrációnak biztonságos, titkosított kapcsolaton és iparági szabványokra épülő azonosítási megoldáson kell alapulnia.
 
 ### 3.4. Kommunikációs interfészek
 
 - A webes kliensalkalmazás és a backend HTTPS-en keresztül kommunikál.
+- A külső HTTPS forgalom első belépési pontja dedikált Ingress/API Gateway, amely TLS terminációt, routingot, request size limiteket, durva rate limitinget és JWT elővalidálást végez.
 - Az API-válaszokat a hálózati forgalom csökkentése érdekében tömöríteni kell.
 - A pályázati értesítések e-mailben és push notification formában is megvalósíthatók.
 - A fotók és videók feltöltését a rendszernek instabil hálózati kapcsolat esetén is hibatűrő módon kell kezelnie.
@@ -223,7 +229,7 @@ A lakosok a rendszeren keresztül új ötleteket javasolhatnak az aktív pályá
 
 #### 4.2.2. Stimulus/Response szekvenciák
 
-- A felhasználó elindítja az ötletbeküldést egy adott pályázaton; a rendszer ellenőrzi, hogy a felhasználó jogosult-e, vagyis lakcíme illeszkedik-e az önkormányzathoz, és még nem küldött-e be ötletet ugyanarra a kampányra.
+- A felhasználó elindítja az ötletbeküldést egy adott pályázaton; a rendszer ellenőrzi, hogy a felhasználó jogosultsági pillanatképe illeszkedik-e az önkormányzathoz, és még nem küldött-e be ötletet ugyanarra a kampányra.
 - A felhasználó képet vagy videót és szöveget küld be; a rendszer eltárolja a javaslatot, a médiafájlok feldolgozását pedig sávszélesség-takarékos formátumokra optimalizálja.
 - A felhasználó megpróbál második ötletet beküldeni ugyanabba a pályázatba; a rendszer hibaüzenettel elutasítja a kérést.
 
@@ -245,19 +251,21 @@ A szavazás és a jogosultságkezelés a rendszer legfontosabb integritási ter�
 
 #### 4.3.2. Stimulus/Response szekvenciák
 
-- A felhasználó bejelentkezik; a rendszer a Zamunda One API-n keresztül elvégzi az autentikációt, és lekéri a bejelentett lakóhelyet.
-- A felhasználó szavazatot ad le egy helyi ötletre; a rendszer ellenőrzi, hogy még nem szavazott-e az adott ötletre, majd megváltoztathatatlan módon rögzíti a szavazatot.
+- A felhasználó bejelentkezik; a rendszer a Zamunda One API-n keresztül elvégzi az autentikációt, és lekéri a bejelentett lakóhelyet, valamint - ha az API támogatja - a lakcím utolsó módosítási dátumát/időbélyegét.
+- A felhasználó először lép interakcióba egy kampánnyal; a rendszer ellenőrzi vagy létrehozza a kampányhoz tartozó jogosultsági pillanatképet.
+- A felhasználó szavazatot ad le egy helyi ötletre; a rendszer a jogosultsági pillanatkép alapján ellenőrzi, hogy jogosult-e és még nem szavazott-e az adott ötletre, majd megváltoztathatatlan módon rögzíti a szavazatot.
 - A felhasználó megpróbál szavazni vagy ötletet beküldeni egy másik önkormányzat pályázatán; a rendszer jogosultság hiányára hivatkozva elutasítja a műveletet.
 - Egy adminisztrátor megpróbál törölni vagy módosítani egy leadott szavazatot; a rendszer elutasítja a műveletet, és az esemény auditálható marad.
 
 #### 4.3.3. Funkcionális követelmények
 
-- **F-SZ-01:** A rendszer integrálódik a Zamunda One API-val az autentikáció és a hivatalos lakcímadatokra épülő autorizáció céljából.
-- **F-SZ-02:** A rendszer szűri a hozzáférést: a felhasználó csak a saját bejelentett lakóhelye szerinti önkormányzat pályázatain adhat be ötletet és szavazhat.
+- **F-SZ-01:** A rendszer integrálódik a Zamunda One API-val az autentikáció és a hivatalos lakcímadatokra épülő autorizáció céljából; a lakcím mellett, feltéve hogy a Zamunda One API támogatja, lekéri a lakcím utolsó hivatalos módosítási dátumát/időbélyegét is.
+- **F-SZ-02:** A rendszer szűri a hozzáférést: a felhasználó csak a jogosultsági pillanatképe szerinti önkormányzat pályázatain adhat be ötletet és szavazhat. A pillanatkép létrehozásakor a rendszer a Zamunda One lakcímét és - ha lekérhető - a lakcím-módosítási dátumot/időbélyeget a kampány kezdési időpontjához viszonyítja.
 - **F-SZ-03:** A rendszer lehetővé teszi, hogy egy felhasználó egy pályázaton belül korlátlan számú különböző ötletre szavazzon, de egy konkrét ötletre csak egyetlen szavazatot adhat le.
 - **F-SZ-04:** A rendszer megakadályozza a leadott szavazatok utólagos módosítását és törlését, beleértve az adminisztrátori felületről indított műveleteket is.
 - **F-SZ-05:** A rendszer a szavazatokat pszeudonimizált szavazói kulccsal kapcsolja az ötletekhez. A szavazati rekord nem tartalmaz nyers személyes azonosítót, ugyanakkor a pszeudonim kulcs lehetővé teszi az egy ötletre egyszeri szavazás technológiai ellenőrzését.
-- **F-SZ-06:** A rendszer a sikeresen rögzített szavazathoz tartozó audit/integrációs eseményt ugyanabban a PostgreSQL tranzakcióban outbox rekordként is rögzíti; a tartós event streambe kerülést CDC folyamat biztosítja.
+- **F-SZ-06:** A rendszer a sikeresen rögzített szavazathoz tartozó audit/integrációs eseményt ugyanabban a PostgreSQL tranzakcióban outbox rekordként is rögzíti; a tartós event streambe kerülést outbox relay worker biztosítja.
+- **F-SZ-07:** A rendszer a felhasználó első kampány-interakciójakor, vagy előzetes kampányindítási jogosultság-előkészítés esetén a kampány indulásakor, rögzíti a felhasználó azonosító hash-ét, a kampány azonosítóját, az önkormányzat azonosítóját, a lakcím-módosítási dátumot/időbélyeget, ha az a Zamunda One-ból lekérhető, és a jogosultság tényét egy megváltoztathatatlan `campaign_eligibility` pillanatkép táblában. A kampány során minden további ötletbeküldési és szavazási jogosultság-ellenőrzés ebből a pillanatképből dolgozik, függetlenül a kampány közben történő lakcímváltozásoktól.
 
 ## 5. Egyéb nemfunkcionális követelmények
 
@@ -278,12 +286,13 @@ A rendszer nem vezérel fizikai biztonságkritikus folyamatot, ezért klasszikus
 ### 5.3. Biztonsági és adatvédelmi követelmények
 
 - Csak bejelentkezett és hitelesített felhasználó tud szavazatot leadni.
-- A rendszernek szigorúan korlátoznia kell a szavazáshoz és ötletbeküldéshez való hozzáférést a bejelentett lakcím alapján.
+- A rendszernek szigorúan korlátoznia kell a szavazáshoz és ötletbeküldéshez való hozzáférést a jogosultsági pillanatkép alapján.
 - A szavazatok védettséget élveznek; a módosítás és törlés technológiai szinten tiltott.
 - A szavazati rekordok nem tartalmaznak nyers személyes azonosítót.
 - A duplikált szavazat kizárásához a rendszer determinisztikus, pszeudonimizált szavazói kulcsot használ.
 - A pszeudonimizáláshoz szükséges titkok csak az erre kijelölt szavazási komponens számára lehetnek hozzáférhetők.
-- A HMAC kulcs nem tárolható `.env` fájlban, alkalmazáskonfigurációban vagy CI/CD változóban; a kulcsműveletet KMS/Vault Transit jellegű szolgáltatás végzi.
+- A HMAC kampány-mesterkulcs nem tárolható `.env` fájlban, alkalmazáskonfigurációban vagy CI/CD változóban; a kulcsszármaztatást KMS/Vault Transit jellegű szolgáltatás védi, a szavazási útban pedig rövid élettartamú kampánykulcs használható.
+- A publikus API-kat dedikált gateway védi; a gateway JWT elővalidálása nem helyettesíti a domain szintű jogosultsági döntéseket.
 - A személyes adatok kezelésénél az adatminimalizálás és célhoz kötöttség elvét kell követni.
 
 ### 5.4. Szoftverminőségi attribútumok
@@ -291,25 +300,26 @@ A rendszer nem vezérel fizikai biztonságkritikus folyamatot, ezért klasszikus
 - **Elérhetőség:** a publikus böngészésnek és a szavazásnak szavazási időszakban részleges háttérfolyamat-hiba esetén is működőképesnek kell maradnia.
 - **Hatékonyság:** a publikus listanézetek lapozottak, méretkorlátot teljesítenek és csak a szükséges mezőket adják vissza; a médiatartalmak optimalizált formában kerülnek kiszolgálásra.
 - **Integritás:** a leadott szavazatok utólag nem módosíthatók és nem törölhetők; az egy ötletre egyszeri szavazást a rendszer technológiai garanciával védi.
-- **Auditálhatóság:** a szavazati audit esemény nem best-effort mellékhatás, hanem PostgreSQL tranzakcióhoz kötött outbox + CDC folyamat eredménye.
-- **Biztonság:** a szavazáshoz és ötletbeküldéshez Zamunda One alapú hitelesítés és lakcím-alapú jogosultságellenőrzés szükséges.
+- **Auditálhatóság:** a szavazati audit esemény nem best-effort mellékhatás, hanem PostgreSQL tranzakcióhoz kötött outbox + relay folyamat eredménye.
+- **Biztonság:** a szavazáshoz és ötletbeküldéshez Zamunda One alapú hitelesítés és jogosultsági pillanatképre épülő lakcím-alapú jogosultságellenőrzés szükséges.
 - **Robusztusság:** a médiafeltöltés hálózati megszakítás esetén is folytatható; a médiafeldolgozás hibája nem akadályozhatja a szavazást vagy a pályázatok böngészését.
 - **Használhatóság:** a rendszer reszponzív webes felületet és kontextusérzékeny útmutatókat biztosít.
 - **Akadálymentesség:** a publikus és szavazási felületeknek biztosítaniuk kell, hogy Zamunda állampolgárai azonos feltételek mellett férjenek hozzá a fő funkciókhoz, különösen billentyűzettel, képernyőolvasóval és megfelelő kontraszttal.
 - **Bővíthetőség:** az aszinkron eseményfolyamhoz új fogyasztók, például későbbi analitikai komponensek kapcsolhatók a meglévő producerek módosítása nélkül.
 - **Elaszticitás:** szavazási csúcsterhelés esetén a Szavazási szolgáltatás önállóan skálázható.
-- **Skálázhatóság:** a szavazási, médiafeldolgozási és értesítési terhelés külön kezelhető; a PostgreSQL írási út connection poolinggal és kampány szerinti particionálással védett.
+- **Skálázhatóság:** a szavazási, médiafeldolgozási és értesítési terhelés külön kezelhető; a PostgreSQL írási út connection poolinggal és kampány szerinti particionálással védett, a peremforgalmat dedikált gateway korlátozza.
 - **Karbantarthatóság:** a rendszer néhány jól körülhatárolt szolgáltatásra épül, amelyek felelőssége dokumentált.
 
 ### 5.5. Üzleti szabályok
 
-- **BR-1:** Adott önkormányzat pályázatára kizárólag az ottani, bejelentett lakcímmel rendelkező lakosok adhatnak be ötleteket.
-- **BR-2:** Adott önkormányzat pályázatán leadott ötletekre kizárólag az ottani, bejelentett lakcímmel rendelkező lakosok szavazhatnak.
+- **BR-1:** Adott önkormányzat pályázatára kizárólag az ottani jogosultsági pillanatképpel rendelkező lakosok adhatnak be ötleteket.
+- **BR-2:** Adott önkormányzat pályázatán leadott ötletekre kizárólag az ottani jogosultsági pillanatképpel rendelkező lakosok szavazhatnak.
 - **BR-3:** Egy felhasználó egy adott pályázatra legfeljebb egy ötletet nyújthat be.
 - **BR-4:** Egy adott ötletre egy felhasználó kizárólag egyszer szavazhat.
 - **BR-5:** Az egyes pályázatokon belül egy felhasználó tetszőleges számú, de egyedi ötletre adhat le szavazatot.
 - **BR-6:** A platform nem kezeli és nem követi nyomon a pályázati költségvetési kereteket és azok kimerülését.
 - **BR-7:** A közzétett ötleteken a szavazás eredményhirdetéséig nem jelenik meg a szavazatok száma.
+- **BR-8:** Ha a lakos lakcíme egy aktív kampányidőszak alatt megváltozik a Zamunda One nyilvántartásban, és a lakcím-módosítás dátuma lekérhető vagy hitelesen megállapítható, a felhasználó a futó ciklusban nem jogosult az új lakcíme szerinti önkormányzat pályázatain részt venni, ha a korábbi lakcímén már interakcióba lépett a platformmal, vagy ha az átjelentkezés dátuma későbbi, mint a kampány hivatalos kezdési időpontja. A korábbi jogosultsági pillanatkép alapján leadott szavazatai az eredeti körzetben érvényesek maradnak.
 
 ## 6. Egyéb követelmények
 
@@ -328,4 +338,4 @@ Az architekturális elemzési modelleket a [C4 modell](../architektura/c4-modell
 
 ## C függelék: Nyitott kérdések
 
-Jelenleg nincs beadandó szinten nyitva hagyott SRS-követelmény. A Zamunda One pontos technikai API-szerződése implementációs fázisban pontosítandó.
+Nyitott integrációs feltétel, hogy a Zamunda One API biztosítja-e a lakcím utolsó hivatalos módosítási dátumát/időbélyegét vagy egy ezzel ekvivalens lakcím-érvényességi metaadatot. Ha nem biztosítja, a jogosultsági pillanatkép időbeli védelméhez külön hivatalos adatforrás vagy üzleti szabály pontosítása szükséges. A Zamunda One pontos technikai API-szerződése implementációs fázisban véglegesítendő.

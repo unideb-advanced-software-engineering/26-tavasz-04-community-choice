@@ -38,7 +38,7 @@ A projekt igényei alapján három stílus maradt: a **moduláris monolit**, a *
   * **Értesítések (*Értesítési szolgáltatás*):** Kampányállapot-változáskor (pl. pályázat lezárása, eredményhirdetés) a rendszer domain eseményeket bocsát ki, amelyeket az Értesítési szolgáltatás aszinkron fogyaszt és kézbesíti az érintett lakosoknak. Az értesítés küldése nem lehet a szavazási kérés kritikus útján.
   * **Auditnapló (*Auditnaplózó szolgáltatás*):** Minden szignifikáns domain esemény (szavazat leadása, ötlet beküldése, adminisztrátori beavatkozás) egy megváltoztathatatlan eseménynaplóba kerül. Az Auditnaplózó szolgáltatás ezeket az eseményeket aszinkron fogyasztja, így az auditnaplózás semmilyen körülmények között nem lassítja a felhasználói kérések kiszolgálását.
 
-Fontos: a szavazás elsődleges, erős konzisztenciát igénylő része nem eseményvezérelt módon „épül fel”, hanem a *Szavazási szolgáltatás* szinkron PostgreSQL tranzakcióban rögzíti a szavazatot egy csak hozzáfűzhető szavazati tranzakciónaplóban. Ugyanebben a tranzakcióban outbox esemény is készül, amelyet Debezium vagy kompatibilis CDC relé juttat a tartós event streambe. Az event stream audit/integrációs eseményfolyam, nem a szavazatok elsődleges igazságforrása.
+Fontos: a szavazás elsődleges, erős konzisztenciát igénylő része nem eseményvezérelt módon „épül fel”, hanem a *Szavazási szolgáltatás* szinkron PostgreSQL tranzakcióban rögzíti a szavazatot egy csak hozzáfűzhető szavazati tranzakciónaplóban. Ugyanebben a tranzakcióban outbox esemény is készül, amelyet az induló takarékos profilban saját outbox relay worker juttat NATS JetStreambe. Az event stream audit/integrációs eseményfolyam, nem a szavazatok elsődleges igazságforrása.
 
 ---
 
@@ -63,7 +63,8 @@ Az SBA a mikroszolgáltatásokhoz képest lényegesen kevesebb mozgó alkatrész
 
 A hibrid SBA + EDA döntés csak akkor védhető közbizalmi rendszerként, ha a kritikus peremeseteket nem implementációs részletként kezeljük:
 
-- **Integritás:** a szavazási auditfolyam kötelezően transactional outbox + CDC mintával készül ([ADR-006](../adrs/adr-006/)), ezért nincs alkalmazásszintű dual-write rés a PostgreSQL tranzakció és az eseménykibocsátás között.
-- **Adatvédelem:** a `voter_key` HMAC kulcsa KMS/Vault Transit jellegű kulcskezelésben él, kampányonkénti kulccsal vagy kulcsverzióval ([ADR-007](../adrs/adr-007/)).
+- **Integritás:** a szavazási auditfolyam kötelezően transactional outbox + outbox relay mintával készül ([ADR-006](../adrs/adr-006/)), ezért nincs alkalmazásszintű dual-write rés a PostgreSQL tranzakció és az eseménykibocsátás között.
+- **Adatvédelem:** a `voter_key` HMAC kampány-mesterkulcsa KMS/Vault Transit jellegű kulcskezelésben él, a kritikus útban pedig rövid élettartamú kampánykulcs használható ([ADR-007](../adrs/adr-007/)).
 - **Csúcsterhelés:** a PostgreSQL írási út PgBouncer poololással és `campaign_id` szerinti particionálással védett ([ADR-008](../adrs/adr-008/)).
 - **Takarékos brokerprofil:** az induló profil NATS JetStream, a Kafka csak országos/nagy audit-replay profilnál indokolt ([ADR-004](../adrs/adr-004/)).
+- **Peremvédelem:** a NestJS BFF elé dedikált, implementációfüggetlen Ingress/API Gateway kerül TLS terminációra, rate limitingre és JWT elővalidálásra ([ADR-009](../adrs/adr-009/)).

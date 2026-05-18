@@ -46,17 +46,20 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 - **Domain esemény (domain event):** Üzleti jelentésű történés (pl. „szavazat leadva”), amelyet a szolgáltatások publikálnak az aszinkron feldolgozáshoz.
 - **Worker (háttérfolyamat):** Aszinkron feldolgozó komponens (pl. videótömörítés), amely eseményeket fogyaszt és CPU-intenzív munkát végez.
 - **Transactional outbox / Outbox minta:** Megközelítés a DB-tranzakció és az eseménypublikálás konzisztens összekötésére; a szavazási auditfolyamban kötelező, mert a szavazati rekord és az outbox esemény egy PostgreSQL tranzakcióban jön létre.
-- **CDC (Change Data Capture):** Adatbázis-változások olvasása a tranzakciós naplóból vagy outbox táblából, hogy az események alkalmazásszintű dual-write nélkül kerüljenek streambe.
-- **Debezium:** CDC eszköz, amely PostgreSQL változásokat olvashat és tartós event streambe publikálhat.
+- **Outbox relay worker:** Dedikált háttérfolyamat, amely az outbox táblát olvassa, például `SELECT ... FOR UPDATE SKIP LOCKED` stratégiával, majd a rekordokat tartós event streambe publikálja.
 
 ## Adatkezelés, biztonság, integritás
 
 - **Zamunda One:** Külső azonosító/lakcím-ellenőrző szolgáltatás; autentikációhoz és autorizációhoz kötelező integráció.
 - **Autentikáció:** A felhasználó azonosítása (bejelentkezés), a Zamunda One-on keresztül.
-- **Autorizáció:** Jogosultság-ellenőrzés (pl. lakcím alapján szavazhat-e az adott önkormányzatban).
+- **Autorizáció:** Jogosultság-ellenőrzés, például jogosultsági pillanatkép alapján szavazhat-e a lakos az adott önkormányzat kampányában.
+- **Jogosultsági pillanatkép (Eligibility Snapshot):** Egy adott kampányhoz tartozó, időben befagyasztott autorizációs állapot. A felhasználó lakhelyi jogosultságát az első kampány-interakció pillanatában rögzíti az önkormányzati kampányhoz, hogy a kampányidőszak alatti lakcímváltoztatás ne vezethessen dupla részvételhez vagy dupla szavazáshoz.
+- **Lakcím-módosítási dátum/időbélyeg (`address_updated_at` jellegű mező):** A Zamunda One API-ból feltételezetten lekérhető metaadat, amely a polgár állandó lakcímének utolsó hivatalos módosítási időpontját jelzi. Ha a Zamunda One nem ilyen néven vagy nem ilyen formában adja, ekvivalens hivatalos lakcím-érvényességi adat szükséges a kampányidőszak alatti spekulatív átjelentkezések kiszűréséhez.
 - **GDPR:** Adatvédelmi megfelelési keret; a dokumentációban személyes adatok minimalizálásával és pszeudonimizálással kapcsolódik.
 - **Pszeudonimizálás:** Személyes azonosítók helyettesítése visszafejtés nélkül nem egyértelmű kulccsal; itt a duplikáció-ellenőrzés mellett védi a szavazók személyazonosságát.
-- **HMAC secret / HMAC kulcs:** Titok, amellyel determinisztikus pszeudonim (`voter_key`) képezhető; a projektben KMS/Vault Transit jellegű szolgáltatásban kezelendő, nem alkalmazáskonfigurációban.
+- **HMAC secret / HMAC kulcs:** Titok, amellyel determinisztikus pszeudonim (`voter_key`) képezhető; a kampány-mesterkulcs KMS/Vault Transit jellegű szolgáltatásban kezelendő, nem alkalmazáskonfigurációban.
+- **Rövid élettartamú kampánykulcs:** Rövid élettartamú, pod memóriájában tartott operatív HMAC kulcs, amely kampányhoz és kulcsverzióhoz kötött, és nem írható lemezre vagy logba.
+- **HKDF:** Kulcsszármaztatási minta, amellyel egy védett mesterkulcsból kontextushoz kötött, elkülönített operatív kulcs képezhető.
 - **KMS (Key Management Service):** Dedikált kulcskezelő szolgáltatás, amely a kriptográfiai kulcsokat központilag védi és auditálja.
 - **Vault Transit:** HashiCorp Vault secrets engine, amely kriptográfiai műveleteket végezhet anélkül, hogy az alkalmazás kiolvasná a nyers kulcsot.
 - **Key rotation / Kulcsrotáció:** Kulcs vagy kulcsverzió cseréje; itt kampányonkénti HMAC kulcs/key version használatával csökkenti egy kompromittált kulcs hatókörét.
@@ -77,6 +80,8 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 - **Presigned upload URL:** Időben és jogosultságban korlátozott objektumtár-feltöltési URL, amellyel a kliens közvetlenül S3-kompatibilis bucketbe tölthet nagy médiafájlt.
 - **S3-kompatibilis multipart upload:** Objektumtár-alapú, darabolt és folytatható feltöltési mechanizmus nagy fájlokhoz.
 - **OAuth 2.0 (jellegű):** Várható token-alapú bejelentkezési/engedélyezési megoldás a Zamunda One integrációhoz (a konkrét specifikáció TBD).
+- **Ingress / API Gateway:** Publikus peremréteg a webes kliensek és a backend között; TLS terminációt, routingot, request size limiteket, durva rate limitinget és JWT elővalidálást végezhet.
+- **BFF (Backend for Frontend):** Alkalmazási backend belépési pont, amely a webes kliensek igényeihez igazított API-összeállítást és domain-specifikus jogosultsági logikát kezel.
 
 ## Teljesítmény és kliensoldali optimalizálás
 
@@ -92,7 +97,7 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 - **CDN (Content Delivery Network):** Opcionális multimédia gyorsítóréteg; csökkentheti az origin terhelést és a hálózati költséget, ha a forgalmi adatok indokolják.
 - **Edge caching:** CDN peremcsomópontokon történő cache-elés; alacsony sávszélesség és magas késleltetés mellett hasznos lehet.
 - **Event stream / Tartós stream:** Visszajátszható eseményfolyam audit, értesítés és médiafeldolgozás céljára; technológiai profilja NATS JetStream vagy Kafka lehet.
-- **NATS JetStream:** NATS tartós stream rétege; a projekt induló, takarékos brokerprofiljának jelöltje replay és at-least-once kézbesítés támogatásával.
+- **NATS JetStream:** NATS tartós stream rétege; a projekt induló, takarékos brokerprofiljának jelöltje replay és at-least-once kézbesítés támogatásával, saját outbox relay workerrel.
 - **Apache Kafka:** Eseményfolyam-platform; a projektben országos/nagy audit-replay vagy sok fogyasztós profilnál indokolt broker opció.
 - **Topic / Stream:** Logikai csatorna az események számára (pl. „vote-cast” jellegű események).
 - **Partition:** Kafka topic felosztása párhuzamos feldolgozásra és skálázásra; NATS JetStream profilban más fogalmi és skálázási beállítások érvényesek.
