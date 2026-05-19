@@ -4,31 +4,39 @@ A kérdés az volt: hogyan építsünk be technológiai szinten egy olyan fogalm
 
 [Rövid szünet – kontaktus a hallgatósággal]
 
-Egy állami, közbizalmi környezetben működő döntéstámogató platform nem engedhet meg magának kompromisszumokat. Ha a lakosok azt érzik, hogy a szavazatuk elveszhet, manipulálható, vagy hogy a rendszerrel vissza lehet élni, a platform elveszíti a létjogosultságát. Emellett a ZDR program szigorú kereteket is szabott: a rendszernek klímabarátnak, takarékosnak és a gyenge hálózatokon is robusztusnak kell lennie.
+Egy állami, közbizalmi környezetben működő szavazási platform nem engedhet meg magának kompromisszumokat. Ha a lakosok azt érzik, hogy a szavazatuk elveszhet, manipulálható, vagy hogy a rendszerrel vissza lehet élni, a platform elveszíti a létjogosultságát. Emellett a ZDR program szigorú kereteket is szabott: a rendszernek klímabarátnak, takarékosnak és a gyenge hálózatokon is robusztusnak kell lennie.
 
 [Az architekturális alapok – kb. 1.5 perc]
 
-Ezek a peremfeltételek vezéreltek minket az architekturális stílus kiválasztásakor. A tiszta monolitikus megközelítést elvetettük, mert egy kampányzárás utolsó órájában, amikor a szavazási forgalom ugrásszerűen megnő, a teljes rendszer horizontális skálázása indokolatlanul nagy erőforrás-pazarlással járna. Ugyanakkor a teljes mikroszolgáltatásos architektúrát is elvetettük – a hálózati többlet, az elosztott tranzakciók kezelése és a komplex üzemeltetés szembement volna a takarékossági elvárásokkal.
+Ezek a peremfeltételek vezéreltek minket az architekturális stílus kiválasztásakor. A tiszta monolitikus megközelítést elvetettük, mert egy kampányzárás utolsó órájában, amikor a szavazási forgalom ugrásszerűen megnőhet, a teljes rendszer horizontális skálázása indokolatlanul nagy erőforrás-pazarlással járna, valamint fenáll a single point of failure probléma is. Ugyanakkor a teljes mikroszolgáltatásos architektúrát is elvetettük – a hálózati többlet, az elosztott tranzakciók kezelése és a komplex üzemeltetés szembement volna a takarékossági elvárásokkal.
 
-Így jutottunk el a Hibrid Service-Based és Event-Driven (SBA + EDA) architektúrához.
+Így jutottunk el a Hibrid Service-Based és Event-Driven architektúrához.
 
-A koncepciónk lényege az arányosság: a kritikus, erős konzisztenciát igénylő folyamatokat – mint maga a szavazás rögzítése – makroszolgáltatásokba zártuk, közös tranzakciós adatbázissal. A nehézkes, időigényes, de szinkron választ nem igénylő feladatokat – mint a médiafeldolgozás vagy az értesítések küldése – pedig eseményvezérelt háttérfolyamatokra bíztuk.
+A koncepciónk lényege: a kritikus, erős konzisztenciát igénylő folyamatokat – mint maga a szavazás rögzítése – makroszolgáltatásokba zártuk, közös tranzakciós adatbázissal. A nehézkes, időigényes, de szinkron választ nem igénylő feladatokat – mint a médiafeldolgozás vagy az értesítések küldése – pedig eseményvezérelt háttérfolyamatokra bíztuk.
 
 [Szünet, hogy az architektúra koncepciója rögzüljön]
 
-Engedjék meg, hogy bemutassak három olyan kritikus architekturális döntést, ahol a hagyományos megközelítések elbuktak volna, és ahol nekünk kellett új utakat keresni.
+Bemutatjuk a szerintünk legérdekesebb architekturális döntéseket, ahol a hagyományos megközelítések elbuktak volna, és ahol nekünk kellett új utakat keresni.
 
-[1. Pillér: Az időbeli autorizáció és a Választási Névjegyzék – kb. 1.5 perc]
+[1. Pillér: A jogosultság előzetes befagyasztása és a villámgyors olvasás – kb. 1.5 perc]
 
-Az első ilyen probléma a lakcím-alapú jogosultság volt. A szabály egyszerű: csak az adott önkormányzat lakója szavazhat. De mi történik akkor, ha egy lakos a 30 napos kampányidőszak közepén átjelentkezik egy másik kerületbe?
+Az első ilyen probléma a jogosultságkezelés és a teljesítmény súlyos konfliktusa volt. Képzeljük el a helyzetet: egy lakos belép a platformra, és a rendszernek azonnal el kell döntenie, hogy az éppen futó kampányokat csak olvashatja, vagy jogosult javaslatot tenni és szavazni is az adott kerületben.
 
-Ha a rendszert dinamikusan ellenőrzi a lakcímet minden szavazásnál, a lakos mindkét kerületben szavazhatna. A korábbi szavazatait viszont nem törölhetjük, mert az sérti a szavazatok megváltoztathatatlanságának elvét.
+Ha minden bejelentkezésnél vagy kattintásnál valós időben lekérdezzük a központi állami nyilvántartást (Zamunda One), vagy komplex térinformatikai számításokat végzünk, a rendszer egy szavazási hajrában pillanatok alatt összeomlana. Arról nem is beszélve, hogy így egy átláthatatlan, folyamatosan mozgó célpont lenne a jogosultság.
 
-Ezt a feloldhatatlan ellentmondást egy úgynevezett Jogosultsági Pillanatkép (Eligibility Snapshot) bevezetésével kezeltük. Ez gyakorlatilag egy digitális választási névjegyzék. Amikor a felhasználó a kampány során először interakcióba lép a platformmal, a rendszer rögzíti a jogosultságát, figyelembe véve a Zamunda One által biztosított utolsó lakcím-módosítási időbélyeget is. Ezzel architekturális szinten zártuk ki a kampányidőszak alatti, spekulatív átjelentkezésekből fakadó visszaéléseket.
+[Enyhe szünet]
 
-[2. Pillér: GDPR és a Paranoiás Pszeudonimizáció – kb. 1.5 perc]
+A megoldásunk az volt, hogy a kiértékelést teljesen leválasztottuk a felhasználói interakcióról. Bevezettük a "Megváltoztathatatlan Jogosultsági Pillanatkép" (Campaign Eligibility Snapshot) koncepcióját.
 
-A második komoly kihívás az adatvédelem volt. Annak érdekében, hogy a duplikált szavazatokat az adatbázis technológiailag, egy UNIQUE szabállyal is blokkolni tudja, szükségünk volt egy szavazói azonosítóra. A nyers személyes adatokat természetesen nem tárolhatjuk.
+Ez azt jelenti, hogy a kampány indulása előtt – például 24 órával – egy aszinkron háttérfolyamat előre kiszámolja és legenerálja a digitális választási névjegyzéket. Ezt a listát egy horizontálisan particionált, célzottan indexelt adatbázistáblában fagyasztjuk le. Amikor a felhasználó belép, a jogosultságának ellenőrzése egy úgynevezett O(1)-es idejű, vagyis szinte azonnali művelet. Ezzel tehermentesítettük az állami azonosító rendszert, villámgyorssá tettük az oldalbetöltést, és garantáltuk, hogy a kampány ideje alatt a jogosultságok nem manipulálhatók.
+
+Minden architekturális döntés kompromisszummal jár, így ennek is megvan a maga trade-offja. [Rövid szünet]
+
+Az ár, amit ezért a sebességért fizetünk, hogy be kellett vezetnünk egy adminisztratív „cut-off” időszakot a kampány kezdete előtt, és a háttérben ki kellett építenünk egy robusztus adatelőkészítő (ETL) infrastruktúrát. Emellett biztosítanunk kell egy dedikált, manuális felülbírálati folyamatot is azok számára, akik pont a befagyasztási ablakban költöznek. De a másodperctört része alatti válaszidő és a rendszer bebetonozott stabilitása bőven megérte ezt az árat.
+
+[2. Pillér: GDPR és a Pszeudonimizáció – kb. 1.5 perc]
+
+A második kihívás az adatvédelem volt. Annak érdekében, hogy a duplikált szavazatokat az adatbázis technológiailag, egy UNIQUE szabállyal is blokkolni tudja, szükségünk volt egy szavazói azonosítóra. A nyers személyes adatokat természetesen nem tárolhatjuk.
 
 De a sima kriptográfiai hash-elés (például SHA-256) önmagában nem elég biztonságos. Ha az adatbázis véletlenül kiszivárog, a hash-ek úgynevezett Rainbow Table-ök segítségével, nyers számítási kapacitással gyorsan visszafejthetők lennének.
 
@@ -44,4 +52,4 @@ A megoldásunk a Transactional Outbox és a CDC (Change Data Capture) minta alka
 
 Amikor a Community Choice dokumentációját összeállítottuk, arra törekedtünk, hogy a végeredmény ne egy felszínes technológiai kívánságlista legyen. Minden architekturális döntésünket (ADR) visszavezettük az esettanulmányból fakadó szignifikáns követelményekre. Legyen szó a szavazási csúcsokat védő adatbázis-particionálásról, adat védelem vagy az eseményvezérelt aszinkron médiafeldolgozásról.
 
-Úgy véljük, hogy a Community Choice nem csupán egy egyetemi vizsgamunka. Ezzel az architekturális alappal és egy kis célzott továbbdolgozással a koncepció akár egy valódi, éles állami környezetben működő projektté is ki tudna alakulni – biztosítva egy transzparens és manipulálhatatlan digitális demokráciát.
+Úgy véljük, hogy a Community Choice nem csupán egy egyetemi projektmunka. Ezzel az architekturális alappal és egy kis célzott továbbdolgozással a koncepció akár egy valódi, éles állami környezetben működő projektté is ki tudna alakulni – biztosítva egy transzparens és manipulálhatatlan digitális demokráciát.

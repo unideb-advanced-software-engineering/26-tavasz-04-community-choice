@@ -479,22 +479,22 @@
       </div>
     </section>
 
-    <section class="slide" data-title="Költözési probléma">
+    <section class="slide" data-title="Teljesítmény probléma">
       <div class="deck-label">06 · 1. Pillér</div>
       <div class="slide-content">
         <div class="split-30-70">
           <div class="stack">
             <span class="slide-kicker reveal">Kihívás</span>
-            <h2 class="reveal d1">A mozgó szavazó esete.</h2>
-            <p class="reveal d2">A szabály egyszerű: csak az adott önkormányzat lakója szavazhat. De mi történik, ha egy
-              lakos a 30 napos kampány közepén átjelentkezik egy másik kerületbe?</p>
+            <h2 class="reveal d1">Jogosultság vs. Teljesítmény.</h2>
+            <p class="reveal d2">Amikor egy lakos belép, azonnal el kell döntenie a rendszernek, hogy hol és miként
+              szavazhat. De ha ezt minden bejelentkezésnél valós időben kérdezzük le az állami rendszertől (Zamunda
+              One), szavazási csúcsidőben összeomlunk.</p>
           </div>
-          <div class="card reveal d3">
-            <h3>A dinamikus ellenőrzés buktatója:</h3>
-            <p style="margin-top: 0.5rem; margin-bottom: 0.5rem;">Ha a rendszer minden gombnyomásnál újra lekérné az
-              aktuális lakcímet, az illető a költözés miatt mindkét kerületben leadhatna szavazatokat.</p>
-            <p>A korábbi szavazatait viszont nem törölhetjük ki utólag, mert az sértené a szavazatok
-              megváltoztathatatlanságát.</p>
+          <div class="card reveal d3" style="border-left: 4px solid var(--cc-red-800); background: var(--cc-red-50);">
+            <h3>A dinamikus lekérdezés buktatója:</h3>
+            <p style="margin-top: 0.5rem; margin-bottom: 0.5rem;">A jogosultság egy átláthatatlan, folyamatosan mozgó
+              célpont lenne (pl. költözések miatt), miközben a szinkron külső API hívások szűk keresztmetszetté
+              (bottleneck) válnának a legkritikusabb pillanatban.</p>
           </div>
         </div>
       </div>
@@ -505,27 +505,26 @@
       <div class="slide-content">
         <div class="stack">
           <span class="slide-kicker reveal">1. Megoldás</span>
-          <h2>A Jogosultsági Pillanatkép (Eligibility Snapshot).</h2>
-          <p class="reveal d1">Ezt a feloldhatatlan ellentmondást egy digitális választási névjegyzékkel kezeltük.
-            Amikor a felhasználó a kampány során először lép interakcióba a platformmal, rögzítjük a kerületi
-            jogosultságát.</p>
+          <h2>A Megváltoztathatatlan Jogosultsági Pillanatkép.</h2>
+          <p class="reveal d1">A kiértékelést teljesen leválasztottuk az interakcióról. A kampány indulása előtt (pl.
+            T-24 óra) egy aszinkron háttérfolyamat előre generálja a névjegyzéket.</p>
 
           <div class="flow-container reveal d2">
-            <div class="flow-step"><span class="badge">1. Belépés</span>
-              <h3>Interakció</h3>
-              <p>Felhasználó szavazni vagy beküldeni szeretne.</p>
+            <div class="flow-step"><span class="badge">1. Kiszámolás</span>
+              <h3>Háttérfolyamat</h3>
+              <p>Adatok előkészítése és kiszámolása a kampány kezdete előtt.</p>
             </div>
-            <div class="flow-step"><span class="badge blue">2. Ellenőrzés</span>
-              <h3>Állami lekérés</h3>
-              <p>Lakcím és utolsó módosítási időbélyeg ellenőrzése.</p>
-            </div>
-            <div class="flow-step"><span class="badge gold">3. Befagyasztás</span>
+            <div class="flow-step"><span class="badge blue">2. Befagyasztás</span>
               <h3>Snapshot rögzítés</h3>
-              <p>A rendszer elmenti az akkori kerületet a kampány végéig.</p>
+              <p>A névjegyzék egy dedikált, particionált adatbázistáblába kerül.</p>
             </div>
-            <div class="flow-step"><span class="badge earth">4. Védelem</span>
-              <h3>Kizárás</h3>
-              <p>A kampány során a költözés már nem nyit új szavazási kört.</p>
+            <div class="flow-step"><span class="badge gold">3. Villámgyors</span>
+              <h3>O(1) Olvasás</h3>
+              <p>Belépéskor az ellenőrzés szinte azonnali, kímélve az IdP-t.</p>
+            </div>
+            <div class="flow-step"><span class="badge earth">4. Trade-off</span>
+              <h3>Kompromisszum</h3>
+              <p>Robusztus ETL igénye és egy adminisztratív "cut-off" ablak bevezetése.</p>
             </div>
           </div>
         </div>
@@ -560,12 +559,12 @@
           <span class="slide-kicker reveal">2. Megoldás</span>
           <h2>Védett Kulcskezelés és elszigetelt azonosítók.</h2>
           <p class="reveal d1">A rendszert kiegészítettük egy dedikált Kulcskezelő Szolgáltatással (KMS). A felhasználói
-            azonosítókból egy külső, védett kulccsal (Global Pepper) képezünk egyedi kódot.</p>
+            azonosítókból egy külső, védett kulccsal (Globális Pepper) képezünk egyedi kódot.</p>
 
           <div class="grid reveal d2" style="margin-top: 0.5rem;">
             <div class="card">
               <h3>Elszigetelt titok</h3>
-              <p>A kódoláshoz használt mesterkulcs soha, egyetlen pillanatra sem hagyja el a kulcskezelő biztonságos
+              <p>A kódoláshoz használt Globális Pepper soha, egyetlen pillanatra sem hagyja el a kulcskezelő biztonságos
                 memóriáját, nem kerül be a fájlokba.</p>
             </div>
             <div class="card">
@@ -591,7 +590,8 @@
             <span class="slide-kicker reveal">Kihívás</span>
             <h2 class="reveal d1">A széteső mentések kockázata.</h2>
             <p class="reveal d2">A rendszernek minden szavazatról értesítést kell küldenie a háttérben futó ellenőrző
-              naplóba. De mi van akkor, ha a szavazat sikeresen bekerül a fő adatbázisba, de a hálózat abban a
+              naplóba (brokerbe). De mi van akkor, ha a szavazat sikeresen bekerül a fő adatbázisba, de a hálózat abban
+              a
               pillanatban megszakad, és az értesítés elvész?</p>
           </div>
           <div class="card reveal d3" style="border-left: 4px solid var(--cc-red-800); background: var(--cc-red-50);">
@@ -609,9 +609,9 @@
       <div class="slide-content">
         <div class="stack">
           <span class="slide-kicker reveal">3. Megoldás</span>
-          <h2>A Transactional Outbox minta alkalmazása.</h2>
-          <p class="reveal d1">A szavazat leadását és a háttérbe szánt ellenőrző naplóbejegyzést a szoftverünk egyetlen,
-            szétválaszthatatlan csomagként (adatbázis-tranzakció) kezeli.</p>
+          <h2>A Transactional Outbox és a CDC alkalmazása.</h2>
+          <p class="reveal d1">A szavazat leadását és az audit eseményt a szoftverünk egyetlen,
+            felbonthatatlan adatbázis-tranzakcióban rögzíti.</p>
 
           <div class="grid-2 reveal d2" style="margin-top: 0.5rem;">
             <div class="box-boundary">
@@ -622,10 +622,9 @@
                 egyszerre vagy sehogy sem teljesül.</p>
             </div>
             <div class="card">
-              <h3>Hibatűrő háttérküldés</h3>
-              <p>Ezt a belső kimenő táblát figyeli egy független háttérprogram. Ha a külső üzenetsor szakad meg, a
-                szavazat biztonságban van, a háttérbejegyzést pedig a hiba elhárulása után automatikusan pótolja a
-                rendszer.</p>
+              <h3>Független CDC háttérfolyamat</h3>
+              <p>Ezt a belső tranzakciós naplót egy független Change Data Capture (CDC) komponens figyeli. Ha a külső
+                üzenetsor megszakad, az adat garantáltan kikerül amint a hiba elhárul, így nincs elveszett nyom.</p>
             </div>
           </div>
         </div>
@@ -664,17 +663,18 @@
           <p class="reveal d1">Amikor a Community Choice dokumentációját összeállítottuk, arra törekedtünk, hogy a
             végeredmény ne egy felszínes technológiai kívánságlista legyen. Minden architekturális döntésünket (ADR)
             visszavezettük az esettanulmányból fakadó szignifikáns követelményekre.</p>
-    
+
           <div class="card reveal d2" style="margin-top: 0.5rem; border-left: 4px solid var(--cc-green-700);">
             <h3>Valós problémákra adott célzott válaszok:</h3>
-            <p style="margin-top: 0.5rem;">· <strong>Megalapozott tervezés:</strong> Legyen szó a szavazási csúcsokat védő
-              adatbázis-particionálásról, adatvédelemről vagy az eseményvezérelt aszinkron médiafeldolgozásról.</p>
-            <p>· <strong>Éles potenciál:</strong> Ezzel az architekturális alappal és egy kis célzott továbbdolgozással a
+            <p style="margin-top: 0.5rem;">· <strong>Megalapozott tervezés:</strong> Legyen szó a megmásíthatatlan
+              pillanatképekről, a védett kulcskezelésről, vagy a tranzakcionális outbox mintáról.</p>
+            <p>· <strong>Éles potenciál:</strong> Ezzel az architekturális alappal és egy kis célzott továbbdolgozással
+              a
               koncepció akár egy valódi, éles állami környezetben működő projektté is ki tudna alakulni.</p>
-            <p>· <strong>Közbizalom:</strong> Biztosítva egy maximálisan transzparens és manipulálhatatlan digitális
+            <p>· <strong>Közbizalom:</strong> Biztosítva egy transzparens, skálázható és manipulálhatatlan digitális
               demokráciát.</p>
           </div>
-    
+
           <p class="reveal d3"
             style="font-size: var(--small-size); font-weight: 600; color: var(--cc-green-700); margin-top: 0.5rem;">
             Köszönjük a figyelmet!</p>

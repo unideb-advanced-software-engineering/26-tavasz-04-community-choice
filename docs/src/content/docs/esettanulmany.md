@@ -1,9 +1,7 @@
 ---
-title: Esettanulmány
-description: Community Choice – Zamunda közösségi ötletplatform esettanulmánya
+title: "Esettanulmány"
+description: "Közösségi költségvetés."
 ---
-
-# 04: Community Choice
 
 ## Háttér
 
@@ -19,11 +17,11 @@ Ez a digitális transzformációs program a Zamunda Digitális Reneszánsz (ZDR)
 
 - Mivel egy állami programról van szó, ezért nagyon fontos, hogy minden projekthez megfelelő mennyiségű és minőségű dokumentáció készüljön.
 - Zamunda nem szegény ország, de feleslegesen nem is akarja szórni a pénzt: a projektek tervezésénél törekedni kell a takarékosságra. Szintén ezt igénylik a klímabarát célok!
-- Figyelembe kell venni, hogy az ország bizonyos területeinek internetlefedettsége hagy némi kívánnivalót maga után. Ahol van internet, ott is előfordulhat magasabb késleltetés és alacsonyabb sávszélesség.
+- Figyelembe kell venni, hogy az ország bizonyos területeienek internetlefedettsége hagy némi kívánnivalót maga után. Ahol van internet, ott is előfordulhatnak magasabb késleltetések, alacsonyabb sávszélességek.
 
 ## Leírás
 
-Zamunda szeretne lehetőséget biztosítani arra, hogy a lakosok helyi szintű, kisebb-nagyobb projekteket kezdeményezhessenek. Ilyen lehet például új zöldfelületek kialakítása, közösségi terek létrehozása vagy egyszerűen csak padok és kerékpártárolók kihelyezése.
+Zamunda szeretne lehetőséget  biztosítani arra, hogy  kezdeményezhessenek helyi szintű, kisebb-nagyobb projekteket. Ilyen lehet például új zöldfelületek kialakítása, közösségi terek létrehozása, vagy egyszerűen csak padok, kerékpártárolók kihelyezése.
 
 ### Valós kapcsolódás
 
@@ -45,7 +43,7 @@ Budapest és a kerületek közösségi költségvetése:
 - Az egyes pályázatokon minden lakos annyi ötletre szavazhat, amennyire csak szeretne.
 - Szigorúan kontrollálni kell a szavazatokhoz való hozzáférést; szavazat adminisztrátori törlése és módosítása pedig egyáltalán nem lehet megoldható.
 - A pályázatok és ötletek teljes életciklusa jelenjen meg a platformban.
-- Az autentikációhoz és autorizációhoz a Zamunda One nevű API-t kell integrálni, mely megbízható adatokat biztosít a bejelentkezett felhasználó bejelentett lakóhelyéről. A kampány közbeni lakcímváltozások kezeléséhez feltétel, hogy a Zamunda One-ból lekérhető legyen a lakcím utolsó módosítási dátuma/időbélyege vagy egy ekvivalens lakcím-érvényességi metaadat.
+- Az autentikációhoz és autorizációhoz a Zamunda One nevű API-t kell integrálni, mely megbízható adatokat biztosít a bejelentkezett felhasználó bejelentett lakóhelyéről.
   - Valós kapcsolódás: [SZEUSZ KAÜ](https://szeusz.gov.hu/szeusz/kau)  
 
 ## Kiegészítések
