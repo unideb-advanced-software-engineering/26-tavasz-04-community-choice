@@ -312,6 +312,22 @@
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.01);
     }
 
+    .hero-slide {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--content-gap);
+      align-items: center;
+    }
+
+    .hero-logo {
+      width: min(28vw, 320px);
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+      justify-self: end;
+      filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.08));
+    }
+
     /* === REVEAL ANIMÁCIÓ === */
     .reveal {
       opacity: 0;
@@ -368,7 +384,8 @@
       .split-30-70,
       .grid,
       .grid-2,
-      .flow-container {
+      .flow-container,
+      .hero-slide {
         grid-template-columns: 1fr;
       }
 
@@ -389,18 +406,22 @@
   <main>
     <section class="slide" data-title="Nyitás">
       <div class="deck-label">Rendszertervezési projektvédés</div>
-      <div class="slide-content">
-        <span class="slide-kicker reveal">Zamunda Digitális Reneszánsz program</span>
-        <h1 class="reveal d1">Community Choice</h1>
-        <p class="reveal d2">Közösségi javaslattételi és szavazási platform szoftverarchitektúra terve.</p>
+      <div class="slide-content hero-slide">
+        <div class="stack">
+          <span class="slide-kicker reveal">Zamunda Digitális Reneszánsz program</span>
+          <h1 class="reveal d1">Community Choice</h1>
+          <p class="reveal d2">Közösségi javaslattételi és szavazási platform szoftverarchitektúra terve.</p>
 
-        <div class="stack reveal d3">
-          <div class="team-container">
-            <div class="team-card">Fekete Adrián</div>
-            <div class="team-card">Nagy Mónika</div>
-            <div class="team-card">Svec Antal</div>
+          <div class="stack reveal d3">
+            <div class="team-container">
+              <div class="team-card">Fekete Adrián</div>
+              <div class="team-card">Nagy Mónika</div>
+              <div class="team-card">Svec Antal</div>
+            </div>
           </div>
         </div>
+
+        <img class="hero-logo reveal d2" src="docs/src/assets/logo.png" alt="Community Choice logó" />
       </div>
     </section>
 
