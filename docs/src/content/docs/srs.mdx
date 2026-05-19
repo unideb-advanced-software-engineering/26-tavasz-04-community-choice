@@ -104,7 +104,7 @@ A fejlesztés során kötelező a klímabarát és sávszélesség-takarékos te
 - A lakcímváltozások kezelésére a rendszer jogosultsági pillanatképet alkalmaz. A jogosultság ellenőrzése a kampány kezdési időpontja és a Zamunda One-ból lekérhető lakcím-módosítási dátum/időbélyeg, például `address_updated_at`, összevetésével történik. Ha ilyen mező nem érhető el, a Zamunda One integrációnak ekvivalens hivatalos lakcím-érvényességi dátumot kell biztosítania.
 - A leadott szavazat utólagos módosítását és törlését a rendszernek meg kell akadályoznia.
 - A médiatartalmak kezelésénél sávszélesség- és tárhelytakarékos formátumokat kell használni.
-- A publikus backend elérés dedikált, implementációfüggetlen Ingress/API Gateway rétegen keresztül történik; Traefik vagy Nginx javasolt önmenedzselt megoldás, de nem kötelező termékválasztás.
+- A publikus backend elérés dedikált, implementációfüggetlen API Gateway rétegen keresztül történik; Traefik vagy Nginx javasolt önmenedzselt megoldás, de nem kötelező termékválasztás.
 - A szavazati tranzakció és a hozzá tartozó audit/integrációs esemény között nem lehet alkalmazásszintű dual-write rés; a szavazási auditfolyam transactional outbox + outbox relay mintával készül.
 - A jogosultsági pillanatképben csak védett kulcskezeléssel képzett felhasználóazonosító-hash tárolható; a képzéshez használt titok nem kerülhet az alkalmazásba, és a nyers Zamunda One ID nem tárolható.
 - A pszeudonimizált szavazói kulcs képzéséhez használt kampány-mesterkulcsot dedikált KMS/Vault Transit jellegű szolgáltatásban kell kezelni; a szavazási kritikus útban pod memóriában tartott rövid élettartamú kampánykulcs használható.
@@ -144,7 +144,7 @@ A pontos protokollokat és adatszerkezeteket a Zamunda One hivatalos technikai s
 ### 3.4. Kommunikációs interfészek
 
 - A webes kliensalkalmazás és a backend HTTPS-en keresztül kommunikál.
-- A külső HTTPS forgalom első belépési pontja dedikált Ingress/API Gateway, amely TLS terminációt, routingot, request size limiteket, durva rate limitinget és JWT elővalidálást végez.
+- A külső HTTPS forgalom első belépési pontja dedikált API Gateway, amely TLS terminációt, routingot, request size limiteket, durva rate limitinget és JWT elővalidálást végez.
 - Az API-válaszokat a hálózati forgalom csökkentése érdekében tömöríteni kell.
 - A pályázati értesítések e-mailben és push notification formában is megvalósíthatók.
 - A fotók és videók feltöltését a rendszernek instabil hálózati kapcsolat esetén is hibatűrő módon kell kezelnie.

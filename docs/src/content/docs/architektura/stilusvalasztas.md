@@ -68,4 +68,4 @@ A hibrid SBA + EDA döntés csak akkor védhető közbizalmi rendszerként, ha a
 - **Jogosultság:** a `campaign_eligibility` megváltoztathatatlan és előre/aszinkron kiértékelt pillanatkép, hogy a bejelentkezés kiértékelése ne váljon szinkron szűk keresztmetszetté ([ADR-010](../adrs/adr-010/)).
 - **Csúcsterhelés:** a PostgreSQL írási út PgBouncer poololással és `campaign_id` szerinti particionálással védett ([ADR-008](../adrs/adr-008/)).
 - **Takarékos brokerprofil:** az induló profil NATS JetStream, a Kafka csak országos/nagy audit-replay profilnál indokolt ([ADR-004](../adrs/adr-004/)).
-- **Peremvédelem:** a NestJS BFF elé dedikált, implementációfüggetlen Ingress/API Gateway kerül TLS terminációra, rate limitingre és JWT elővalidálásra ([ADR-009](../adrs/adr-009/)).
+- **Peremvédelem:** a NestJS BFF elé dedikált, implementációfüggetlen API Gateway kerül TLS terminációra, rate limitingre és JWT elővalidálásra ([ADR-009](../adrs/adr-009/)).

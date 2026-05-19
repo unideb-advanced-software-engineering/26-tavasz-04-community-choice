@@ -3,8 +3,6 @@ title: Implementációs javaslatok
 description: A követelményekből leválasztott technológiai és megvalósítási javaslatok gyűjtőoldala
 ---
 
-# Implementációs javaslatok
-
 Ez az oldal azokat a technológiai részleteket gyűjti, amelyek hasznos tervezési javaslatok, de nem önálló SRS-követelmények. A követelmények oldalon az üzleti vagy minőségi elvárás szerepel, itt pedig az egyik lehetséges megvalósítási irány.
 
 ## Hitelesítés és külső integráció
@@ -15,7 +13,7 @@ Ez az oldal azokat a technológiai részleteket gyűjti, amelyek hasznos tervez�
 
 ## Peremvédelem és API belépési pont
 
-- A publikus webes forgalom dedikált Ingress/API Gateway rétegen keresztül érkezzen, ne közvetlenül a NestJS BFF vagy domain szolgáltatások felé.
+- A publikus webes forgalom dedikált API Gateway rétegen keresztül érkezzen, ne közvetlenül a NestJS BFF vagy domain szolgáltatások felé.
 - A gateway felelőssége a TLS termináció, routing, request size limitek, durva rate limiting, alapvető DDoS/abuse szűrés, biztonsági fejlécek és JWT formai/JWKS-alapú elővalidálás.
 - A gateway implementációfüggetlen döntés: önmenedzselt környezetben Traefik vagy Nginx javasolt, plugin-orientált gateway igénynél Kong, felhőben natív API gateway/load balancer is megfelelő lehet.
 - A NestJS BFF maradjon alkalmazási belépési pont az üzleti jogosultság, lakcím-alapú ellenőrzés, API-összeállítás és domain-specifikus hibakezelés számára.

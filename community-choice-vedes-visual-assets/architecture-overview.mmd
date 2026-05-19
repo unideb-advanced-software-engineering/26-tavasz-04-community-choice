@@ -1,5 +1,5 @@
 flowchart LR
-  Public["Publikus portál\nReact + TypeScript"] --> Edge["Ingress / API Gateway\nTLS · routing · rate limit · JWT elővalidálás"]
+  Public["Publikus portál\nReact + TypeScript"] --> Edge["API Gateway\nTLS · routing · rate limit · JWT elővalidálás"]
   Dashboard["Lakossági vezérlőpult\nReact + TypeScript"] --> Edge
   Admin["Közigazgatási panel\nReact + TypeScript"] --> Edge
   Edge --> BFF["Backend API / BFF\nNode.js + NestJS"]

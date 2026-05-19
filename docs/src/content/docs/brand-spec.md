@@ -3,8 +3,6 @@ title: Brand Specification – Community Choice Zamunda
 description: "A Community Choice vizuális identitásának hivatalos specifikációja: színek, tipográfia, design tokenek és használati szabályok"
 ---
 
-# Brand Specification – Community Choice Zamunda
-
 > **Verzió:** 1.0.0
 > **Utolsó módosítás:** 2026-05-12
 > **Státusz:** Forrásként szolgáltat a design rendszer és a UI Kit felépítéséhez. Minden vizuális döntés ehhez a dokumentumhoz igazodik.

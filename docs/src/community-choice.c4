@@ -146,7 +146,7 @@ model {
 			}
 		}
 
-		edgeGateway = gateway 'Ingress / API Gateway' 'Publikus peremréteg: TLS termináció, routing, request limit, durva rate limit és JWT elővalidálás.' 'Traefik / Nginx / Kong / cloud gateway' {
+		edgeGateway = gateway 'API Gateway' 'Publikus peremréteg: TLS termináció, routing, request limit, durva rate limit és JWT elővalidálás.' 'Traefik / Nginx / Kong / cloud gateway' {
 			style { color amber }
 		}
 

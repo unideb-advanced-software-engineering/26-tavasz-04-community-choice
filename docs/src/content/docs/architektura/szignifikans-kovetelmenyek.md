@@ -45,7 +45,7 @@ A rendszerben egy felhasználó egy adott ötletre csak egyszer szavazhat (F-SZ-
 * A szavazati rekord és az audit/integrációs esemény kapcsolatát transactional outbox + outbox relay minta garantálja, nem best-effort alkalmazásszintű publikálás.
 * A pszeudonimizált szavazói kulcshoz használt kampánytitok dedikált külső kulcskezelésben él, a szavazási kritikus útban pedig rövid élettartamú operatív kulcs használható, hogy a kulcskezelő ne legyen per-request szűk keresztmetszet.
 * A szavazási hajrában a PostgreSQL írási út védelme PgBouncer poololást és `campaign_id` szerinti szavazati particionálást igényel.
-* A publikus API-forgalmat dedikált, implementációfüggetlen Ingress/API Gateway védi, hogy a TLS termináció, a durva rate limiting és a JWT elővalidálás ne a NestJS BFF nyers internetes belépési pontján fusson.
+* A publikus API-forgalmat dedikált API Gateway védi, hogy a TLS termináció, a durva rate limiting és a JWT elővalidálás ne a NestJS BFF nyers internetes belépési pontján fusson.
 
 ## Kapcsolódó, de nem önálló ASR
 

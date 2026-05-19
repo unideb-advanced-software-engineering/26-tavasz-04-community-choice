@@ -83,7 +83,7 @@ A fogalomtár célja, hogy a dokumentációban előforduló szakszavakat és rö
 - **Presigned upload URL:** Időben és jogosultságban korlátozott objektumtár-feltöltési URL, amellyel a kliens közvetlenül S3-kompatibilis bucketbe tölthet nagy médiafájlt.
 - **S3-kompatibilis multipart upload:** Objektumtár-alapú, darabolt és folytatható feltöltési mechanizmus nagy fájlokhoz.
 - **OAuth 2.0 (jellegű):** Várható token-alapú bejelentkezési/engedélyezési megoldás a Zamunda One integrációhoz (a konkrét specifikáció TBD).
-- **Ingress / API Gateway:** Publikus peremréteg a webes kliensek és a backend között; TLS terminációt, routingot, request size limiteket, durva rate limitinget és JWT elővalidálást végezhet.
+- **API Gateway:** Publikus peremréteg a webes kliensek és a backend között; TLS terminációt, routingot, request size limiteket, durva rate limitinget és JWT elővalidálást végezhet.
 - **BFF (Backend for Frontend):** Alkalmazási backend belépési pont, amely a webes kliensek igényeihez igazított API-összeállítást és domain-specifikus jogosultsági logikát kezel.
 
 ## Teljesítmény és kliensoldali optimalizálás

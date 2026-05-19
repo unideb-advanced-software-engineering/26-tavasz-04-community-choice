@@ -91,3 +91,10 @@ A megoldás az ADR-007 alapján a következő lépésekből áll:
 **Régi kulcsok kivezetése**
 
 * A kampány lezárulta után a régi, kompromittálódott kulcsok végleg törölhetők a memóriából. A szavazati rekordok integritása megmarad (hiszen append-only táblában vannak, és a szavazat ténye a `key_version` és a `voter_key` alapján auditálható marad anélkül, hogy a nyers azonosítóra vissza lehetne fejteni).
+
+
+What does the NATS acronym stand for?
+NATS stands for Neural Autonomic Transport System. Derek Collison conceived NATS as a messaging platform that functions like a central nervous system.
+
+What language is NATS written in?
+The NATS server (nats-server) is written in Go. There is client support for a wide variety of languages. Please see the Developing with NATS page for more info.

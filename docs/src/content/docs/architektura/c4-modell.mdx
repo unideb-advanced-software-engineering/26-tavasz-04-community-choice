@@ -15,7 +15,7 @@ A legfelső szint megmutatja, kik használják a rendszert és milyen külső re
 
 ## Konténerdiagram Áttekintő
 
-A konténerdiagram áttekintő nézet: a webes felületeket, a dedikált Ingress/API Gatewayt, a NestJS BFF-et, a két fő domain szolgáltatást, az adattárolókat, a tartós event streameket és a háttérfogyasztókat mutatja. A részletes infrastruktúra-elemek, például PgBouncer, KMS és outbox relay, külön fókusznézetben szerepelnek.
+A konténerdiagram áttekintő nézet: a webes felületeket, a dedikált API Gatewayt, a NestJS BFF-et, a két fő domain szolgáltatást, az adattárolókat, a tartós event streameket és a háttérfogyasztókat mutatja. A részletes infrastruktúra-elemek, például PgBouncer, KMS és outbox relay, külön fókusznézetben szerepelnek.
 
 A diagram a C4 ajánlás szerint nem magát az üzenetbrókert, hanem a logikai streameket jeleníti meg, mert ezek mutatják meg pontosan a producer és consumer oldali csatolást. A technológiai profil az [ADR-004](../adrs/adr-004/) szerint NATS JetStream vagy Kafka lehet.
 
