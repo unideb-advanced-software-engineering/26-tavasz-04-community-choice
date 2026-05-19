@@ -268,6 +268,33 @@
       padding: var(--element-gap);
     }
 
+    .diagram-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--content-gap);
+      margin-top: 0.75rem;
+      align-items: stretch;
+    }
+
+    .diagram-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: clamp(0.75rem, 1.4vw, 1rem);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .diagram-card img {
+      width: 100%;
+      max-height: 34vh;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+      background: #fff;
+    }
+
     /* === CSAPAT === */
     .team-container {
       display: flex;
@@ -445,6 +472,17 @@
           <p class="reveal d2">A kritikus, szigorú és azonnali választ igénylő folyamatokat jól körülhatárolt
             szolgáltatásokba (makroszolgáltatások) zártuk. A nehézkes, időigényes, de azonnali választ nem igénylő
             feladatokat pedig eseményvezérelt háttérfolyamatokra bíztuk.</p>
+
+          <div class="diagram-grid reveal d3">
+            <div class="diagram-card">
+              <h3>Azonnali válaszú folyamatok</h3>
+              <img src="diagrams/szinkron_makroszolgaltatasok.png" alt="Szinkron makroszolgáltatások egyszerűsített diagramja" />
+            </div>
+            <div class="diagram-card">
+              <h3>Eseményvezérelt feldolgozás</h3>
+              <img src="diagrams/esemenyvezerelt_hatterfolyamatok.png" alt="Eseményvezérelt háttérfolyamatok egyszerűsített diagramja" />
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -465,8 +503,8 @@
             <div class="panel" style="border-top: 4px solid var(--cc-blue-600);">
               <h3>Központi csatorna</h3>
               <p><strong>Eseményvezérelt üzenetsor</strong></p>
-              <p style="margin-top: 0.5rem;">Tartós, visszajátszható adatfolyam (NATS / Kafka), amely továbbítja a
-                sikeres események híreit.</p>
+              <p style="margin-top: 0.5rem;">Tartós, visszajátszható adatfolyam, amely továbbítja a
+                sikeres események üzeneteit.</p>
             </div>
             <div class="panel" style="border-top: 4px solid var(--cc-gold-500);">
               <h3>Háttér folyamatok</h3>
@@ -490,11 +528,8 @@
               szavazhat. De ha ezt minden bejelentkezésnél valós időben kérdezzük le az állami rendszertől (Zamunda
               One), szavazási csúcsidőben összeomlunk.</p>
           </div>
-          <div class="card reveal d3" style="border-left: 4px solid var(--cc-red-800); background: var(--cc-red-50);">
-            <h3>A dinamikus lekérdezés buktatója:</h3>
-            <p style="margin-top: 0.5rem; margin-bottom: 0.5rem;">A jogosultság egy átláthatatlan, folyamatosan mozgó
-              célpont lenne (pl. költözések miatt), miközben a szinkron külső API hívások szűk keresztmetszetté
-              (bottleneck) válnának a legkritikusabb pillanatban.</p>
+          <div class="card reveal d3" style="border-left: 4px solid var(--cc-red-800); background: var(--cc-red-50); display: flex; align-items: center; justify-content: center;">
+            <img src="diagrams/dinamikus_lekerdezes_buktatoja.png" alt="A dinamikus lekérdezés buktatóját bemutató diagram" style="width: 100%; max-height: 48vh; object-fit: contain; border-radius: var(--radius-md); background: #fff;" />
           </div>
         </div>
       </div>
@@ -509,23 +544,8 @@
           <p class="reveal d1">A kiértékelést teljesen leválasztottuk az interakcióról. A kampány indulása előtt (pl.
             T-24 óra) egy aszinkron háttérfolyamat előre generálja a névjegyzéket.</p>
 
-          <div class="flow-container reveal d2">
-            <div class="flow-step"><span class="badge">1. Kiszámolás</span>
-              <h3>Háttérfolyamat</h3>
-              <p>Adatok előkészítése és kiszámolása a kampány kezdete előtt.</p>
-            </div>
-            <div class="flow-step"><span class="badge blue">2. Befagyasztás</span>
-              <h3>Snapshot rögzítés</h3>
-              <p>A névjegyzék egy dedikált, particionált adatbázistáblába kerül.</p>
-            </div>
-            <div class="flow-step"><span class="badge gold">3. Villámgyors</span>
-              <h3>O(1) Olvasás</h3>
-              <p>Belépéskor az ellenőrzés szinte azonnali, kímélve az IdP-t.</p>
-            </div>
-            <div class="flow-step"><span class="badge earth">4. Trade-off</span>
-              <h3>Kompromisszum</h3>
-              <p>Robusztus ETL igénye és egy adminisztratív "cut-off" ablak bevezetése.</p>
-            </div>
+          <div class="card reveal d2" style="display: flex; align-items: center; justify-content: center; padding: 1rem;">
+            <img src="diagrams/jogosultsagi pillanatkép.png" alt="A megváltoztathatatlan jogosultsági pillanatképet bemutató diagram" style="width: 100%; max-height: 48vh; object-fit: contain; border-radius: var(--radius-md); background: #fff;" />
           </div>
         </div>
       </div>
@@ -588,7 +608,7 @@
         <div class="split-30-70">
           <div class="stack">
             <span class="slide-kicker reveal">Kihívás</span>
-            <h2 class="reveal d1">A széteső mentések kockázata.</h2>
+            <h2 class="reveal d1">A nem auditált mentések kockázata.</h2>
             <p class="reveal d2">A rendszernek minden szavazatról értesítést kell küldenie a háttérben futó ellenőrző
               naplóba (brokerbe). De mi van akkor, ha a szavazat sikeresen bekerül a fő adatbázisba, de a hálózat abban
               a
@@ -597,8 +617,7 @@
           <div class="card reveal d3" style="border-left: 4px solid var(--cc-red-800); background: var(--cc-red-50);">
             <h3>A Dual-Write hiba:</h3>
             <p style="margin-top: 0.5rem;">Ha az alkalmazásból két külön lépésben küldjük el az adatot az adatbázisnak
-              és a háttérsornak, hálózati anomália esetén a két rendszer állapota eltérhet egymástól. Ez egy közbizalmi
-              rendszernél megengedhetetlen.</p>
+              és a háttérsornak, hálózati anomália esetén a két rendszer állapota eltérhet egymástól.</p>
           </div>
         </div>
       </div>
@@ -613,18 +632,17 @@
           <p class="reveal d1">A szavazat leadását és az audit eseményt a szoftverünk egyetlen,
             felbonthatatlan adatbázis-tranzakcióban rögzíti.</p>
 
-          <div class="grid-2 reveal d2" style="margin-top: 0.5rem;">
+          <div class="split reveal d2" style="margin-top: 0.5rem; align-items: stretch;">
             <div class="box-boundary">
               <h3 style="color: var(--cc-gold-800);">Atomi adatbázis lépés</h3>
               <p style="margin-top: 0.5rem;">· <strong>Szavazati rekord</strong> elmentése</p>
               <p>· <strong>Outbox (Kimenő) rekord</strong> elmentése</p>
+              <p style="margin-top: 0.5rem;">· <strong>CDC / relay</strong> később továbbítja</p>
               <p style="margin-top: 0.5rem; font-size: var(--small-size); color: var(--text-secondary);">A kettő
-                egyszerre vagy sehogy sem teljesül.</p>
+                egyszerre vagy sehogy sem teljesül, ezért nincs elveszett auditnyom.</p>
             </div>
-            <div class="card">
-              <h3>Független CDC háttérfolyamat</h3>
-              <p>Ezt a belső tranzakciós naplót egy független Change Data Capture (CDC) komponens figyeli. Ha a külső
-                üzenetsor megszakad, az adat garantáltan kikerül amint a hiba elhárul, így nincs elveszett nyom.</p>
+            <div class="card" style="display: flex; align-items: center; justify-content: center; padding: 1rem;">
+              <img src="diagrams/outbox_cdc.png" alt="Transactional Outbox és CDC diagram" style="width: 100%; max-height: 52vh; object-fit: contain; border-radius: var(--radius-md); background: #fff;" />
             </div>
           </div>
         </div>
@@ -656,28 +674,23 @@
 
     <section class="slide" data-title="Összegzés">
       <div class="deck-label">13 · Következtetés</div>
-      <div class="slide-content">
-        <div class="stack">
+      <div class="slide-content" style="justify-content: center;">
+        <div class="stack" style="text-align: center; align-items: center; gap: 1.25rem;">
           <span class="slide-kicker reveal">Eredmények és jövőkép</span>
-          <h2>Több, mint egy egyetemi vizsgamunka.</h2>
-          <p class="reveal d1">Amikor a Community Choice dokumentációját összeállítottuk, arra törekedtünk, hogy a
-            végeredmény ne egy felszínes technológiai kívánságlista legyen. Minden architekturális döntésünket (ADR)
-            visszavezettük az esettanulmányból fakadó szignifikáns követelményekre.</p>
+          <h2 class="reveal d1">Összegzés</h2>
 
-          <div class="card reveal d2" style="margin-top: 0.5rem; border-left: 4px solid var(--cc-green-700);">
-            <h3>Valós problémákra adott célzott válaszok:</h3>
-            <p style="margin-top: 0.5rem;">· <strong>Megalapozott tervezés:</strong> Legyen szó a megmásíthatatlan
-              pillanatképekről, a védett kulcskezelésről, vagy a tranzakcionális outbox mintáról.</p>
-            <p>· <strong>Éles potenciál:</strong> Ezzel az architekturális alappal és egy kis célzott továbbdolgozással
-              a
-              koncepció akár egy valódi, éles állami környezetben működő projektté is ki tudna alakulni.</p>
-            <p>· <strong>Közbizalom:</strong> Biztosítva egy transzparens, skálázható és manipulálhatatlan digitális
-              demokráciát.</p>
+          <div class="card reveal d2" style="margin-top: 0.5rem; border-left: 4px solid var(--cc-green-700); max-width: 820px; width: 100%; text-align: left;">
+            <h3>Záró gondolatok</h3>
+            <p style="margin-top: 0.5rem;">• Az architekturális döntéseket végig a szignifikáns követelmények vezették.</p>
+            <p>• A cél nem technológiai kívánságlista, hanem valós problémákra adott válasz volt.</p>
+            <p>• A koncepció célzott továbbdolgozással éles állami környezet felé vihető.</p>
+            <p>• A végcél egy transzparens és manipulálhatatlan digitális demokrácia.</p>
           </div>
 
           <p class="reveal d3"
-            style="font-size: var(--small-size); font-weight: 600; color: var(--cc-green-700); margin-top: 0.5rem;">
-            Köszönjük a figyelmet!</p>
+            style="font-size: clamp(1.6rem, 3vw, 2.6rem); font-weight: 800; color: var(--cc-green-700); margin-top: 0.75rem; text-align: center; width: 100%;">
+            Köszönjük a figyelmet!
+          </p>
         </div>
       </div>
     </section>
